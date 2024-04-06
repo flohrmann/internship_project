@@ -5,6 +5,8 @@ function trial = displayStim(window, bar_width, bar_height, jitter, current_stim
 escapeKey = KbName('ESCAPE');
 leftKey = KbName('LeftArrow');
 rightKey = KbName('RightArrow');
+% Hide the mouse cursor
+HideCursor;
 
 trial = [];
 
@@ -24,7 +26,7 @@ for row = 1:size(current_stim, 1) %y
         yEnd = yPos - bar_height * sin(angleRad); % Subtract because Y-axis is inverted
 
         % Draw the line to the screen
-        Screen('DrawLine', window, color, xPos, yPos, xEnd, yEnd, 2);
+        Screen('DrawLine', window, color, xPos, yPos, xEnd, yEnd, bar_width);
     end
 end
 
@@ -66,16 +68,12 @@ end
 %%%%%%
 
 % Record user response and response time
+trial.condition = current_cond;
 trial.target = current_target_pos;
 trial.response = response;
 trial.correct = correctness;
 trial.start = startResp;
 trial.end = endResp;
 trial.rt = rt;
-
-disp(['Target ' current_target_pos]);
-disp(['Response ' response]);
-disp(['Correct? ' correctness]);
-
 
 end
