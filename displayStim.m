@@ -8,8 +8,8 @@ rightKey = KbName('RightArrow');
 
 trial = [];
 
-for row = 1:size(current_stim, 1)
-    for col = 1:size(current_stim, 2)
+for row = 1:size(current_stim, 1) %y
+    for col = 1:size(current_stim, 2)%x
         % Calculate position of the bar
         xPos = (col - 0.5) * (screenXpixels / size(current_stim, 2));
         yPos = (row - 0.5) * (screenYpixels / size(current_stim, 1));
@@ -19,7 +19,7 @@ for row = 1:size(current_stim, 1)
         yPos = yPos + randi([-jitter, jitter]);
 
         % Calculate end point of the line based on angle
-        angleRad = deg2rad(current_stim(row, col));
+        angleRad = deg2rad(current_stim(row, col));%row, col
         xEnd = xPos + bar_height * cos(angleRad);
         yEnd = yPos - bar_height * sin(angleRad); % Subtract because Y-axis is inverted
 
@@ -72,5 +72,10 @@ trial.correct = correctness;
 trial.start = startResp;
 trial.end = endResp;
 trial.rt = rt;
+
+disp(['Target ' current_target_pos]);
+disp(['Response ' response]);
+disp(['Correct? ' correctness]);
+
 
 end
