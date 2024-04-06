@@ -60,8 +60,7 @@ function main()
     folder_name = 'C:\Users\idm\Desktop\Semester4\Internship\Matlab\Data\test_20240406_155217\';
     startPsychToolbox(data, folder_name); 
     %%%
-
-    % Step 6: Analyse Data
+    % Step 6: End experiment and cleanup
     %endExperiment();
 end
 %%
@@ -99,8 +98,8 @@ function startPsychToolbox(data, folder_name)
 
     %%%%%%% Define texts
     texts = {'Welcome :)', ...
+        'Before each trial you will see a dot in the middle of the screen
              'In this experiment you will be presented a grid of bars \n Press the Left Arrow Key if you can see a uniquely oriented bar on the Left side of the screen \n and the Right Arrow Key if you can see a uniquely oriented bar on the Right side of the screen', ...
-             'Before each trial you will see a dot in the middle of the screen \n The next trial will only start if you look at it for around 2 seconds. \n (If you need a break inbetween not looking at it will do the trick ;)', ...
              'Please try to be as fast and as accurate as possible!', ...
              'TODO Insert Exercise Trials', ...
              'Press Any Key To Begin'};
@@ -171,6 +170,7 @@ function startPsychToolbox(data, folder_name)
         KbStrokeWait(-1);
 
     end
+
     disp('Experiment Finished')
     % Close the window
     sca;
