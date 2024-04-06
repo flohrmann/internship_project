@@ -6,7 +6,7 @@ function trial_data = generateTrials(n_trials, conditions, n_rows, n_columns, gr
 trial_data = table();
 
 corner = 2; % min abstand to border of screen
-middle = 1; % min abstand to middle of screen
+middle = 2; % min abstand to middle of screen
 
 % Loop over the number of trials
 for trial = 1:n_trials
@@ -33,33 +33,33 @@ for trial = 1:n_trials
     trial_matrix = zeros(n_rows, n_columns);
 
     % Set the target object to 1
-    trial_matrix(unique_point_col, unique_point_row) = 1;
+    trial_matrix(unique_point_row, unique_point_col) = 1;
 
     % Add trial data to the table
     trial_data.trialMatrix{trial, 1} = trial_matrix;
-    trial_data.targetPosition(trial, :) = [unique_point_col, unique_point_row];
+    trial_data.targetPosition(trial, :) = [unique_point_row, unique_point_col];
     trial_data.targetSide{trial, 1} = target_side;
 end
 % Rename the variables in the table
 trial_data.Properties.VariableNames = {'TrialMatrix', 'TargetPosition', 'TargetSide'};
 end
 
+%%
 function number_list = generateNumberList(corner, middle, n_rows)
     % Generate the first part of the list from 1 to y-1
-    part1 = corner:n_rows-middle;
+    part1 = corner:n_rows/2-middle;
     % Generate the second part of the list from y+1 to x
-    part2 = n_rows+middle:n_rows-corner;
+    part2 = n_rows/2+middle:n_rows-corner;
     % Concatenate the two parts to form the final list
     number_list = [part1, part2];
 end
 
+%%
 function random_number = getRandomNumberFromList(number_list)
     % Get the length of the list
-    list_length = length(number_list);
-    
+    list_length = length(number_list);    
     % Generate a random index within the range of the list
-    random_index = randi(list_length);
-    
+    random_index = randi(list_length);    
     % Select the number corresponding to the random index
     random_number = number_list(random_index);
 end
