@@ -28,7 +28,7 @@ for trial = 1:n_trials
     
     % Generate a random position for the target object within the determined side of the grid
     number_list = generateNumberList(corner, middle, n_rows); % neither at cornder nor middle
-    %unique_point_row = randi([corner, n_rows-corner]); 
+    unique_point_row = getRandomNumberFromList(number_list); 
     % Initialize a matrix with zeros for the grid
     trial_matrix = zeros(n_rows, n_columns);
 
@@ -51,4 +51,15 @@ function number_list = generateNumberList(corner, middle, n_rows)
     part2 = n_rows+middle:n_rows-corner;
     % Concatenate the two parts to form the final list
     number_list = [part1, part2];
+end
+
+function random_number = getRandomNumberFromList(number_list)
+    % Get the length of the list
+    list_length = length(number_list);
+    
+    % Generate a random index within the range of the list
+    random_index = randi(list_length);
+    
+    % Select the number corresponding to the random index
+    random_number = number_list(random_index);
 end
