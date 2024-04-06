@@ -4,7 +4,7 @@ function main()
     close all;
     clear;
     %% Create a folder with the current date and time 
-    folder_name = ['test_' datestr(now, 'yyyymmdd_HHMMSS')];
+    folder_name = ['C:\Users\idm\Desktop\Semester4\Internship\Matlab\Data\test_' datestr(now, 'yyyymmdd_HHMMSS')];
     mkdir(folder_name);
     
     %% Parameters for this run
@@ -55,9 +55,9 @@ function main()
     %startPsychToolbox(rand_trials, folder_name); 
     
     %%%% Load custom path for testing 
-    data_struct = load('C:\Users\idm\Desktop\Semester4\Internship\Matlab\Experiment\test_20240405_175621\rand_trials.mat');
+    data_struct = load('C:\Users\idm\Desktop\Semester4\Internship\Matlab\Data\test_20240406_145054\rand_trials.mat');
     data = data_struct.rand_trials;
-    folder_name = 'C:\Users\idm\Desktop\Semester4\Internship\Matlab\Experiment\test_20240405_175621\';
+    folder_name = 'C:\Users\idm\Desktop\Semester4\Internship\Matlab\Data\test_20240406_145054\';
     startPsychToolbox(data, folder_name); 
     %%%
     % Step 6: End experiment and cleanup
@@ -134,6 +134,9 @@ function startPsychToolbox(data, folder_name)
         current_stim = data.TrialMatrix{i};
         current_cond = data.Condition{i};
         current_target_pos = data.TargetSide{i};
+
+        disp(['Current Stim ' data.TargetPosition(i)]);
+        disp(['Current Target ' current_target_pos]);
 
         % Define parameters for the bars
         bar_width = 5; % Width of each bar
