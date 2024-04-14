@@ -63,6 +63,8 @@ function main()
 
     % Step 6: Analyse Data
     %endExperiment();
+
+    % optional eye tracking in case it doesnt work
 end
 %%
 function startPsychToolbox(data, folder_name)
@@ -92,7 +94,7 @@ function startPsychToolbox(data, folder_name)
     xCenter = screenXpixels / 2;
     yCenter = screenYpixels / 2;
     % Set text properties
-    Screen('TextSize', window, 26);
+    Screen('TextSize', window, 30);
     Screen('TextColor', window, color_stim);
     % Enable alpha blending for anti-aliasing
     Screen('BlendFunction', window, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -100,7 +102,7 @@ function startPsychToolbox(data, folder_name)
     %%%%%%% Define texts
     texts = {'Welcome :)', ...
              'In this experiment you will be presented a grid of bars \n Press the Left Arrow Key if you can see a uniquely oriented bar on the Left side of the screen \n and the Right Arrow Key if you can see a uniquely oriented bar on the Right side of the screen', ...
-             'Before each trial you will see a dot in the middle of the screen \n The next trial will only start if you look at it for around 2 seconds. \n (If you need a break inbetween not looking at it will do the trick ;)', ...
+             'Before each trial you will see a dot in the middle of the screen \n The next trial will only start if you look at it for around 2 seconds/PRESS A KEY TODO. \n (If you need a break inbetween not looking at it will do the trick ;)', ...
              'Please try to be as fast and as accurate as possible!', ...
              'TODO Insert Exercise Trials', ...
              'Press Any Key To Begin'};
@@ -124,14 +126,11 @@ function startPsychToolbox(data, folder_name)
     % TODO CHANGE BACK FOR EXPERIMENT 
     % for i = 1:size(data, 1)
     for i = 1:4
-        % Display fixation cross
-        draw_fixation(window, xCenter, yCenter, color_stim, dotSizePix); % colour, size, width
-
-        % Wait 0.3 seconds
-        WaitSecs(0.3);
-        %Screen('FillRect', window, color_bg);
-        %Screen('Flip', window);
-
+        % Display fixation dot & empty screen after
+        % TODO still works with keypress, need eyetracking?
+        drawFixation(window, xCenter, yCenter, color_stim, dotSizePix);
+        drawEmptyScreen(window, color_bg, 1)
+       
         % Display stimulus
         current_stim = data.TrialMatrix{i};
         current_cond = data.Condition{i};
