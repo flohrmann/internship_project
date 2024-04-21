@@ -3,7 +3,6 @@ function condition_trials = createTrialsByCondition_new(NumberOfBlocks, NTrialsE
 % Returns trial matrix filled with angles of conditions
 % Bsp. 2 3 2 3 2 3  + a_simple_1 = 45 45 45  45 45 45
 %      2 3 1 3 2 3                 45 45 135 45 45 45
-
     % Initialize an empty table to store data for each condition
     condition_trials = table;
 
@@ -27,33 +26,34 @@ function condition_trials = createTrialsByCondition_new(NumberOfBlocks, NTrialsE
             partition_index = ceil(j / (trials_per_condition / partitions));
             angles = conditions.(condition_name)(partition_index, :);
 
-             % Assign each trial
+            % Assign each trial
             trial = condition_trials_data(j, :);
-            if iscell(angles)  % Checking if the angles are in a cell array (for complex conditions with tuples)
-                for idx = 1:numel(trial.TrialMatrix{1})
-                    tuple_idx = trial.TrialMatrix{1}(idx);
-                    angle_set = angles{tuple_idx};  % Access the correct tuple for target/distractors
-                    % Now, handle both angles
-                    % Assuming each angle set in the tuple has exactly two angles
-                    trial.TrialMatrix{1}{idx} = angle_set;
-                end
-            else
-                for idx = 1:numel(trial.TrialMatrix{1})
-                    trial.TrialMatrix{1}(idx) = angles(trial.TrialMatrix{1}(idx));
+            angle_matrix = cell(size(trial.TrialMatrix{1}, 1), size(trial.TrialMatrix{1}, 2));  % Initialize the angle matrix as a cell array
+
+            for row = 1:size(trial.TrialMatrix{1}, 1)
+                for col = 1:size(trial.TrialMatrix{1}, 2)
+                    idx = trial.TrialMatrix{1}(row, col);
+                    if iscell(angles)  % Check if angles are stored in a cell array (tuples)
+                        angle_set = angles{idx};  % Each set in the tuple represents a different configuration
+                        angle_matrix{row, col} = angle_set;  % Store the angle set directly in the cell
+                    else
+                        angle_matrix{row, col} = [angles(idx)];  % Wrap the single angle in an array and store in the cell
+                    end
                 end
             end
+            trial.AngleMatrix = {angle_matrix};  % Assign the angle matrix to the trial
 
-        end
             % Set additional trial information
             trial.Condition = {condition_name};
             trial.ConditionType = {strcat(condition_name, '_', num2str(partition_index))};
-            trial.TargetAngle = angles(1);  % Target 
-            trial.DistractorAngle_1 = angles(2);  % Distractor 1 
-            trial.DistractorAngle_2 = angles(3);  % Distractor 1 
+%             trial.TargetAngle = angles{1}(1);  % Assuming the first entry in a tuple as the target
+%             trial.DistractorAngle_1 = angles{2}(1);  % Assuming the second entry as Distractor 1
+%             trial.DistractorAngle_2 = angles{3}(1);  % Assuming the third entry as Distractor 2
 
             % Append to the main table
             condition_trials = [condition_trials; trial];
-   end
+        end
+    end
 end
 
 % 
