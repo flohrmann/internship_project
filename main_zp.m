@@ -279,14 +279,26 @@ Screen('BlendFunction', window, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 % Define texts
 texts = {'Welcome :)', ...
     'In this experiment you will be presented a grid of bars \n Press the Left Arrow Key if you can see a uniquely oriented bar on the Left side of the screen \n and the Right Arrow Key if you can see a uniquely oriented bar on the Right side of the screen', ...
-    'Before each trial you will see a dot in the middle of the screen \n The next trial will only start if you look at it for around 2 seconds/PRESS A KEY TODO. \n (If you need a break inbetween not looking at it will do the trick ;)', ...
-    'Please try to be as fast and as accurate as possible!', ...
-    'TODO Insert Exercise Trial Pictures', ...
+    'Lets look at a possible images you will see later', ...
+    'The trials can look like this for example. Can you find the uniquely oriented bar?',...
+    'The trials can also look like this for example. Can you find the uniquely oriented bar?', ...
+    'Before each trial you will see a fixation dot in the middle of the screen, please remember to look at it for as long as it is there \n The next trial will only start if you look at it for around 2 seconds/PRESS A KEY TODO. \n (If you need a break inbetween not looking at it will do the trick ;)', ...
+    'During the experiment once you have found the uniquely oriented bar remember to press the corresponding button \n Please try to be as fast and as accurate as possible!', ...
     'Do you have any questions? \n \n If you feel ready: Press Any Key To Begin The Experiment'};
 % Display each instruction/text
 for t = 1:numel(texts)
-    % Display text
-    displayText(window, texts{t});
+    if t == 4 % Add images to certain 'slides'
+        img = imread('C:\Users\idm\Desktop\Semester4\Internship\Matlab\ExperimentRepo\Images\example_1.png'); 
+        displayImage(window, texts{t}, img, screenXpixels, screenYpixels)
+    elseif t == 5
+        img = imread('C:\Users\idm\Desktop\Semester4\Internship\Matlab\ExperimentRepo\Images\example_2.png'); 
+        displayImage(window, texts{t}, img, screenXpixels, screenYpixels)
+    else
+        displayText(window, texts{t}); % Display text 
+    end
+
+    %TODO add back/next button for instruction
+
     % Wait for a key press to continue
     while KbCheck; end % Wait for all keys to be released
     while ~KbCheck; end % Wait for a key press
@@ -334,7 +346,6 @@ end
 %if i == size(data, 1)
 if i == 4
     displayText(window, 'Experiment Complete\n Thank you for your participation! <3');
-    %Screen('Flip', window);
     WaitSecs(2);
     KbStrokeWait(-1);  % Wait to end with key press
 end
