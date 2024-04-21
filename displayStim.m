@@ -1,4 +1,4 @@
-function trial = displayStim(window, bar_width, bar_height, jitter, current_stim, current_cond, current_target_pos, screenXpixels, screenYpixels, color)
+function trial = displayStim(window, bar_width, bar_height, jitter_x, jitter_y, current_stim, current_cond, current_target_pos, screenXpixels, screenYpixels, color)
 % Define the keyboard keys that are listened for. We will be using the left
 % and right arrow keys as response keys for the task and the escape key as
 % a exit/reset key
@@ -17,8 +17,8 @@ for row = 1:size(current_stim, 1) %y
         yPos = (row - 0.5) * (screenYpixels / size(current_stim, 1));
 
         % Add random jitter to the position
-        xPos = xPos + randi([-jitter, jitter]);
-        yPos = yPos + randi([-jitter, jitter]);
+        xPos = xPos + randi([-jitter_x, jitter_y]); %maybe change xy
+        yPos = yPos + randi([-jitter_x, jitter_y]);
 
         % Calculate end point of the line based on angle
         angleRad = deg2rad(current_stim(row, col));%row, col
