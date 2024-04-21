@@ -1,4 +1,4 @@
-function condition_trials = createTrialsByCondition(n_trials, trial_data, conditions)
+function condition_trials = createTrialsByCondition_new(n_trials, trial_data, conditions)
     % Initialize table to store data for each condition
     condition_trials = [];
 
