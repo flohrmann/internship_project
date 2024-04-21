@@ -1,7 +1,11 @@
 function trial_data = generateTrials_new(n_trials, n_rows, n_columns, grid_visual_angle, ec_circle, ec_min)
-% gives back matrix filled with 2s and 3s in a checkerboard pattern for
-% distractors, as well as a 1 at random position of unique stimulus, with L/R tag
-% depending on side unique stimulus position 
+% Generate matrix: 23232323   where 1 is for target bar/stimulus
+%                  32321232         2 is for 1st distractor
+%                  23232323         3 is for 2nd distractor
+% Position of 1 is generated randomly and annotated with its position
+% (left/right side of screen)
+
+% TODO implement eccentricity
 
 % Initialize empty table to store trial data
 trial_data = table();
