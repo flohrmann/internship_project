@@ -101,7 +101,7 @@ LowToneSoundwave =  sin(2*pi*fs/2*t);
 HighToneSoundwave = sin(2*pi*fs*2*t);
 VolumnOK =0;
 while VolumnOK ==0
-    sound(LowToneSoundwave, fs); pause(0.2);   sound(HighToneSoundwave, fs); pause(0.2);
+    sound(LowToneSoundwave, fs); pause(0.5);   sound(HighToneSoundwave, fs); pause(0.5);
     SoundVolumn_prompt = {'Enter 1 or 0 if the volumn of the low and high tune for feedback are ok or otherwise', 'Check audio volumn for feedback use'};
     SoundVolumn_prompt_title='Check audio speaker';
     num_lines =1;
@@ -281,12 +281,42 @@ texts = {'Welcome :)', ...
     'In this experiment you will be presented a grid of bars \n Press the Left Arrow Key if you can see a uniquely oriented bar on the Left side of the screen \n and the Right Arrow Key if you can see a uniquely oriented bar on the Right side of the screen', ...
     'Before each trial you will see a dot in the middle of the screen \n The next trial will only start if you look at it for around 2 seconds/PRESS A KEY TODO. \n (If you need a break inbetween not looking at it will do the trick ;)', ...
     'Please try to be as fast and as accurate as possible!', ...
-    'TODO Insert Exercise Trial Pictures', ...
+    'Lets look at a possible stimulus \n\n Try to find the uniquely oriented bar and press the corresponding button (left/right), once you have found it', ...
     'Do you have any questions? \n \n If you feel ready: Press Any Key To Begin The Experiment'};
 % Display each instruction/text
 for t = 1:numel(texts)
-    % Display text
-    displayText(window, texts{t});
+    if t == 5 % Add images to certain 'slides'
+        img = imread('C:\Users\idm\Desktop\Semester4\Internship\Matlab\ExperimentRepo\Images\example_1.png'); 
+        texture = Screen('MakeTexture', window, img);
+        % Calculate the position of the scaled image to center it
+        dstX = (screenXpixels - screenXpixels * 0.7) / 2;
+        dstY = (screenYpixels - screenYpixels * 0.7) / 2;
+        dstRect = [dstX dstY dstX + screenXpixels * 0.7 dstY + screenYpixels * 0.7];
+        % Add text on top of the image
+        Screen('TextSize', window, 30);
+        DrawFormattedText(window, 'The pictures can either look like this:', 'center', dstY * 0.9, 0);
+        % Draw the scaled texture to the window
+        Screen('DrawTexture', window, texture, [], dstRect);
+        %Screen('DrawTexture', window, texture, []);
+        Screen('Flip', window);
+    elseif t == 6
+        img = imread('C:\Users\idm\Desktop\Semester4\Internship\Matlab\ExperimentRepo\Images\example_2.png'); 
+        img = imread('C:\Users\idm\Desktop\Semester4\Internship\Matlab\ExperimentRepo\Images\example_1.png'); 
+        texture = Screen('MakeTexture', window, img);
+        % Calculate the position of the scaled image to center it
+        dstX = (screenXpixels - screenXpixels * 0.7) / 2;
+        dstY = (screenYpixels - screenYpixels * 0.7) / 2;
+        dstRect = [dstX dstY dstX + screenXpixels * 0.7 dstY + screenYpixels * 0.7];
+        % Add text on top of the image
+        Screen('TextSize', window, 30);
+        DrawFormattedText(window, texts{t}, 'center', dstY * 0.9, 0);
+        % Draw the scaled texture to the window
+        Screen('DrawTexture', window, texture, [], dstRect);
+        %Screen('DrawTexture', window, texture, []);
+        Screen('Flip', window);
+    else
+        displayText(window, texts{t}); % Display text
+    end
     % Wait for a key press to continue
     while KbCheck; end % Wait for all keys to be released
     while ~KbCheck; end % Wait for a key press
@@ -334,7 +364,6 @@ end
 %if i == size(data, 1)
 if i == 4
     displayText(window, 'Experiment Complete\n Thank you for your participation! <3');
-    %Screen('Flip', window);
     WaitSecs(2);
     KbStrokeWait(-1);  % Wait to end with key press
 end
