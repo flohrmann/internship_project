@@ -1,7 +1,7 @@
 % start this function to start the epxeriment
 % add cirlce of buttons around button i want pressed
 
-function main()
+function main_zp()
     %% Clear the workspace and the screen
     sca;
     close all;
