@@ -6,7 +6,7 @@ escapeKey = KbName('ESCAPE');
 leftKey = KbName('LeftArrow');
 rightKey = KbName('RightArrow');
 % Hide the mouse cursor
-HideCursor;
+%HideCursor; % disabled for testing
 
 trial = [];
 

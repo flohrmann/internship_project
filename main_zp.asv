@@ -8,13 +8,9 @@ function main_zp()
     clear;
     PsychDefaultSetup(2);
     % set the seed for reproducibility
+    %rng('default') 
 
     global folder_name
-
-
-    %HideCursor;
-    RandomNumber = sum(100*clock);
-    rand('state',RandomNumber);
 
     % fani windows desktopauflösung: 1920 x 1080, frame rate 60,033 Hz
     % Get the screen numbers
@@ -192,7 +188,15 @@ function main_zp()
             %
             GiveFeedbackOrNot = 0;
 
-
+            %---- prepare
+            KbName('UnifyKeyNames');
+            leftarrow=KbName('LeftArrow');
+            rightarrow=KbName('RightArrow');
+            stopkey=KbName('ESCAPE');
+            %HideCursor;
+            RandomNumber = sum(100*clock);
+            Screen('Preference', 'SkipSyncTests', 1);
+            rand('state',RandomNumber);
             
 %             day = date; clocktime = clock;
 %             fn_out =[num2str(SubjectID), '_', num2str(SessionNumber), '-', day, '-', num2str(clocktime(4)), '-', num2str(clocktime(5)), '.mat'];
@@ -258,26 +262,20 @@ function startPsychToolbox(data, folder_name, Window_Width, Window_Height, NbX, 
     subfolder_name = [folder_name 'results' datestr(now, 'yyyymmdd_HHMMSS')];
     mkdir(subfolder_name);
     
-    KbName('UnifyKeyNames');
-    left=KbName('LeftArrow');
-    right=KbName('RightArrow');
-    escape=KbName('ESCAPE');
-
-%     % Define parameters for the bars
-%     bar_width = 5; % Width of each bar
-%     bar_height = 20; % Height of each bar
-    bar_wh_ratio = 0.1;
+    % Define parameters for the bars
+    bar_width = 5; % Width of each bar
+    bar_height = 20; % Height of each bar
     % Define colors for background and stim
     color_bg = WhiteIndex(screenNumber);
     color_stim = BlackIndex(screenNumber);
     % Size of the fixation point
     dotSizePix = 8;
     % Maximum amount of jitter for each bar
-    jitter_x = round(0.2*Window_Width/NbX); 
-    jitter_y = round(0.2*Window_Height/NbY);
+    jitter_x = round(0.8*Window_Width/NbX*1/3); 
+    jitter_y = round(0.8*Window_Height/NbY*1/3);
     
     % Open Psychtoolbox window
-    PsychDebugWindowConfiguration(0,0.5); % for debugging
+    PsychDebugWindowConfiguration(0,ity=0.5); % for debugging
     Screen('Preference', 'SkipSyncTests', 1); % Skip synchronization tests, disable for experiment!!
     [window, windowRect] = PsychImaging('OpenWindow', screenNumber, color_bg); 
     [screenXpixels, screenYpixels] = Screen('WindowSize', window);
@@ -285,8 +283,8 @@ function startPsychToolbox(data, folder_name, Window_Width, Window_Height, NbX, 
     yCenter = screenYpixels / 2;
 
     % save params
-    infos = {color_bg, color_stim, dotSizePix, jitter_x, jitter_y, xCenter, yCenter};
-    infos_table = cell2table(infos, 'VariableNames', {'color_bg', ...
+    infos = {bar_width, bar_height, color_bg, color_stim, dotSizePix, jitter_x, jitter_y, xCenter, yCenter};
+    infos_table = cell2table(infos, 'VariableNames', {'bar_width', 'bar_height', 'color_bg', ...
         'color_stim', 'dotSizePix', 'jitter_x', 'jitter_y', 'xCenter', 'yCenter'});
     saveData(infos_table, folder_name, 'screen_info.csv');
  
@@ -312,7 +310,7 @@ function startPsychToolbox(data, folder_name, Window_Width, Window_Height, NbX, 
         while ~KbCheck; end % Wait for a key press
         [~, ~, keyCode] = KbCheck; % Check for key press
         % Check for Escape key press to close the experiment
-        if keyCode(KbName('escape'))
+        if keyCode(KbName('Escape'))
             break;
         end
     end    
@@ -334,9 +332,8 @@ function startPsychToolbox(data, folder_name, Window_Width, Window_Height, NbX, 
         current_target_pos = data.TargetSide{i};
 
         % start stim
-        % todo remove bar width length 
-        trial_result = displayStim_new(window, bar_wh_ratio, jitter_x, jitter_y, ...
-            current_stim, current_cond, current_target_pos, screenXpixels, screenYpixels, color_bg, color_stim);
+        trial_result = displayStim(window, bar_width, bar_height, jitter_x, jitter_y, ...
+            current_stim, current_cond, current_target_pos, screenXpixels, screenYpixels, color_stim);
     
         trial_results = [trial_results, trial_result];
         % save/overwrite each loop in case experiment crashes/gets aborted
