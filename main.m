@@ -1,15 +1,87 @@
+% start this function to start the epxeriment
+
 function main()
-    % Clear the workspace and the screen
+    global Window_Width Window_Height
+
+    %% Clear the workspace and the screen
     sca;
     close all;
     clear;
-    %% Create a folder with the current date and time 
-    folder_name = ['C:\Users\idm\Desktop\Semester4\Internship\Matlab\Data\test_' datestr(now, 'yyyymmdd_HHMMSS')];
-    mkdir(folder_name);
+    PsychDefaultSetup(2);
+    % set the seed for reproducibility
+    rng('default')
+
+    % fani windows desktopauflösung: 1920 x 1080, frame rate 60,033 Hz
+    % Get the screen numbers
+    screens = Screen('Screens');
+    % Draw to the external screen if avaliable
+    ScreenNumber = max(screens);
+
+    %set(0,'units','pixels') 
+    %Pix_SS = get(0,'screensize')
+    [WindowDimensions] = Screen('rect',  ScreenNumber);
+    WhiteLuminance = WhiteIndex(ScreenNumber);
+    BlackLuminance= BlackIndex(ScreenNumber);
+    FrameRate=Screen('NominalFrameRate', ScreenNumber);
+
+    Window_Width = WindowDimensions(3);
+    Window_Height = WindowDimensions(4);
+
+    %% Standard parameters for this experiment
+
+        % taken from ZhaopingGuyader_Exp_SetUp.m
+        Conditions_A = [29:32];  %condition A in Zhaoping and Guyader 2007
+        Conditions_B = [33:36];  %condition B in Zhaoping and Guyader 2007
+        Conditions_Asimple = [49, 50];  %condition Asimple, in Zhaoping and Guyader 2007, repeated twice to match the numbers in A, B etc.
+        Conditions_Bsimple = [51, 52, 53, 54];  %condition Bsimple, in Zhaoping and Guyader 2007, repeated twice to match the numbers in A, B etc.
+        
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+        %
+        %---------- determine the conditions in terms of variables 
+        %-----------ItemTypes, AllCubes, in GetAllCubes_Aug2017.m
+        %----------
+        Conditions_ForExp{1} = Conditions_Asimple;
+        Conditions_ForExp{2} = Conditions_Bsimple;
+        Conditions_ForExp{3} = Conditions_A;
+        Conditions_ForExp{4} = Conditions_B;
+        NConditions = length(Conditions_ForExp);
     
-    %% Parameters for this run
-    n_rows = 12; % number stimulus x axis
-    n_columns = 20; % number stimulus y axis
+        %--- set sizes of these NConditions conditions
+        %OneSetSize = [12, 9];  %[15, 11];   %--- =[NbX, NbY], the number of columns and rows of the search array
+        SetSize_prompt = {'Numbers of columns (minimum 4) and rows (mininum 4) in the search array'};
+        SetSize_dialog_title='Row_column_Num';
+        num_lines=1;
+        SetSize_default_answer={'9 12'};
+        SetSize_info = inputdlg(SetSize_prompt,SetSize_dialog_title,num_lines,SetSize_default_answer);
+        OneSetSize = str2num(SetSize_info{1}); %gives column x row num
+        
+        SetSizes_ForExp = repmat(OneSetSize, NConditions, 1);  %== could also give different set sizes for different conditions.
+
+        
+        n_rows = OneSetSize(2); % number stimulus x axis
+        n_columns = OneSetSize(1); % number stimulus y axis
+        
+        % she does jitter here (80%), plus target side (first half 1 side, 2nd
+        % half other side)
+
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %
+        % -------GapDuration, FixationDuration backgroundScale
+        %
+        GapDuration = 0.2; %---- determine the Duration of gap between fixation point disappearance and search array appearance.
+        FixationDuration = 0.7; %---- determine the Duration of gap between fixation point disappearance and search array appearance.
+        BackgroundScale = 0.75; %--- background
+
+
+
+
+
+
+
+
+
+
+
     grid_visual_angle = [34, 46]; % in degrees
     stim_size = [0.12, 1.1]; % in degrees
     ec_circle = 15; % circle of stim pos in degrees
@@ -17,32 +89,37 @@ function main()
     fix_stim_dia = 0.3; % in degrees
     %stimulus_brightness = 48; % in cd/m² -> dont need, white bg & black stim?
     %conditions = [a_simple, b_simple, a, b]; % conditions you wanna use
+    
+    %% Ask user for input parameters
+    % Ask user for input/change params
+    data = startGUI();
 
-    % save
+    % Create a folder with User ID and the current date and time 
+    folder_name = ['C:\Users\idm\Desktop\Semester4\Internship\Matlab\Data\test_' datestr(now, 'yyyymmdd_HHMMSS')];
+    mkdir(folder_name);
+    
+    % Save all params into folder
     param = {n_rows, n_columns, grid_visual_angle, stim_size, ec_circle, ec_min, fix_stim_dia};
     param_table = cell2table(param, 'VariableNames', {'n_rows', 'n_columns', 'grid_visual_angle', 'stim_size', 'eccentricity_circle', ...
                                                       'eccentricity_min', 'fixation_stimulus_diameter'});
     saveData(param_table, folder_name, 'parameters.csv');
  
-    % set the seed for reproducibility
-    rng(42);
-
-    %% Function Calls
-    % Ask user for input parameters
-    data = startGUI();
-    
     % Save input parameters in a table
     param = {data.date, data.id, data.name, data.n_trials, data.conditions, data.notes};
     param_table = cell2table(param, 'VariableNames', {'Date', 'ID', 'Name', 'Trials', 'Conditions', 'Notes'});
     saveData(param_table, folder_name, 'info.csv');
  
+
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Function Calls
+        
     %% Generate trials
-    trials = generateTrials(data.n_trials, data.conditions, n_rows, n_columns, grid_visual_angle, ec_circle, ec_min);
+    trials = generateTrials_new(data.n_trials, data.conditions, n_rows, n_columns, grid_visual_angle, ec_circle, ec_min);
     trial_data_file_name = fullfile(folder_name, 'trials.mat');
     save(trial_data_file_name, 'trials');
     
     %% Fill trials with angles
-    trial_data = createTrialsByCondition(data.n_trials, trials, data.conditions);
+    trial_data = createTrialsByCondition_new(data.n_trials, trials, data.conditions);
     trial_data_file_name = fullfile(folder_name, 'trials_filled.mat');
     save(trial_data_file_name, 'trial_data');
 
@@ -70,17 +147,11 @@ end
 function startPsychToolbox(data, folder_name)
     subfolder_name = [folder_name 'results' datestr(now, 'yyyymmdd_HHMMSS')];
     mkdir(subfolder_name);
-    % Clear the workspace and the screen
-    sca;
-    close all;
+
     % Open Psychtoolbox window
     Screen('Preference', 'SkipSyncTests', 1); % Skip synchronization tests, disable for experiment!!
-    PsychDefaultSetup(2); % Some default variables
 
-    % Get the screen numbers
-    screens = Screen('Screens');
-    % Draw to the external screen if avaliable
-    screenNumber = max(screens);
+%%%
 
     % Define colors for background and stim
     color_bg = WhiteIndex(screenNumber);
@@ -139,9 +210,15 @@ function startPsychToolbox(data, folder_name)
         % Define parameters for the bars
         bar_width = 5; % Width of each bar
         bar_height = 20; % Height of each bar
-        jitter = 3; % Maximum amount of jitter for each bar
+        
+        
+        
+        jitter_x = 0.8*Window_Width/NbX*1/3; % Maximum amount of jitter for each bar
+        jitter_y = 0.8*Window_Height/NbY*1/3;
+
+
         % start stim
-        trial_result = displayStim(window, bar_width, bar_height, jitter, ...
+        trial_result = displayStim(window, bar_width, bar_height, jitter_x, jitter_y, ...
             current_stim, current_cond, current_target_pos, screenXpixels, screenYpixels, color_stim);
     
         trial_results = [trial_results, trial_result];
