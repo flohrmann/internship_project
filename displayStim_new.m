@@ -1,42 +1,45 @@
-function trial = displayStim_new(window, bar_wh_ratio, jitter_x, jitter_y, current_stim, current_cond, current_target_pos, screenXpixels, screenYpixels, color_stim)
-% Define the keyboard keys that are listened for. We will be using the left
-% and right arrow keys as response keys for the task and the escape key as
-% a exit/reset key
+function trial = displayStim_new(window, bar_wh_ratio, jitter_x, jitter_y, current_stim, current_cond, current_target_pos, screenXpixels, screenYpixels, color_stim, timeoutDuration)
 
+% Define the keyboard keys that are listened for
+% TODO add more keys for slipping
 escapeKey = KbName('ESCAPE');
 leftKey = KbName('LeftArrow');
 rightKey = KbName('RightArrow');
-% Hide the mouse cursor
-%HideCursor; % disabled for testing
+leftShift = KbName('LeftShift');
+rightShift = KbName('RightShift');
+leftKey = leftShift;
+rightKey = rightShift;
+
 
 num_cols = size(current_stim, 2);
 num_rows = size(current_stim, 1);
-cellWidth = screenXpixels / num_cols;
-cellHeight = screenYpixels / num_rows;
+cell_width = screenXpixels / num_cols;
+cell_height = screenYpixels / num_rows;
 
 % Define a line length based on the cell size
-lineLength = min(cellWidth, cellHeight) * 0.5;
-lineWidth = bar_wh_ratio * lineLength;
+line_length = min(cell_width, cell_height) * 0.5;
+line_width = bar_wh_ratio * line_length;
 
 trial = [];
-
 for row = 1:num_rows %y
     for col = 1:num_cols %x
-        
-        % Calculate center of each cell
-        xCenter = (col - 0.5) * cellWidth;
-        yCenter = (row - 0.5) * cellHeight;
+        % Get random jitter for this position
+        x_jitter = randi([-jitter_x, jitter_x]);
+        y_jitter = randi([-jitter_y, jitter_y]);
 
-        % Retrieve angles for this cell
-        angles = current_stim{row, col};
+        % Calculate center of each cell & add jitter
+        x_center = ((col - 0.5) * cell_width) + x_jitter;
+        y_center = ((row - 0.5) * cell_height)+ y_jitter;
+
+        angles = current_stim{row, col}; % Retrieve angles for this cell
 
         % Loop over each angle and draw the lines
         for angle = angles
-            dx = (lineLength / 2) * cosd(angle);
-            dy = (lineLength / 2) * sind(angle);
-            lineCoords = [-dx, dy; dx, -dy]'; % Column vector for x and y coordinates
+            dx = (line_length / 2) * cosd(angle); % cosd/sind can use degrees, so dont
+            dy = (line_length / 2) * sind(angle); % need to convert to radians like for cos/sin
+            line_coords = [-dx, dy; dx, -dy]'; % Column vector for x and y coordinates
             % Draw the line
-            Screen('DrawLines', window, lineCoords, lineWidth, color_stim, [xCenter, yCenter], 2);
+            Screen('DrawLines', window, line_coords, line_width, color_stim, [x_center, y_center], 2);
         end
     end
 end
@@ -46,6 +49,7 @@ Screen('Flip', window);
 
 % Record the start time of the trial
 trial_start_time = GetSecs;
+response = 'none'; % Default response if no key is pressed
 
 %%% Code from https://peterscarfe.com/poserCuingExperiment.html :
 % Now we wait for a keyboard button signaling the observers response.
@@ -54,7 +58,8 @@ trial_start_time = GetSecs;
 % program
 respToBeMade = true;
 startResp = GetSecs;
-while respToBeMade
+while respToBeMade && (GetSecs - trial_start_time < timeoutDuration)
+%while respToBeMade
     [keyIsDown,secs, keyCode] = KbCheck(-1);
     if keyCode(escapeKey)
         ShowCursor;
