@@ -1,4 +1,4 @@
-function trial = displayStim_new(window, bar_wh_ratio, jitter_x, jitter_y, current_stim, current_cond, current_target_pos, screenXpixels, screenYpixels, color_stim, timeoutDuration)
+function data = displayStim_new(window, data, bar_wh_ratio, jitter_x, jitter_y, screenXpixels, screenYpixels, color_stim, timeoutDuration)
 
 % Define the keyboard keys that are listened for
 % TODO add more keys for slipping
@@ -10,6 +10,9 @@ rightShift = KbName('RightShift');
 leftKey = leftShift;
 rightKey = rightShift;
 
+current_stim = data.AngleMatrix{1};
+current_target_pos = data.TargetSide{1};
+
 
 num_cols = size(current_stim, 2);
 num_rows = size(current_stim, 1);
@@ -20,19 +23,25 @@ cell_height = screenYpixels / num_rows;
 line_length = min(cell_width, cell_height) * 0.5;
 line_width = bar_wh_ratio * line_length;
 
+%safe
+data.cell_width = cell_width;
+data.cell_height = cell_height;
+data.line_length = line_length;
+data.line_width = line_width;
+
 trial = [];
 for row = 1:num_rows %y
     for col = 1:num_cols %x
         % Get random jitter for this position
         x_jitter = randi([-jitter_x, jitter_x]);
         y_jitter = randi([-jitter_y, jitter_y]);
-
+        data.x_jitter = x_jitter; data.y_jitter = y_jitter; % safe
         % Calculate center of each cell & add jitter
         x_center = ((col - 0.5) * cell_width) + x_jitter;
         y_center = ((row - 0.5) * cell_height)+ y_jitter;
-
+        data.x_center = x_center; data.y_center = y_center; % safe
         angles = current_stim{row, col}; % Retrieve angles for this cell
-
+        line_coords_list = [];
         % Loop over each angle and draw the lines
         for angle = angles
             dx = (line_length / 2) * cosd(angle); % cosd/sind can use degrees, so dont
@@ -40,7 +49,9 @@ for row = 1:num_rows %y
             line_coords = [-dx, dy; dx, -dy]'; % Column vector for x and y coordinates
             % Draw the line
             Screen('DrawLines', window, line_coords, line_width, color_stim, [x_center, y_center], 2);
+            line_coords_list = [line_coords_list, line_coords];
         end
+        data.Line_Coords = {line_coords_list};
     end
 end
 
@@ -91,13 +102,12 @@ end
 
 %%%
 
-% Record user response and response time
-trial.condition = current_cond;
-trial.target = current_target_pos;
-trial.response = response;
-trial.correct = correctness;
-trial.start = startResp;
-trial.end = endResp;
-trial.rt = rt;
+% Record user response, response time
+data.Target = current_target_pos;
+data.Response = {response};
+data.Correct = correctness;
+data.Start = startResp;
+data.End = endResp;
+data.RT = rt;
 
 end
