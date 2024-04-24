@@ -222,10 +222,10 @@ save(rand_trials_file_name, 'rand_trials');
 startPsychToolbox(rand_trials, folder_name, n_columns, n_rows, TimeOut_DurationInSeconds);
 
 %% Load custom path for testing
-% data_struct = load('C:\Users\idm\Desktop\Semester4\Internship\Matlab\Data\test_1_20240421_151825\rand_trials.mat');
-% data = data_struct.rand_trials;
-% folder_name = 'C:\Users\idm\Desktop\Semester4\Internship\Matlab\Data\test_1_20240421_151825';
-% startPsychToolbox(data, folder_name, 9, 12, 10);
+data_struct = load('C:\Users\idm\Desktop\Semester4\Internship\Matlab\Data\test_1_20240421_151825\rand_trials.mat');
+data = data_struct.rand_trials;
+folder_name = 'C:\Users\idm\Desktop\Semester4\Internship\Matlab\Data\test_1_20240421_151825';
+startPsychToolbox(data, folder_name, 9, 12,5);
 
 %% Ask for user feedback
 Ending_prompt={'Type in subject report', ...
@@ -253,15 +253,13 @@ KbName('UnifyKeyNames');
 escapeKey = KbName('ESCAPE');
 rightKey = KbName('RightArrow');
 leftKey = KbName('LeftArrow');
-
 leftShift = KbName('LeftShift');
 rightShift = KbName('RightShift');
-
 leftKey = leftShift;
 rightKey = rightShift;
 
 % Hide the mouse cursor
-HideCursor; % TODO disabled for testing
+%HideCursor; % TODO disable, for testing
 
 bar_wh_ratio = 0.08; % bar width to height ratio
 screenNumber = 0; % 0 default screen, 1 for external screen
@@ -283,8 +281,8 @@ jitter_x = round(0.1*screenXpixels/NbX);
 jitter_y = round(0.1*screenYpixels/NbY);
 
 % save infos
-infos = {color_bg, color_stim, text_size, dotSizePix, jitter_x, jitter_y, xCenter, yCenter};
-infos_table = cell2table(infos, 'VariableNames', {'color_bg', 'color_stim', ...
+infos = {bar_wh_ratio, color_bg, color_stim, text_size, dotSizePix, jitter_x, jitter_y, xCenter, yCenter};
+infos_table = cell2table(infos, 'VariableNames', {'bar_wh_ratio', 'color_bg', 'color_stim', ...
      'text_size', 'dotSizePix', 'jitter_x', 'jitter_y', 'xCenter', 'yCenter'});
 saveData(infos_table, folder_name, 'screen_info.csv');
 
@@ -344,26 +342,23 @@ end
 %% Start experiment
 disp('Start Experiment');
 results_file_name = [subfolder_name, '\trial_results_' , datestr(now, 'yyyymmdd_HHMM'), '.mat'];
-trial_results = [];
+trial_results = table();
 % TODO disable/change back
 % for i = 1:size(data, 1)
-for i = 1:10
+for i = 1:4
     % Display fixation dot & empty screen after
     drawFixation(window, xCenter, yCenter, color_stim, dotSizePix);
     WaitSecs(0.5); % show for 0.5 seconds
     drawEmptyScreen(window, color_bg, 1)
     WaitSecs(0.2); % wait before drawing stim
 
-    current_stim = data.AngleMatrix{i};
-    current_cond = data.Condition{i};
-    current_target_pos = data.TargetSide{i};
-
+    current_data = data(i,:);
     % Display stimulus
-    trial_result = displayStim_new(window, bar_wh_ratio, jitter_x, jitter_y, current_stim,...
-        current_cond, current_target_pos, screenXpixels, screenYpixels, color_stim, timeout);
-
-    trial_results = [trial_results, trial_result];
+    trial_result = displayStim_new(window, current_data, bar_wh_ratio, jitter_x, jitter_y, ...
+        screenXpixels, screenYpixels, color_stim, timeout);
+         
     % save/overwrite each loop in case experiment crashes/gets aborted
+    trial_results(i,:) = trial_result(1,:);
     save(results_file_name, 'trial_results');
 
     % Check for Escape key press to close the experiment
@@ -376,7 +371,7 @@ end
 %% End screen
 % TODO CHANGE BACK FOR EXPERIMENT
 %if i == size(data, 1)
-if i == 10
+if i == 4
     displayText(window, 'Experiment Complete\n\n Thank you for your participation! <3');
     WaitSecs(2);
     KbStrokeWait(-1);  % Wait to end with key press
