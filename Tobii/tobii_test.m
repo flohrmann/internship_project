@@ -14,12 +14,13 @@ disp(["Address: ", my_eyetracker.Address]);
 disp(["Model: ", my_eyetracker.Model]);
 disp(["Name (It's OK if this is empty): ", my_eyetracker.Name]);
 disp(["Serial number: ", my_eyetracker.SerialNumber]);
+disp(['Frame rate:', my_eyetracker.get_gaze_output_frequency(), 'Hz']);
 
 %% Calibration
 
-
 eyetracker_address = my_eyetracker.Address;
 
+% [calibApplyResult, calParams] = TobiiCalibrate(eyetracker_address)
 
 % Check if a specific eye tracker address has been provided, and if so,
 % try to locate it and return the corresponding eye tracker object.
