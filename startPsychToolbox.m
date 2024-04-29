@@ -1,4 +1,5 @@
 function startPsychToolbox(data, folder_name, NbX, NbY, timeout, language)
+% doesnt use eyetracking
 % make subfolder for results
 subfolder_name = [folder_name '\results'];
 mkdir(subfolder_name);
