@@ -13,7 +13,6 @@ rightKey = rightShift;
 current_stim = data.AngleMatrix{1};
 current_target_pos = data.TargetSide{1};
 
-
 num_cols = size(current_stim, 2);
 num_rows = size(current_stim, 1);
 cell_width = screenXpixels / num_cols;
