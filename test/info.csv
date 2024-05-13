@@ -1,2 +1,2 @@
-Date,ID,Name,Trials,Conditions,Notes
-2024-04-05,,,120,"a_simple,b_simple,a,b",
+SubjectName,SubjectID,SessionNumber,Subject_Gender,Subject_Age,Subject_LeftEyeSight,Subject_RightEyeSight,Subject_OtherVisionInfo
+Fani,1,1,,27,normal,normal,experimenter
