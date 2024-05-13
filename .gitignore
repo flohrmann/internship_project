@@ -5,3 +5,6 @@ displayStim_new.asv
 displayStim_new.asv
 main_zp.asv
 *.asv
+*.mat
+*.csv
+*.png

@@ -28,17 +28,27 @@ data.cell_height = cell_height;
 data.line_length = line_length;
 data.line_width = line_width;
 
+% Initialize jitter storage
+x_jitters = zeros(num_rows, num_cols);
+y_jitters = zeros(num_rows, num_cols);
+x_centers = zeros(num_rows, num_cols);
+y_centers = zeros(num_rows, num_cols);
+
 trial = [];
 for row = 1:num_rows %y
     for col = 1:num_cols %x
         % Get random jitter for this position
         x_jitter = randi([-jitter_x, jitter_x]);
         y_jitter = randi([-jitter_y, jitter_y]);
-        data.x_jitter = x_jitter; data.y_jitter = y_jitter; % safe
+        % Store jitter values
+        x_jitters(row, col) = x_jitter;
+        y_jitters(row, col) = y_jitter;
+        
         % Calculate center of each cell & add jitter
         x_center = ((col - 0.5) * cell_width) + x_jitter;
         y_center = ((row - 0.5) * cell_height)+ y_jitter;
-        data.x_center = x_center; data.y_center = y_center; % safe
+        x_centers(row, col) = x_center; 
+        y_centers(row, col) = y_center; % safe
         angles = current_stim{row, col}; % Retrieve angles for this cell
         line_coords_list = [];
         % Loop over each angle and draw the lines
@@ -54,6 +64,7 @@ for row = 1:num_rows %y
     end
 end
 
+
 % Flip to the screen for each trial
 Screen('Flip', window);
 
@@ -61,6 +72,11 @@ Screen('Flip', window);
 trial_start_time = GetSecs;
 response = 'none'; % Default response if no key is pressed
 
+% Store the jitters in the data struct
+data.x_jitters = {x_jitters};
+data.y_jitters = {y_jitters};
+data.x_centers = {x_centers};
+data.y_centers = {y_centers};
 %%% Code from https://peterscarfe.com/poserCuingExperiment.html :
 % Now we wait for a keyboard button signaling the observers response.
 % The left arrow key signals a "left" response and the right arrow key
@@ -105,8 +121,8 @@ end
 data.Target = current_target_pos;
 data.Response = {response};
 data.Correct = correctness;
-data.Start = startResp;
-data.End = endResp;
+data.TrialStartTime = startResp;
+data.TrialEndTime = endResp;
 data.RT = rt;
 
 end
