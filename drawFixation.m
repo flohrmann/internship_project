@@ -5,4 +5,3 @@ Screen('Flip', window);
 
 % end with keystroke
 % KbStrokeWait(-1);
-
