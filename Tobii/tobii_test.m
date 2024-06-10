@@ -1,4 +1,4 @@
-% Start Tobii Pro SDK Operations
+%% Start Tobii Pro SDK Operations
 tobii = EyeTrackingOperations();
 
 % Find connected eye trackers
@@ -136,7 +136,7 @@ end
 
 calib.leave_calibration_mode();
 
-% Now that calibration is finished, get the gaze data recorded in the meantime.
+%% Now that calibration is finished, get the gaze data recorded in the meantime.
 gaze_data = eyetracker.get_gaze_data();
 
 eyetracker.stop_gaze_data();
