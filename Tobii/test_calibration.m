@@ -26,3 +26,19 @@ end
 % retrieve_calibration_data('C:\Users\idm\Desktop\Semester4\Internship\Matlab\ExperimentRepo\results\calibration_results_20240513_1144')	;
 % apply_calibration_data(calibration_file);	
 sca; % Close the window
+
+
+
+%% test 2
+Screen('Preference', 'SkipSyncTests', 1); % TODO disable, skips synchronization tests
+[window, windowRect] = PsychImaging('OpenWindow', screenNumber, color_bg);
+
+% Add Titta to MATLAB path if not already added
+settings = Titta.getDefaults('Tobii Pro Nano');
+eye_tracker = Titta(settings);
+eye_tracker.init();
+
+eye_tracker.calibrate(window);
+
+sca; % Close the window
+

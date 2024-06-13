@@ -26,9 +26,9 @@ dotSizePix = 8; % Size of fixation point
 text_size = 30;
 
 % Open Psychtoolbox window
-PsychDebugWindowConfiguration(0,0.5); % TODO disable, makes window transparent
+%PsychDebugWindowConfiguration(0,0.5); % TODO disable, makes window transparent
 Screen('Preference', 'SkipSyncTests', 1); % TODO disable, skips synchronization tests
-[window, windowRect] = PsychImaging('OpenWindow', screenNumber, color_bg);
+[window, ~] = PsychImaging('OpenWindow', screenNumber, color_bg);
 [screenXpixels, screenYpixels] = Screen('WindowSize', window);
 xCenter = screenXpixels / 2;
 yCenter = screenYpixels / 2;
