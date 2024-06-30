@@ -2,7 +2,7 @@
 screenNumber = 0; % 0 default screen, 1 for external screen
 color_bg = WhiteIndex(screenNumber);% colors for background and stim
 subfolder_name = 'C:\Users\flohrmann\Documents\MATLAB\internship_project\test';
-%Screen('Preference', 'SkipSyncTests', 1); % TODO disable, skips synchronization tests
+Screen('Preference', 'SkipSyncTests', 1); % TODO disable, skips synchronization tests
 [window, ~] = PsychImaging('OpenWindow', screenNumber, color_bg);
 [screenXpixels, screenYpixels] = Screen('WindowSize', window);
 %screenXpixels = screenXpixels\2;
