@@ -1,4 +1,4 @@
-function data = displayStim_new(window, data, bar_wh_ratio, jitter_x, jitter_y, screenXpixels, screenYpixels, color_stim, timeoutDuration)
+function [data, stop] = displayStim_new(window, data, bar_wh_ratio, jitter_x, jitter_y, screenXpixels, screenYpixels, color_stim, timeoutDuration, blankStartTime, monitorFlipInterval, continue_without_eyetracking, eye_tracker)
 
 % Define the keyboard keys that are listened for
 % TODO add more keys for slipping
@@ -34,7 +34,8 @@ y_jitters = zeros(num_rows, num_cols);
 x_centers = zeros(num_rows, num_cols);
 y_centers = zeros(num_rows, num_cols);
 
-trial = [];
+trial_coords_list = cell(num_rows, num_cols);
+
 for row = 1:num_rows %y
     for col = 1:num_cols %x
         % Get random jitter for this position
@@ -50,7 +51,7 @@ for row = 1:num_rows %y
         x_centers(row, col) = x_center; 
         y_centers(row, col) = y_center; % safe
         angles = current_stim{row, col}; % Retrieve angles for this cell
-        line_coords_list = [];
+        cell_line_coords = [];
         % Loop over each angle and draw the lines
         for angle = angles
             dx = (line_length / 2) * cosd(angle); % cosd/sind can use degrees, so dont
@@ -58,49 +59,60 @@ for row = 1:num_rows %y
             line_coords = [-dx, dy; dx, -dy]'; % Column vector for x and y coordinates
             % Draw the line
             Screen('DrawLines', window, line_coords, line_width, color_stim, [x_center, y_center], 2);
-            line_coords_list = [line_coords_list, line_coords];
+            cell_line_coords = [cell_line_coords, line_coords];
         end
-        data.Line_Coords = {line_coords_list};
+        trial_coords_list{row, col} = cell_line_coords;
     end
 end
+data.TrialCenterStimCoords = {trial_coords_list};
 
-
+% Start time of the trial
+trial_start_time = blankStartTime+0.2-0.5*monitorFlipInterval;
 % Flip to the screen for each trial
-Screen('Flip', window);
+Screen('Flip', window, trial_start_time); % to make sure it doesnt flip a frame too late
 
-% Record the start time of the trial
-trial_start_time = GetSecs;
+% Start recording eye data if with eyetracking
+if ~continue_without_eyetracking
+    eye_tracker.buffer.start('gaze');
+end
+
+    
 response = 'none'; % Default response if no key is pressed
 
-% Store the jitters in the data struct
-data.x_jitters = {x_jitters};
-data.y_jitters = {y_jitters};
-data.x_centers = {x_centers};
-data.y_centers = {y_centers};
 %%% Code from https://peterscarfe.com/poserCuingExperiment.html :
 % Now we wait for a keyboard button signaling the observers response.
 % The left arrow key signals a "left" response and the right arrow key
 % a "right" response. You can also press escape if you want to exit the
 % program
 respToBeMade = true;
-startResp = GetSecs;
+stop = 0;
 while respToBeMade && (GetSecs - trial_start_time < timeoutDuration)
 %while respToBeMade
     [keyIsDown,secs, keyCode] = KbCheck(-1);
     if keyCode(escapeKey)
         ShowCursor;
+        stop = 1;
         sca;
         return
     elseif keyCode(leftKey)
         response = 'L';
         respToBeMade = false;
+        stop = 0;
     elseif keyCode(rightKey)
         response = 'R';
         respToBeMade = false;
+        stop = 0;
     end
 end
-endResp = GetSecs;
-rt = endResp - startResp;
+% Get eye data, since start/last getting eye data & safe
+if ~continue_without_eyetracking
+    % Get eye data, since start/last getting eye data & save
+    samp = eye_tracker.buffer.consumeN('gaze');
+else
+    samp = struct('deviceTimeStamp', [], 'systemTimeStamp', [], 'left', struct(), 'right', struct()); % No eye-tracking data
+end
+    
+trial_resp_time = GetSecs;
 
 % noise
 fs = 5000; t = 0:0.00002:0.02;
@@ -117,12 +129,22 @@ end
 
 %%%
 
+% Store the jitters in the data struct
+data.x_jitters = {x_jitters};
+data.y_jitters = {y_jitters};
+data.x_centers = {x_centers};
+data.y_centers = {y_centers};
+
 % Record user response, response time
-data.Target = current_target_pos;
-data.Response = {response};
-data.Correct = correctness;
-data.TrialStartTime = startResp;
-data.TrialEndTime = endResp;
-data.RT = rt;
+data.target = current_target_pos;
+data.response = {response};
+data.correct = correctness;
+data.blankStartTime = blankStartTime;
+data.trialStartTime = trial_start_time;
+data.trialEndTime = trial_resp_time;
+data.rt = trial_resp_time - trial_start_time;
+data.eyeTrial = samp; % eyetracker 
+
+
 
 end
