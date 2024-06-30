@@ -1591,7 +1591,7 @@ classdef Titta < handle
             settings.UI.setup.fixFrontSize      = 5;
             settings.UI.setup.fixBackColor      = 0;
             settings.UI.setup.fixFrontColor     = 255;
-            settings.UI.setup.showInstruction   = true; %FANI was true                         % if false, the instruction text is not shown on the participant monitor when showing setup display
+            settings.UI.setup.showInstruction   = true; %FANI was true       % if false, the instruction text is not shown on the participant monitor when showing setup display
             settings.UI.setup.showFixPoints     = true;                         % if false, the fixation points in the corners of the screen are not shown on the participant monitor when showing setup display
             settings.UI.setup.eyeImageMargin    = 20;                           % distance between the eye images on the setup display
             % functions for drawing instruction and positioning information
@@ -1599,7 +1599,7 @@ classdef Titta < handle
             % NaN (unknown) if reference position is not set by user
             settings.UI.setup.instruct.strFun   = @(x,y,z,rx,ry,rz) sprintf('Position yourself such that the two circles overlap.\n\n\n Distance: %.0f cm',z);
             settings.UI.setup.instruct.font     = sansFont;
-            settings.UI.setup.instruct.size     = 30; % FANI added FLOOR was 24*textfac
+            settings.UI.setup.instruct.size     = 30; % FANI was 24*textfac
             settings.UI.setup.instruct.color    = 0;                            % only for messages on the screen, doesn't affect buttons
             settings.UI.setup.instruct.style    = 0;                            % can OR together, 0=normal,1=bold,2=italic,4=underline,8=outline,32=condense,64=extend.
             settings.UI.setup.instruct.vSpacing = 1.5;
@@ -1658,7 +1658,7 @@ classdef Titta < handle
             settings.UI.button.setup.toggEyeIm.edgeColor    = toggleButClr.edge;
             settings.UI.button.setup.toggEyeIm.textColor    = toggleButClr.text;
             settings.UI.button.setup.cal.accelerator        = 'space';
-            settings.UI.button.setup.cal.visible            = false; % FANI true
+            settings.UI.button.setup.cal.visible            = false; % FANI was true
             settings.UI.button.setup.cal.string             = 'calibrate (<i>spacebar<i>)';
             settings.UI.button.setup.cal.fillColor          = continueButClr.fill;
             settings.UI.button.setup.cal.edgeColor          = continueButClr.edge;
@@ -1775,7 +1775,7 @@ classdef Titta < handle
             settings.UI.plot.but.valSel.fillColor   = toggleButClr.fill;
             settings.UI.plot.but.valSel.edgeColor   = toggleButClr.edge;
             settings.UI.plot.but.valSel.textColor   = toggleButClr.text;
-            settings.UI.cal.errMsg.string           = 'Calibration failed\nPress any key to continue';  % NB: shown on participant screen during one-screen operation, on operator screen during two-screen operation
+            settings.UI.cal.errMsg.string           = 'Calibration failed\n\n\nPress any key to continue';  % NB: shown on participant screen during one-screen operation, on operator screen during two-screen operation
             settings.UI.cal.errMsg.font             = sansFont;
             settings.UI.cal.errMsg.size             = floor(36*textFac); % FANI added FLOOR
             settings.UI.cal.errMsg.color            = [150 0 0];
@@ -2539,7 +2539,7 @@ classdef Titta < handle
             qCanDoMonocularCalib    = obj.hasCap('CanDoMonocularCalibration');
             
             % setup text for buttons
-            obj.settings.UI.button.setup.text.size % FANI print
+            %obj.settings.UI.button.setup.text.size % FANI print
             Screen('TextFont',  wpnt(end), obj.settings.UI.button.setup.text.font, obj.settings.UI.button.setup.text.style);
             Screen('TextSize',  wpnt(end), obj.settings.UI.button.setup.text.size);
             
@@ -2619,7 +2619,7 @@ classdef Titta < handle
             Screen('TextSize',  wpnt(1), obj.settings.UI.setup.instruct.size);
             if qHasOperatorScreen
                 Screen('TextFont',  wpnt(2), obj.settings.UI.operator.setup.instruct.font, obj.settings.UI.operator.setup.instruct.style);
-                %obj.settings.UI.setup.instruct.size = 50; % FANI added line
+                %obj.settings.UI.setup.instruct.size = 30; % FANI added line
                 Screen('TextSize',  wpnt(2), obj.settings.UI.operator.setup.instruct.size);
             end
             
@@ -2820,7 +2820,7 @@ classdef Titta < handle
                 if obj.settings.UI.setup.showInstruction && ~qHideSetup
                     str = obj.settings.UI.setup.instruct.strFun(headP.avgX,headP.avgY,headP.avgDist,obj.settings.UI.setup.referencePos(1),obj.settings.UI.setup.referencePos(2),obj.settings.UI.setup.referencePos(3));
                     if ~isempty(str)
-                        % disp("im here") % FANI addded so text stays the
+                        %disp("im here") % FANI addded so text stays the
                         % same size every iteration and doesnt get smaller
                         Screen('TextFont',  wpnt(1), obj.settings.UI.setup.instruct.font, obj.settings.UI.setup.instruct.style);% FANI added line
                         obj.settings.UI.setup.instruct.size = 30; % FANI added line
@@ -3015,7 +3015,7 @@ classdef Titta < handle
                     inputs.(varargin{p}) = varargin{p+1};
                 end
                 args = [fieldnames(inputs) struct2cell(inputs)].';
-                [~,~,txtbounds,cache] = DrawFormattedText(text,'win',wpnt,'cacheOnly',true,args{:}); % FANI changed from DrawFormattedText2
+                [~,~,txtbounds,cache] = DrawFormattedText2(text,'win',wpnt,'cacheOnly',true,args{:}); % FANI changed from DrawFormattedText2
             else
                 inputs.vSpacing = [];
                 fs=fieldnames(inputs);
@@ -3077,52 +3077,52 @@ classdef Titta < handle
             end
         end
         
-%         function drawCachedText(obj,cache,rect)
-%             if obj.usingFTGLTextRenderer
-%                 args = {};
-%                 if nargin>2
-%                     args = {'sx','center','sy','center','xalign','center','yalign','center','winRect',rect};
+        function drawCachedText(obj,cache,rect)
+            if obj.usingFTGLTextRenderer
+                args = {};
+                if nargin>2
+                    args = {'sx','center','sy','center','xalign','center','yalign','center','winRect',rect};
+                end
+                for p=1:length(cache)
+                    DrawFormattedText(cache(p),args{:});
+                end
+            else
+                for p=1:length(cache)
+                    if nargin>2
+                        [cx,cy] = RectCenterd(rect);
+                        cache(p).px = cache(p).px+cx;
+                        cache(p).py = cache(p).py+cy;
+                    end
+                    DrawFormattedText2GDI(cache(p));
+                end
+            end
+        end
+%         function drawCachedText(obj, cache, rect) % FANI
+%         % Calculate screen scaling factor
+%         screenScaling = get(0, 'ScreenPixelsPerInch') / 96; % Assuming 96 DPI as baseline
+% 
+%         if obj.usingFTGLTextRenderer
+%             args = {};
+%             if nargin > 2
+%                 args = {'sx', 'center', 'sy', 'center', 'xalign', 'center', 'yalign', 'center', 'winRect', rect};
+%             end
+%             for p = 1:length(cache)
+%                 DrawFormattedText(cache(p), args{:});
+%             end
+%         else
+%             for p = 1:length(cache)
+%                 if nargin > 2
+%                     [cx, cy] = RectCenter(rect);
+%                     % Adjust center position based on scaling
+%                     cx = floor(cx * screenScaling);
+%                     cy = floor(cy * screenScaling);
+%                     cache(p).px = cache(p).px + cx;
+%                     cache(p).py = cache(p).py + cy;
 %                 end
-%                 for p=1:length(cache)
-%                     DrawFormattedText(cache(p),args{:});
-%                 end
-%             else
-%                 for p=1:length(cache)
-%                     if nargin>2
-%                         [cx,cy] = RectCenterd(rect);
-%                         cache(p).px = cache(p).px+cx;
-%                         cache(p).py = cache(p).py+cy;
-%                     end
-%                     DrawFormattedText2GDI(cache(p));
-%                 end
+%                 DrawFormattedText2GDI(cache(p));
 %             end
 %         end
-        function drawCachedText(obj, cache, rect) % FANI
-        % Calculate screen scaling factor
-        screenScaling = get(0, 'ScreenPixelsPerInch') / 96; % Assuming 96 DPI as baseline
-
-        if obj.usingFTGLTextRenderer
-            args = {};
-            if nargin > 2
-                args = {'sx', 'center', 'sy', 'center', 'xalign', 'center', 'yalign', 'center', 'winRect', rect};
-            end
-            for p = 1:length(cache)
-                DrawFormattedText(cache(p), args{:});
-            end
-        else
-            for p = 1:length(cache)
-                if nargin > 2
-                    [cx, cy] = RectCenter(rect);
-                    % Adjust center position based on scaling
-                    cx = floor(cx * screenScaling);
-                    cy = floor(cy * screenScaling);
-                    cache(p).px = cache(p).px + cx;
-                    cache(p).py = cache(p).py + cy;
-                end
-                DrawFormattedText2GDI(cache(p));
-            end
-        end
-        end
+%         end
 
 
         function drawFixPoints(obj,wpnt,pos,fixBackSize,fixFrontSize,fixBackColor,fixFrontColor)
@@ -4387,7 +4387,9 @@ classdef Titta < handle
                     end
                     
                     % draw text with validation accuracy etc info
-                    obj.drawCachedText(valInfoTopTextCache);
+                    %obj.drawCachedText(valInfoTopTextCache); % FANI COMMENTED OUT; 
+                    % is for accuracy/validity aufm screen after calibration
+                    
                     % draw buttons
                     mousePos = [mx my];
                     but(1).draw(mousePos);
