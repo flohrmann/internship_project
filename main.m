@@ -128,7 +128,7 @@ Subject_prompt={'Subject name (no space)', ...
     };
 dialog_title='Give_Subject_Information';
 num_lines=1;
-Subject_default_answer={'','', '', '','','','', '', '', '', '', '', '', ''};
+Subject_default_answer={'','', '', '','','','', '', '', '', '', '', '', '', ''};
 %Subject_default_answer={'Fani','1', '1', '','27','normal','normal', 'experimenter', '', '', '', '', '', ''};
 subject_info=inputdlg(Subject_prompt,dialog_title,num_lines,Subject_default_answer);
 SubjectName  = subject_info{1};
@@ -141,8 +141,10 @@ Subject_RightEyeSight = subject_info{7};
 Subject_OtherVisionInfo = subject_info{8};
 Subject_ADHD = subject_info{9};
 Subject_ADHD_when = subject_info{10};
-Subject_Autism = subject_info{11};
-Subject_Gaming = subject_info{12};
+Subject_ADHD_meds = subject_info{11};
+Subject_ADHD_meds_taken = subject_info{12};
+Subject_Autism = subject_info{13};
+Subject_Gaming = subject_info{14};
 
 
 %% experiment infos
@@ -200,9 +202,10 @@ param_table = cell2table(param, 'VariableNames', {'seed', 'n_rows', 'n_columns'}
 saveData(param_table, folder_name, 'parameters.csv');
 
 % Save subject info parameters in a table
-infos = {SubjectName, SubjectID, SessionNumber, Subject_Gender, Subject_Age, Subject_LeftEyeSight, Subject_RightEyeSight, Subject_OtherVisionInfo, Subject_ADHD, Subject_ADHD_when, Subject_Autism, Subject_Gaming};
-infos_table = cell2table(infos, 'VariableNames', {'SubjectName', 'SubjectID', 'SessionNumber', 'Subject_Gender', ...
-    'Subject_Age', 'Subject_LeftEyeSight', 'Subject_RightEyeSight', 'Subject_OtherVisionInfo', 'Subject_ADHD', 'Subject_ADHD_when', 'Subject_Autism', 'Subject_Gaming'});
+infos = {SubjectName, SubjectID, SessionNumber, Subject_Gender, Subject_Age, Subject_LeftEyeSight, Subject_RightEyeSight,...
+    Subject_OtherVisionInfo, Subject_ADHD, Subject_ADHD_when,Subject_ADHD_meds,Subject_ADHD_meds_taken, Subject_Autism, Subject_Gaming};
+infos_table = cell2table(infos, 'VariableNames', {'SubjectName', 'SubjectID', 'SessionNumber', 'SubjectGender', ...
+    'Subject_Age', 'SubjectLeftEyeSight', 'SubjectRightEyeSight', 'SubjectOtherVisionInfo', 'SubjectADHD', 'SubjectADHD_when', 'SubjecADHD_meds', 'SubjectADHD_meds_taken', 'SubjectAutism', 'SubjectGaming'});
 saveData(infos_table, folder_name, 'info.csv');
 
 % Save exp infos in table
