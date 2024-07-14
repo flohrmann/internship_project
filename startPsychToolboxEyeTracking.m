@@ -226,12 +226,17 @@ end
                 disp('Experiment Aborted: Escape Key was pressed')
                 % safe continous eyetracker data
                 %continue_without_eyetracking = true;
-                samp = eye_tracker.buffer.consumeN('gaze');
-                save(eye_results_file_name, 'samp');
-                eye_tracker.buffer.stop('gaze');
-                eye_tracker.deInit();               
-                sca; % close window
-                return; % close function
+                if ~continue_without_eyetracking
+                    samp = eye_tracker.buffer.consumeN('gaze');
+                    save(eye_results_file_name, 'samp');
+                    eye_tracker.buffer.stop('gaze');
+                    eye_tracker.deInit();               
+                    sca; % close window
+                    return; % close function
+                else
+                    sca; % close window
+                    return; % close function
+                end
             end
         end
         % Display fixation dot for 0.5 seconds

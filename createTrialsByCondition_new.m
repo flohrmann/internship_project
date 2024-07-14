@@ -1,4 +1,4 @@
-function condition_trials = createTrialsByCondition_new(NumberOfBlocks, NTrialsEachCondition, trial_data, conditions)
+function condition_trials = createTrialsByCondition_new(NTrialsEachCondition, trial_data, conditions)%NumberOfBlocks
 % Gets trial matrix and conditions
 % Returns trial matrix filled with angles of conditions
 % Bsp. 2 3 2 3 2 3  + a_simple_1 = 45 45 45  45 45 45
@@ -12,7 +12,7 @@ function condition_trials = createTrialsByCondition_new(NumberOfBlocks, NTrialsE
     % Loop through each condition
     for i = 1:numel(condition_names)
         condition_name = condition_names{i};
-        trials_per_condition = NTrialsEachCondition(i) * NumberOfBlocks;
+        trials_per_condition = NTrialsEachCondition(i); %* NumberOfBlocks;
         % Extract trial data for the current condition
         start_index = (i-1) * trials_per_condition + 1;
         end_index = start_index + trials_per_condition - 1;
