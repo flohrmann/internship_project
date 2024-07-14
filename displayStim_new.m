@@ -1,14 +1,14 @@
-function [data, stop] = displayStim_new(window, data, bar_wh_ratio, jitter_x, jitter_y, screenXpixels, screenYpixels, color_stim, timeoutDuration, blankStartTime, monitorFlipInterval, continue_without_eyetracking, eye_tracker)
+function [data, stop] = displayStim_new(window, data, bar_wh_ratio, jitter_x, jitter_y, screenXpixels, screenYpixels, color_stim, timeoutDuration, blankStartTime, monitorFlipInterval, continue_without_eyetracking, eye_tracker, color_bg)
 
 % Define the keyboard keys that are listened for
 % TODO add more keys for slipping
 escapeKey = KbName('ESCAPE');
-leftKey = KbName('LeftArrow');
-rightKey = KbName('RightArrow');
-leftShift = KbName('LeftShift');
-rightShift = KbName('RightShift');
-leftKey = leftShift;
-rightKey = rightShift;
+%leftKey = KbName('LeftArrow');
+%rightKey = KbName('RightArrow');
+leftKey = KbName('LeftShift');
+rightKey = KbName('RightShift');
+% leftKey = leftShift;
+% rightKey = rightShift;
 
 current_stim = data.AngleMatrix{1};
 current_target_pos = data.TargetSide{1};
@@ -34,7 +34,18 @@ y_jitters = zeros(num_rows, num_cols);
 x_centers = zeros(num_rows, num_cols);
 y_centers = zeros(num_rows, num_cols);
 
-trial_coords_list = cell(num_rows, num_cols);
+%trial_coords_list = cell(num_rows, num_cols);
+
+
+% flip to another blank screen just to make sure eyetracker starts before stimulation starts
+Screen('FillRect', window, color_bg); 
+Screen('Flip', window, blankStartTime+0.2-1.5*monitorFlipInterval); % wait 0.2 sec - 1 screen flip
+ 
+% Start recording eye data if with eyetracking
+if ~continue_without_eyetracking
+    eye_tracker.buffer.start('gaze');
+end   
+
 
 for row = 1:num_rows %y
     for col = 1:num_cols %x
@@ -51,7 +62,7 @@ for row = 1:num_rows %y
         x_centers(row, col) = x_center; 
         y_centers(row, col) = y_center; % safe
         angles = current_stim{row, col}; % Retrieve angles for this cell
-        cell_line_coords = [];
+        %cell_line_coords = [];
         % Loop over each angle and draw the lines
         for angle = angles
             dx = (line_length / 2) * cosd(angle); % cosd/sind can use degrees, so dont
@@ -59,22 +70,17 @@ for row = 1:num_rows %y
             line_coords = [-dx, dy; dx, -dy]'; % Column vector for x and y coordinates
             % Draw the line
             Screen('DrawLines', window, line_coords, line_width, color_stim, [x_center, y_center], 2);
-            cell_line_coords = [cell_line_coords, line_coords];
+            %cell_line_coords = [cell_line_coords, line_coords];
         end
-        trial_coords_list{row, col} = cell_line_coords;
+        %trial_coords_list{row, col} = cell_line_coords;
     end
 end
-data.TrialCenterStimCoords = {trial_coords_list};
-
+%data.TrialCenterStimCoords = {trial_coords_list};
+      
 % Start time of the trial
 trial_start_time = blankStartTime+0.2-0.5*monitorFlipInterval;
 % Flip to the screen for each trial
-Screen('Flip', window, trial_start_time); % to make sure it doesnt flip a frame too late
-
-% Start recording eye data if with eyetracking
-if ~continue_without_eyetracking
-    eye_tracker.buffer.start('gaze');
-end
+StimulusOnsetTime = Screen('Flip', window, trial_start_time); % to make sure it doesnt flip a frame too late
 
     
 response = 'none'; % Default response if no key is pressed
@@ -141,6 +147,7 @@ data.response = {response};
 data.correct = correctness;
 data.blankStartTime = blankStartTime;
 data.trialStartTime = trial_start_time;
+data.StimulusOnsetTime = StimulusOnsetTime;
 data.trialEndTime = trial_resp_time;
 data.rt = trial_resp_time - trial_start_time;
 data.eyeTrial = samp; % eyetracker 
