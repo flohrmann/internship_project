@@ -17,7 +17,9 @@ sca; close all; clear;
 
 %% Standard parameters for this experiment
 %PsychDefaultSetup(2); % standard setup 
-rand('state',42); % seed for reproducibility
+%rand('state',42); % seed for reproducibility
+rand('state', sum(clock)); % seed AGAINST reproducibility
+
 global exp_folder backup_folder ptb_drawformattedtext_oversize
 exp_folder = 'C:\Users\flohrmann\Documents\MATLAB\internship_project';
 results_folder = 'C:\Users\flohrmann\Documents\Results';
@@ -149,7 +151,9 @@ Exp_prompt={'Lights on?', 'other info.', ...
     'Display screen height', 'Display screen description', 'With eyetracking? (1 yes, 0 no)'};
 Exp_dialog_title='Give_Exp_Information';
 num_lines=1;
-Exp_default_answer={'Indoor dim light', 'none', 'English', '1', '8 8 8 8', '0 0 0 0', '60', '0', '50 cm', '32 cm', '21 cm',  '', '1'};
+%Exp_default_answer={'Indoor dim light', 'none', 'English', '1', '8 8 8 8', '0 0 0 0', '60', '0', '50 cm', '32 cm', '21 cm',  '', '1'};
+Exp_default_answer={'Indoor dim light', 'none', 'English', '1', '40 40 40 40', '0 0 0 0', '60', '0', '50 cm', '32 cm', '21 cm',  '', '1'};
+
 %Exp_default_answer={'Done', 'Indoor dim light', 'yes/irrelevant', 'none', '30 30 30 30', '1 1 1 1', '0', '4', '+', '1', '40 cm', '40.9 cm', '25.6 cm', 'Attwood lab display screen'};
 Exp_info=inputdlg(Exp_prompt,Exp_dialog_title,num_lines,Exp_default_answer);
 Exp_RoomLights = Exp_info{1};
@@ -182,7 +186,7 @@ DisplayScreenHeight = Exp_info{11};
 DisplayScreenDescription = Exp_info{12};
 
 %% Create a folder with User ID and the current date and time
-folder_name = strcat(results_folder, ['\test_' num2str(SubjectID) '_' datestr(now, 'yyyymmdd_HHMMSS')]);
+folder_name = strcat(results_folder, ['\fani_' num2str(SubjectID) '_' datestr(now, 'yyyymmdd_HHMMSS')]);
 disp(folder_name)
 %folder_name = ['C:\Users\flohrmann\Documents\MATLAB\ExperimentRepo\test_' num2str(SubjectID) '_' datestr(now, 'yyyymmdd_HHMMSS')];
 mkdir(folder_name);
@@ -251,6 +255,10 @@ saveData(end_table, folder_name, 'end_comments.csv');
 createQuestionnaire(folder_name, num2str(SubjectID));
 
 %% Step 6: Analyse Data
+plotConditionSpreadAndStimPosition(rand_trials, n_rows, n_columns);
+
+
+
 end
 
 function trial_results = startPsychToolboxEyeTracking(data, folder_name, NbX, NbY, timeout, language)
@@ -261,6 +269,8 @@ global ptb_drawformattedtext_oversize
 subfolder_name = [folder_name '\results'];
 disp(subfolder_name)
 mkdir(subfolder_name);
+trial_results = table();
+
 % Define key names
 KbName('UnifyKeyNames');
 escapeKey = KbName('ESCAPE');
@@ -396,7 +406,6 @@ catch
             break;
         end
     end
-    
 end
 
 %% Instructions Part 2
@@ -435,9 +444,8 @@ end
 %% Experiment Loop
 disp('Start Experiment');
 results_file_name = [subfolder_name, '\trial_results_' , datestr(now, 'yyyymmdd_HHMM'), '.mat'];
-trial_results = table();
 
-try
+%try
     for i = 1:size(data, 1)
         current_data = data(i,:);
         %for i = 1:4
@@ -497,7 +505,7 @@ try
 
         % Display stimulus (wait 0.2 s for screen flip)
         [trial_result, stop] = displayStim_new(window, current_data, bar_wh_ratio, jitter_x, jitter_y, screenXpixels, screenYpixels,...
-            color_stim, timeout, blankStartTime, monitorFlipInterval, continue_without_eyetracking, eye_tracker);
+            color_stim, timeout, blankStartTime, monitorFlipInterval, continue_without_eyetracking, eye_tracker, color_bg);
         
         % Check for Escape key press to close the experiment
         if stop == 1
@@ -524,9 +532,9 @@ try
         
         clear trial_result
     end
-catch
-    disp('Experiment Crashed')
-end
+% catch
+%     disp('Experiment Crashed')
+% end
 % Clean up: stop eye tracker, save results, and close
 if ~continue_without_eyetracking
     eye_tracker.buffer.stop('gaze');
