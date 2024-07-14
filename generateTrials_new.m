@@ -1,11 +1,9 @@
-function trial_data = generateTrials_new(n_trials, n_rows, n_columns, grid_visual_angle, ec_circle, ec_min)
+function trial_data = generateTrials_new(n_trials, n_rows, n_columns)%, grid_visual_angle, ec_circle, ec_min)
 % Generate matrix: 23232323   where 1 is for target bar/stimulus
 %                  32321232         2 is for 1st distractor
 %                  23232323         3 is for 2nd distractor
 % Position of 1 is generated randomly and annotated with its position
 % (left/right side of screen)
-
-% TODO implement eccentricity
 
 % Initialize empty table to store trial data
 trial_data = table();
