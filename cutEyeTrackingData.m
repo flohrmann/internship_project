@@ -69,20 +69,29 @@ function cutData = cutEyeTrackingData(folder_name, trial_results, eye_tracking_d
             cutData(trial).withTracking = 0;
         else
             cutData(trial).withTracking = 1;
-            
         end
-
         % Add trial-specific data
-        cutData(trial).trialEndTime = trialEndTime;
-        cutData(trial).StimulusOnsetTime = StimulusOnsetTime;
-        cutData(trial).fixStartTime = fixStartTime;
-        cutData(trial).rt = current_data.rt;
-        cutData(trial).TargetPosition = current_data.TargetPosition;
-        cutData(trial).x_centers = current_data.x_centers{1};
-        cutData(trial).y_centers = current_data.y_centers{1};
         cutData(trial).AngleMatrix = current_data.AngleMatrix;
+        cutData(trial).TargetPosition = current_data.TargetPosition;
+        cutData(trial).targetSide = current_data.TargetSide;
+        cutData(trial).Condition = current_data.Condition;
+        cutData(trial).conditionType = current_data.ConditionType;
+        cutData(trial).cell_width = current_data.cell_width;
+        cutData(trial).cell_height = current_data.cell_height;
         cutData(trial).line_length = current_data.line_length;
         cutData(trial).line_width = current_data.line_width;
+        cutData(trial).x_jitters = current_data.x_jitters{1};
+        cutData(trial).y_jitters = current_data.y_jitters{1};
+        cutData(trial).x_centers = current_data.x_centers{1};
+        cutData(trial).y_centers = current_data.y_centers{1};
+        cutData(trial).response = current_data.response;
+        cutData(trial).trialStartTime = current_data.trialStartTime;
+        cutData(trial).blankStartTime = current_data.blankStartTime;
+        cutData(trial).fixStartTime = fixStartTime;
+        cutData(trial).StimulusOnsetTime = StimulusOnsetTime;
+        cutData(trial).trialEndTime = trialEndTime;
+        cutData(trial).rt = current_data.rt;
+        cutData(trial).fixTime = current_data.fixTime;     
     end
 
     % Convert struct array to table
