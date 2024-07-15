@@ -159,7 +159,7 @@ Exp_prompt={'Lights on?', ...
 Exp_dialog_title='Give_Exp_Information';
 num_lines=1;
 %Exp_default_answer={'Indoor dim light', 'none', 'English', '1', '8 8 8 8', '0 0 0 0', '60', '0', '50 cm', '32 cm', '21 cm',  '', '1'};
-Exp_default_answer={'Indoor dim light', '', 'English', '40 40 40 40', '60', '50 cm', '32 cm', '21 cm',  '', '1'};
+Exp_default_answer={'Indoor dim light', '', 'English', '50 50 50 50', '60', '50 cm', '32 cm', '21 cm',  '', '1'};
 Exp_info=inputdlg(Exp_prompt,Exp_dialog_title,num_lines,Exp_default_answer);
 Exp_RoomLights = Exp_info{1};
 Exp_OtherInfo = Exp_info{2};
@@ -231,9 +231,11 @@ save(rand_trials_file_name, 'rand_trials');
 
 %%  Start Psychtoolbox and display instructions
 if use_eyetracking == 1 % with eyetracking
-    [trial_results, samp] = startPsychToolboxEyeTracking(rand_trials, folder_name, n_columns, n_rows, TimeOut_DurationInSeconds, EnglishOrGerman);
+    continue_without_eyetracking = false; % flag to check if the experiment should continue without eye-tracking
+    [trial_results, samp] = startPsychToolboxEyeTracking(rand_trials, folder_name, n_columns, n_rows, TimeOut_DurationInSeconds, EnglishOrGerman, continue_without_eyetracking);
 else % without eyetracking
-    startPsychToolbox(rand_trials, folder_name, n_columns, n_rows, TimeOut_DurationInSeconds, EnglishOrGerman);
+    continue_without_eyetracking = true; % flag to check if the experiment should continue without eye-tracking
+    [trial_results, samp] = startPsychToolboxEyeTracking(rand_trials, folder_name, n_columns, n_rows, TimeOut_DurationInSeconds, EnglishOrGerman, continue_without_eyetracking);
 end
 
 %% Clean up Fixation Data and Safe
@@ -262,16 +264,15 @@ createQuestionnaire(folder_name, num2str(SubjectID));
 analysis_folder = strcat(folder_name, '\analysis');
 mkdir(analysis_folder);
 
-cut_data = cutEyeTrackingData(analysis_folder, trial_results, samp);
-plotStimAndEye(analysis_folder, cut_data, 10)
+if isstruct(samp)  
+    analyseResults(n_rows, n_columns, folder_name, rand_trials, trial_results, samp)
+    %cut_data = cutEyeTrackingData(analysis_folder, trial_results, samp);
+    %plotStimAndEye(analysis_folder, cut_data, 10)
+    %plotPupilDiameterOverTime(cut_data, samp, trial_results)
+else
+    % dont plot eyetracking data if theres none
+end
+plotConditionSpreadAndStimPosition(rand_trials, n_rows, n_columns, analysis_folder);
 
-plotConditionSpreadAndStimPosition(rand_trials, n_rows, n_columns);
-plotPupilDiameterOverTime(cut_data, samp, trial_results)
-%% custom path for testing
-analysis_folder = 'C:\Users\flohrmann\Documents\Results\1_20240714_140048\analysis';
-%cut_data = cutEyeTrackingData(analysis_folder, trial_results, samp);
-plotStimAndEye(analysis_folder, cut_data, 10)
-plotConditionSpreadAndStimPosition(rand_trials, n_rows, n_columns);
-plotPupilDiameterOverTime(cut_data, samp, trial_results)
 
 end

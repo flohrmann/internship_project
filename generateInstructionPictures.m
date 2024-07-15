@@ -122,17 +122,31 @@ for a = 1:4
     name = strcat('C:\Users\flohrmann\Documents\MATLAB\internship_project\Images\example_jittered_', int2str(a), '.jpg');
     imwrite(current_display, name);
 end
+
 Screen('Flip', window);
-dotSizePix = 15; % Size of fixation point
-xCenter = screenXpixels / 2;
-yCenter = screenYpixels / 2;
-black = BlackIndex(screenNumber);
-Screen('DrawDots', window, [xCenter, yCenter], dotSizePix, black, [], 2);
-Screen('Flip', window);
+
+crossSizePix = 60;
+crossLineWidthPix = 15;
+crossColour = [255 0 0]; % Red 
+fixStartTime = drawFixation(window, screenXpixels/2, screenYpixels/2, crossColour, crossLineWidthPix, crossSizePix);
 KbStrokeWait;
 current_display = Screen('GetImage', window);
-name = strcat('C:\Users\flohrmann\Documents\MATLAB\internship_project\Images\example_fixation.jpg');
+name = strcat('C:\Users\flohrmann\Documents\MATLAB\internship_project\Images\example_fixation_cross.jpg');
 imwrite(current_display, name);
+
+
+
+% Screen('Flip', window);
+% dotSizePix = 15; % Size of fixation point
+% xCenter = screenXpixels / 2;
+% yCenter = screenYpixels / 2;
+% black = BlackIndex(screenNumber);
+% Screen('DrawDots', window, [xCenter, yCenter], dotSizePix, black, [], 2);
+% Screen('Flip', window);
+% KbStrokeWait;
+% current_display = Screen('GetImage', window);
+% name = strcat('C:\Users\flohrmann\Documents\MATLAB\internship_project\Images\example_fixation.jpg');
+% imwrite(current_display, name);
 
 % Clear the screen
 sca;

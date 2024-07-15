@@ -1,4 +1,4 @@
-function [trial_results, samp] = startPsychToolboxEyeTracking(data, folder_name, NbX, NbY, timeout, language)
+function [trial_results, samp] = startPsychToolboxEyeTracking(data, folder_name, NbX, NbY, timeout, language, continue_without_eyetracking)
 global exp_folder
 global ptb_drawformattedtext_oversize
 
@@ -20,7 +20,7 @@ rightKey = rightShift;
 spaceKey = KbName('space');
 deleteKey = KbName('Delete'); % ENTF key to stop eyetracking
 
-continue_without_eyetracking = false; % flag to check if the experiment should continue without eye-tracking
+%continue_without_eyetracking = false; % flag to check if the experiment should continue without eye-tracking
 
 % Hide the mouse cursor
 HideCursor; % TODO disable, for testing
@@ -29,6 +29,9 @@ bar_wh_ratio = 0.08; % bar width to height ratio
 screenNumber = 0; % 0 default screen, 1 for external screen
 color_bg = WhiteIndex(screenNumber);% colors for background and stim
 color_stim = BlackIndex(screenNumber);
+crossSizePix = 60;
+crossLineWidthPix = 15;
+crossColour = [255 0 0]; % Red 
 dotSizePix = 15; % Size of fixation point
 text_size = 40;
 
@@ -44,7 +47,7 @@ yCenter = screenYpixels / 2;
 jitter_x = round(0.1*screenXpixels/NbX);
 jitter_y = round(0.1*screenYpixels/NbY);
 
-% save infos
+% save infos % TODO save cross
 infos = {bar_wh_ratio, color_bg, color_stim, text_size, dotSizePix, jitter_x, jitter_y, xCenter, yCenter};
 infos_table = cell2table(infos, 'VariableNames', {'bar_wh_ratio', 'color_bg', 'color_stim', ...
      'text_size', 'dotSizePix', 'jitter_x', 'jitter_y', 'xCenter', 'yCenter'});
@@ -69,7 +72,14 @@ end
 
 % Show the first 2 pictures/instructions
 t = 1;
-while t <= 2
+
+if ~continue_without_eyetracking
+    t_end = 2;
+else
+    t_end = 1;
+end
+
+while t <= t_end
     % Display first two images based on the current index
     img = imread(strcat(text_path, sprintf('\\instructions-0%0d.jpg', t)));
     displayImage(window, img, screenXpixels, screenYpixels);
@@ -102,6 +112,7 @@ end
 
 
 %% Initialize Titta and set up the eye tracker 
+if ~continue_without_eyetracking
 try
     settings = Titta.getDefaults('Tobii Pro Nano');
     eye_tracker = Titta(settings);
@@ -142,6 +153,9 @@ catch
             break;
         end
     end
+end
+else
+    % do nothing
 end
 
 %% Instructions Part 2
@@ -239,9 +253,10 @@ end
                 end
             end
         end
-        % Display fixation dot for 0.5 seconds
-        Screen('DrawDots', window, [xCenter; yCenter], dotSizePix, color_stim, [], 2);
-        fixStartTime = Screen('Flip', window); % next possible screen flip
+        % Display fixation dot for 0.5 seconds       
+        fixStartTime = drawFixation(window, xCenter, yCenter, crossColour, crossLineWidthPix, crossSizePix);
+        %Screen('DrawDots', window, [xCenter; yCenter], dotSizePix, color_stim, [], 2);
+        %fixStartTime = Screen('Flip', window); % next possible screen flip
         %drawFixation(window, xCenter, yCenter, color_stim, dotSizePix); % fixationcross without eyetrackgin
         
         % Display empty screen for 0.2 seconds (wait 0.5 for screen flip)
@@ -296,6 +311,8 @@ if ~continue_without_eyetracking
     eye_tracker.deInit();
     %eye_tracker.buffer.stop('gaze');
     %eye_tracker.deInit();
+else
+    samp = [];
 end
 
 
