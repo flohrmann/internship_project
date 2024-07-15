@@ -11,7 +11,7 @@ function plotStimAndEye(analysis_folder, cutData, num_plots)
     screenXpixels = 3240;
     screenYpixels = 2160;
 
-    for trial = 1:num_plots%size(cutData,1)
+    for trial = 20:num_plots%size(cutData,1)
         current_data = cutData(trial,:);
         plot_lines_with_gaze(current_data, screenXpixels, screenYpixels, trial);
         saveas(gcf,strcat(safe_name, num2str(trial),'.png'));

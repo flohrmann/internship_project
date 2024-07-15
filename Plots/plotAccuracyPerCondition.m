@@ -1,4 +1,4 @@
-function plotAccuracyPerCondition(trial_results)
+function plotAccuracyPerCondition(trial_results, analysis_folder)
     conditions = categorical(trial_results.Condition);
     correct = trial_results.correct;
     
@@ -16,4 +16,5 @@ function plotAccuracyPerCondition(trial_results)
     xlabel('Condition');
     ylabel('Accuracy');
     title('Accuracy per Condition');
+    saveas(gcf,strcat(analysis_folder, '\accuracy_per_condition.png'));
 end

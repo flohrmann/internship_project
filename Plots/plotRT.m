@@ -1,4 +1,4 @@
-function plotRT(trial_results)
+function plotRT(trial_results, analysis_folder)
 % Extract relevant data from the table
 conditions = trial_results.Condition;
 rt = trial_results.rt;
@@ -29,4 +29,6 @@ ylabel('Reaction Time (s)');
 title('Reaction Time Colored by Condition');
 legend(unique_conditions, 'Location', 'best');
 hold off;
+saveas(gcf,strcat(analysis_folder, '\rt_over_trials.png'));
+
 end

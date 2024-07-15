@@ -2,23 +2,51 @@
 %% for testing hardcoded
 num_rows = 9;
 num_columns = 12;
+folder = 'C:\Users\flohrmann\Documents\Results\1_20240714_140048';
+
+% path for saving
+analysis_folder = strcat(folder, '\analysis');
+
+load(strcat(folder, '\rand_trials.mat')); % load trial infos; rand_trials
+
+% get results file
+file_pattern = fullfile(folder, '\results', 'trial_results_*');
+file_info = dir(file_pattern);
+load(strcat(folder, '\results\', file_info.name)); % load results; trial_results
+
+% get eye tracking data
+file_pattern = fullfile(folder, 'results', 'eyetracking_results*');
+file_info = dir(file_pattern);
+load(strcat(folder, '\results\', file_info.name)); % eyetrackgin data; samp
+% get cut eye tracking data
+try % try cut data
+    file_pattern = fullfile(analysis_folder, 'cut_trials_*');
+    file_info = dir(file_pattern);
+    load(strcat(analysis_folder, '\', file_info.name)); % cut eyetracking; cut_data
+catch % cut data if not already
+    cutData = cutEyeTrackingData(analysis_folder, trial_results, samp); % cut eyetracking; cut_data
+end
+
+%% reaction time numbers and plots
+rt_per_condition = rtTimes(cutData, analysis_folder);
+save(fullfile(analysis_folder, 'rt_per_condition.mat'), 'rt_per_condition');
+plotRT(trial_results, analysis_folder)
+plotRTDistributionPerCondition(trial_results, analysis_folder)
+
+%% rt/accuracy
+plotAccuracyPerCondition(trial_results, analysis_folder)
+plotRTvsAccuracy(trial_results, analysis_folder)
 
 %% plot verteilung stims
-%old
-%load('C:\Users\flohrmann\Documents\Results\fani_test\rand_trials.mat'); % rand_trials
-%new
-load('C:\Users\flohrmann\Documents\Results\fani_1_20240701_135200\rand_trials.mat') % rand_trials
-plotConditionSpreadAndStimPosition(rand_trials, num_rows, num_columns)
+plotConditionSpreadAndStimPosition(rand_trials, num_rows, num_columns, analysis_folder)
 %plotTargetPositionHeatmap(rand_trials, num_rows, num_columns)
 
-%% plot eye gaze and trials
-plotStimAndEye(trial_results)
+%% plot eye gaze and stimulation per trial
+num_plots = 10; % how many trials you want plotted, starts with first
+plotStimAndEye(analysis_folder, cutData, num_plots)
 
-%% get latency exetracker/monitor
-load('C:\Users\flohrmann\Documents\Results\fani_test\results\trial_results_20240701_1123.mat'); %trial_results
-plotRT(trial_results)
-plotRTDistributionPerCondition(trial_results)
-plotAccuracyPerCondition(trial_results)
-plotRTvsAccuracy(trial_results)
-
+%% pupil size
+plotPupilDiameterOverTime(cutData, samp, trial_results, analysis_folder)
+plotPupilDiameterAverageOverTrials(cutData, analysis_folder)
+plotPupilSizeAroundEvents(cutData)
 %end

@@ -1,4 +1,4 @@
-function plotRTDistributionPerCondition(trial_results)
+function plotRTDistributionPerCondition(trial_results, analysis_folder)
     conditions = categorical(trial_results.Condition);
     rt = trial_results.rt;
     
@@ -18,4 +18,6 @@ function plotRTDistributionPerCondition(trial_results)
     ylabel('Density');
     title('Reaction Time Distribution per Condition');
     legend('show');
+    saveas(gcf,strcat(analysis_folder, '\rt_distr_condition.png'));
+
 end

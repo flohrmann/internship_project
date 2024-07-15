@@ -1,17 +1,12 @@
-function plotConditionSpreadAndStimPosition(rand_trials, num_rows, num_columns)
-    % Extract data from the table
-    %targetPositions = table2array(rand_trials(:, {'TargetPosition', 'TargetPosition'}));
+function plotConditionSpreadAndStimPosition(rand_trials, num_rows, num_columns, analysis_folder)
     targetPositions = table2array(rand_trials(:, {'TargetPosition'}));%, 'TargetPosition'}));
 
     conditions = categorical(rand_trials.Condition);
-
-    % Define unique conditions and initialize count matrices
     uniqueConditions = unique(conditions);
     numConditions = length(uniqueConditions);
     maxPosition_y = num_rows;
     maxPosition_x = num_columns;
     
-    % Initialize count matrices for each condition
     countMatrices = cell(numConditions, 1);
     for i = 1:numConditions
         %countMatrices{i} = zeros(maxPosition_y, maxPosition_x);
@@ -37,6 +32,8 @@ function plotConditionSpreadAndStimPosition(rand_trials, num_rows, num_columns)
         xlabel('Y Position');
         ylabel('X Position');
         axis equal tight;
+        saveas(gcf,strcat(analysis_folder, '\condition_spread.png'));
+
     end
         % Sum all conditions into one
     totalCountMatrix = sum(cat(3, countMatrices{:}), 3);
@@ -50,4 +47,6 @@ function plotConditionSpreadAndStimPosition(rand_trials, num_rows, num_columns)
     ylabel('Y Position');
     axis equal tight;
     set(gca, 'YDir', 'normal'); % Ensure the y-axis is in normal direction
+    saveas(gcf,strcat(analysis_folder, '\condition_spread_sum.png'));
+
 end
