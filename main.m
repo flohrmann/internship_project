@@ -266,7 +266,12 @@ cut_data = cutEyeTrackingData(analysis_folder, trial_results, samp);
 plotStimAndEye(analysis_folder, cut_data, 10)
 
 plotConditionSpreadAndStimPosition(rand_trials, n_rows, n_columns);
-
-
+plotPupilDiameterOverTime(cut_data, samp, trial_results)
+%% custom path for testing
+analysis_folder = 'C:\Users\flohrmann\Documents\Results\1_20240714_140048\analysis';
+%cut_data = cutEyeTrackingData(analysis_folder, trial_results, samp);
+plotStimAndEye(analysis_folder, cut_data, 10)
+plotConditionSpreadAndStimPosition(rand_trials, n_rows, n_columns);
+plotPupilDiameterOverTime(cut_data, samp, trial_results)
 
 end
