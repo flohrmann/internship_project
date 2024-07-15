@@ -1,24 +1,44 @@
-function plotStimAndEye(analysis_folder, cutData, num_plots)
+function eye_rt = plotStimAndEye(analysis_folder, cutData, num_plots, show)
     close all;
-    safe_name = strcat(analysis_folder, '\gaze_path_trial_start');
-
-    %%% get stimulus onset time instead of trialstarttime
-%     cutData = renamevars(cutData, 'eyeTrial', 'eyeTrial1');
-%     cutData = renamevars(cutData, 'stimulusTrial', 'eyeTrial');
-%     safe_name = strcat(analysis_folder, '\gaze_path_stim_onset_');
-    %%%%
+    %safe_name = strcat(analysis_folder, '\gaze_path_trial_start');
     
+    %%% get stimulus onset time instead of trialstarttime
+     cutData = renamevars(cutData, 'eyeTrial', 'eyeTrial1');
+     cutData = renamevars(cutData, 'stimulusTrial', 'eyeTrial');
+     safe_name = strcat(analysis_folder, '\gaze_path_stim_onset_');
+    %%%%
+    eye_rt = table('Size', [0 7], 'VariableTypes', {'double', 'double', 'double', 'double', 'double', 'double', 'double'}, ...
+                          'VariableNames', {'Trial', 'StartTime' 'RightEyeArrivalTime', 'LeftEyeArrivalTime', 'RTmatlab', 'RightEyeRT', 'LeftEyeRT'});
+
     screenXpixels = 3240;
     screenYpixels = 2160;
 
-    for trial = 20:num_plots%size(cutData,1)
+    for trial = 1:num_plots%size(cutData,1)
         current_data = cutData(trial,:);
-        plot_lines_with_gaze(current_data, screenXpixels, screenYpixels, trial);
+        [right_eye_arrival_idx, left_eye_arrival_idx]  = plot_lines_with_gaze(current_data, screenXpixels, screenYpixels, trial, show);
+        start_time = double(current_data.eyeTrial.systemTimeStamp(1)) / 1e6;
+        if ~(isnan(right_eye_arrival_idx)) % if target not found
+            right_eye_arrival_time = double(current_data.eyeTrial.systemTimeStamp(right_eye_arrival_idx)) / 1e6;
+            right_eye_rt = right_eye_arrival_time - start_time;
+        else
+            right_eye_arrival_time = 0;
+            right_eye_rt = 0;
+        end
+        if ~(isnan(left_eye_arrival_idx))% if target not found
+            left_eye_arrival_time = double(current_data.eyeTrial.systemTimeStamp(left_eye_arrival_idx)) / 1e6;
+            left_eye_rt = left_eye_arrival_time - start_time;
+        else
+            left_eye_arrival_time = 0;
+            left_eye_rt = 0;
+        end 
+        eye_rt = [eye_rt; {trial, start_time, right_eye_arrival_idx, left_eye_arrival_idx, current_data.rt, right_eye_rt, left_eye_rt}];
         saveas(gcf,strcat(safe_name, num2str(trial),'.png'));
     end
+    save(fullfile(analysis_folder, 'eye_rt.mat'), 'eye_rt');
 end
 
-function plot_lines_with_gaze(trial_data, screenXpixels, screenYpixels, t)
+function [right_eye_arrival_time, left_eye_arrival_time] = plot_lines_with_gaze(trial_data, screenXpixels, screenYpixels, t, show)
+
     % Extracting data for the current trial
     AngleMatrix = trial_data.AngleMatrix{1};
     line_length = trial_data.line_length;
@@ -35,10 +55,16 @@ function plot_lines_with_gaze(trial_data, screenXpixels, screenYpixels, t)
     targetCol = targetPos(1); % Column index of the target
 
     % Creating a new figure for each trial
-    figure('Position', [0, 0, 3240, 2160]);
-    hold on;
-    axis equal;
-
+    if ~show
+        figure('Position', [0, 0, 3240, 2160], 'Visible', 'off');
+        hold on;
+        axis equal;
+    else
+        figure('Position', [0, 0, 3240, 2160]);
+        hold on;
+        axis equal;
+    end
+    
     for i = 1:numRows
         for j = 1:numCols
             angles = AngleMatrix{i, j}; % Cell containing angles
@@ -70,7 +96,7 @@ function plot_lines_with_gaze(trial_data, screenXpixels, screenYpixels, t)
     end
 
     % Overlay eyetracking data
-    visualizeGazePathWithColor(trial_data, screenXpixels, screenYpixels, targetRow, targetCol);
+    [right_eye_arrival_time, left_eye_arrival_time] = visualizeGazePathWithColor(trial_data, screenXpixels, screenYpixels, targetRow, targetCol);
     % Annotate RT from matlab
     text(screenXpixels - 2200, -40, sprintf('RT matlab: %.2f s', trial_data.rt), 'Color', 'black');
 
@@ -78,7 +104,7 @@ function plot_lines_with_gaze(trial_data, screenXpixels, screenYpixels, t)
     title(['Trial ', num2str(t)]);
 end
 
-function visualizeGazePathWithColor(trial_results, screenXpixels, screenYpixels, targetRow, targetCol)
+function [right_eye_arrival_time, left_eye_arrival_time] = visualizeGazePathWithColor(trial_results, screenXpixels, screenYpixels, targetRow, targetCol)
     % Extract gaze points and system timestamps, convert to milliseconds
     
     a_r = trial_results.eyeTrial.right.gazePoint.onDisplayArea;
@@ -109,7 +135,7 @@ function visualizeGazePathWithColor(trial_results, screenXpixels, screenYpixels,
     % Annotate time for both eyes
     targetX = trial_results.x_centers{1}(targetRow, targetCol);
     targetY = screenYpixels - trial_results.y_centers{1}(targetRow, targetCol);  % Inverting y-axis for display
-    annotateTime(trial_results, x_r, y_r, t_r, x_l, y_l, t_l, screenXpixels, screenYpixels, targetRow, targetCol);
+    [right_eye_arrival_time, left_eye_arrival_time] = annotateTime(trial_results, x_r, y_r, t_r, x_l, y_l, t_l, screenXpixels, screenYpixels, targetRow, targetCol);
 
 
     % Additional plot settings
@@ -139,25 +165,30 @@ function plotGazePaths(x, y, colorMap)
     end
 end
 
-function annotateTime(trial_results, x_r, y_r, t_r, x_l, y_l, t_l, screenXpixels, screenYpixels, targetRow, targetCol)
+function [right_eye_arrival_time, left_eye_arrival_time]  = annotateTime(trial_results, x_r, y_r, t_r, x_l, y_l, t_l, screenXpixels, screenYpixels, targetRow, targetCol)
     proximityThreshold = 70; % Pixels within which the gaze is considered to reach the target
     targetX = trial_results.x_centers{1}(targetRow, targetCol);
     targetY = screenYpixels - trial_results.y_centers{1}(targetRow, targetCol);
 
     targetIndex_r = find(sqrt((x_r - targetX).^2 + (y_r - targetY).^2) < proximityThreshold, 1, 'first');
     targetIndex_l = find(sqrt((x_l - targetX).^2 + (y_l - targetY).^2) < proximityThreshold, 1, 'first');
-
+    
+    right_eye_arrival_time = NaN;
+    left_eye_arrival_time = NaN;
+    
     % Change stimulus color if either eye reaches the target
     if ~isempty(targetIndex_r) || ~isempty(targetIndex_l)
         changeStimulusColor(trial_results, targetRow, targetCol, 'g');
         
         if ~isempty(targetIndex_r)
+            right_eye_arrival_time = targetIndex_r; %t_r(targetIndex_r) - t_r(1);  % Time from trial start to target reach in s
             timeToTarget_r = t_r(targetIndex_r) - t_r(1);  % Time from trial start to target reach in s
             text(screenXpixels - 500, -40, sprintf('Right Eye Found: %.2f s', timeToTarget_r), 'Color', 'black');
             plot(x_r(targetIndex_r), y_r(targetIndex_r), 'o', 'MarkerFaceColor', 'g');
         end
         
         if ~isempty(targetIndex_l)
+            left_eye_arrival_time = targetIndex_l;% t_l(targetIndex_l) - t_l(1);  % Time from trial start to target reach in s
             timeToTarget_l = t_l(targetIndex_l) - t_l(1);  % Time from trial start to target reach in s
             text(screenXpixels - 500, -80, sprintf('Left Eye Found: %.2f s', timeToTarget_l), 'Color', 'black');
             plot(x_l(targetIndex_l), y_l(targetIndex_l), 'o', 'MarkerFaceColor', 'g');

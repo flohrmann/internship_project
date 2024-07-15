@@ -57,10 +57,3 @@ function plotPupilSizeAroundEvents(cutData)
     hold off;
 end
 
-% Sample usage:
-% Load your data into a table named 'cutData' with the following columns:
-% - StimulusOnsetTime: stimulus onset time in microseconds
-% - trialEndTime: trial end time in microseconds
-% - eyeTrial: struct containing eye tracking data with fields systemTimeStamp, right, and left
-% Then call the function:
-% plotPupilSizeStimulusToEnd(cutData);
