@@ -1,7 +1,6 @@
 function plotRTDistributionPerCondition(trial_results, analysis_folder)
     conditions = categorical(trial_results.Condition);
     rt = trial_results.rt;
-    
     uniqueConditions = categories(conditions);
     numConditions = length(uniqueConditions);
     

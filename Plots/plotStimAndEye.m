@@ -32,7 +32,7 @@ function eye_rt = plotStimAndEye(analysis_folder, cutData, num_plots, show)
             left_eye_rt = 0;
         end 
         eye_rt = [eye_rt; {trial, start_time, right_eye_arrival_idx, left_eye_arrival_idx, current_data.rt, right_eye_rt, left_eye_rt}];
-        saveas(gcf,strcat(safe_name, num2str(trial),'.png'));
+        %saveas(gcf,strcat(safe_name, num2str(trial),'.png'));
     end
     save(fullfile(analysis_folder, 'eye_rt.mat'), 'eye_rt');
 end

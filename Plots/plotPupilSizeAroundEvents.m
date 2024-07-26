@@ -1,7 +1,7 @@
 function plotPupilSizeAroundEvents(cutData)
     % Define the time window around the events (in seconds)
     pre_event_time = 0.2; % Start from StimulusOnsetTime
-    post_event_time = 2; % 2 seconds after the event (adjust as needed)
+    post_event_time = 0; % 2 seconds after the event (adjust as needed)
     sampling_rate = 60; % Assuming 60 Hz sampling rate
 
     % Define colors for plotting
