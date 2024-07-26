@@ -259,20 +259,5 @@ saveData(end_table, folder_name, 'end_comments.csv');
 %% User questionaire of (in)attention
 createQuestionnaire(folder_name, num2str(SubjectID));
 
-%% Step 6: Analyse Data
-%folder_name = 'C:\Users\flohrmann\Documents\Results\fani_cont_test';
-analysis_folder = strcat(folder_name, '\analysis');
-mkdir(analysis_folder);
-
-if isstruct(samp)  
-    analyseResults(n_rows, n_columns, folder_name, rand_trials, trial_results, samp)
-    %cut_data = cutEyeTrackingData(analysis_folder, trial_results, samp);
-    %plotStimAndEye(analysis_folder, cut_data, 10)
-    %plotPupilDiameterOverTime(cut_data, samp, trial_results)
-else
-    % dont plot eyetracking data if theres none
-end
-plotConditionSpreadAndStimPosition(rand_trials, n_rows, n_columns, analysis_folder);
-
 
 end
