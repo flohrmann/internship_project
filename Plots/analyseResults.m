@@ -19,7 +19,14 @@ n_rows = 9;
 n_columns = 12;
 screenXpixels = 3240;
 screenYpixels = 2160;
-folder = 'C:\Users\flohrmann\Documents\Results\1_20240714_140048';
+
+
+
+%folder = 'C:\Users\flohrmann\Documents\Results\1_20240714_140048'; %alex
+%folder = 'C:\Users\flohrmann\Documents\Results\2_20240726_191755'; % mara
+%folder = 'C:\Users\flohrmann\Documents\Results\3_20240805_105213'; % tilo 
+folder = 'C:\Users\flohrmann\Documents\Results\4_20240811_131601'; % anu 
+
 load(strcat(folder, '\rand_trials.mat')); % load trial infos; rand_trials
 % get results file
 file_pattern = fullfile(folder, '\results', 'trial_results_*');
@@ -33,6 +40,10 @@ load(strcat(folder, '\results\', file_info.name)); % eyetrackgin data; samp
 
 %% 
 analysis_folder = strcat(folder, '\analysis');
+try
+    mkdir(analysis_folder);
+catch % folder already exists
+end
 
 try % try get cut data
     file_pattern = fullfile(analysis_folder, 'cut_trials_*');
@@ -42,21 +53,21 @@ catch % cut data if not already cut
     cutData = cutEyeTrackingData(analysis_folder, trial_results, samp); % cut eyetracking; cut_data
 end
 
-
 %% plot eye gaze and stimulation per trial
-
 try % load data (takes forever to calc/plot, dont wanna do this twice)
     load(strcat(analysis_folder, '\eye_rt.mat')); % eye_rt
+    %show = true; % show plot (very slow)?
+    %num_plots = size(cutData, 1); % how many trials you want plotted, starts with first
+    %eye_rt = plotStimAndEye(analysis_folder, cutData, num_plots, show);
 catch % calculate/plot if first time
-    show = false; % show plot (very slow)?
-    num_plots = size(cutData, 1); % how many trials you want plotted, starts with first
-    eye_rt = plotStimAndEye(analysis_folder, cutData, num_plots, show);
+     %load(strcat(analysis_folder, '\eye_rt.mat')); % eye_rt
+     show = false; % show plot (very slow)?
+     num_plots = size(cutData, 1); % how many trials you want plotted, starts with first
+     eye_rt = plotStimAndEye(analysis_folder, cutData, num_plots, show);
 end
 
-%% distance to target at onset vs rt (gaze) to target
+%% distance to target at onset vs rt (gaze) to target (did they even look at the stim)
 plotDistanceVsRT(trial_results, samp, eye_rt, screenXpixels, screenYpixels, analysis_folder, color_map)
-
-
 
 %% rt vs pupil size scatterplot per condition
 plotRTvsPupilSizePerCondition(trial_results, samp, analysis_folder, color_map)
@@ -65,6 +76,7 @@ plotRTvsPupilSizePerCondition(trial_results, samp, analysis_folder, color_map)
 plotButtonPressVsGazeRT(trial_results, eye_rt, analysis_folder)
 
 %% reaction time numbers and plots
+%% todo check for differences between rt plots/if the same/debug
 rt_per_condition = rtTimes(cutData, analysis_folder);
 save(fullfile(analysis_folder, 'rt_per_condition.mat'), 'rt_per_condition');
 plotRT(trial_results, analysis_folder)
@@ -78,7 +90,6 @@ plotRTvsAccuracy(trial_results, analysis_folder)
 plotConditionSpreadAndStimPosition(rand_trials, n_rows, n_columns, analysis_folder)
 %plotTargetPositionHeatmap(rand_trials, num_rows, num_columns)
 
-
 %% did they look at fixation?
 fixationThreshold = 150; % threshold for how close the gaze needs to be to the fixation cross
 lookedAtFixation = checkFixation(trial_results, samp, screenXpixels, screenYpixels, fixationThreshold);
@@ -90,18 +101,24 @@ percentageOnes = numOnes / size(lookedAtFixation,1) * 100;
 %% rt trial with looking at fixation vs without
 plotRTwithAndWithoutFixation(trial_results, eye_rt, lookedAtFixation, analysis_folder);
 
-
 %% pupil size
 plotPupilDiameterOverTime(cutData, samp, trial_results, analysis_folder)
 plotPupilDiameterAverageOverTrials(cutData, analysis_folder)
 
 %% todo:
-plotPupilSizeAroundEvents(cutData)
+%plotPupilSizeAroundEvents(cutData)
 
-%% todo: rt vs gaze distance to stim at end (did they even look at the stim)
 
 %% todo: diff rt over under 300 ms topdown/bottom up
 
-%% todo: diff rt inner/outer circle position (eccentrictiy)
 
 %% todo: plot  button press - gaze rt (speed of pressing button once stim found)
+plotRTbyEccentricity(trial_results, eye_rt, screenXpixels, screenYpixels, analysis_folder);
+
+
+%% todo: questionaire answers (look for cutoff)
+
+
+
+
+
