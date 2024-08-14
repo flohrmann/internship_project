@@ -21,11 +21,11 @@ screenXpixels = 3240;
 screenYpixels = 2160;
 
 
-
 %folder = 'C:\Users\flohrmann\Documents\Results\1_20240714_140048'; %alex
 %folder = 'C:\Users\flohrmann\Documents\Results\2_20240726_191755'; % mara
 %folder = 'C:\Users\flohrmann\Documents\Results\3_20240805_105213'; % tilo 
-folder = 'C:\Users\flohrmann\Documents\Results\4_20240811_131601'; % anu 
+%folder = 'C:\Users\flohrmann\Documents\Results\4_20240811_131601'; % anu 
+folder = 'C:\Users\flohrmann\Documents\Results\5_20240813_114700'; % kieran
 
 load(strcat(folder, '\rand_trials.mat')); % load trial infos; rand_trials
 % get results file
@@ -65,6 +65,12 @@ catch % calculate/plot if first time
      num_plots = size(cutData, 1); % how many trials you want plotted, starts with first
      eye_rt = plotStimAndEye(analysis_folder, cutData, num_plots, show);
 end
+
+%% plot  button press - gaze rt (speed of pressing button once stim found)
+plotButtonPressMinusGazeRT(trial_results, eye_rt, analysis_folder);
+
+%% diff if stim in inner vs outer circle of screen
+plotRTbyEccentricity(trial_results, eye_rt, screenXpixels, screenYpixels, n_rows, n_columns, analysis_folder);
 
 %% distance to target at onset vs rt (gaze) to target (did they even look at the stim)
 plotDistanceVsRT(trial_results, samp, eye_rt, screenXpixels, screenYpixels, analysis_folder, color_map)
@@ -112,8 +118,6 @@ plotPupilDiameterAverageOverTrials(cutData, analysis_folder)
 %% todo: diff rt over under 300 ms topdown/bottom up
 
 
-%% todo: plot  button press - gaze rt (speed of pressing button once stim found)
-plotRTbyEccentricity(trial_results, eye_rt, screenXpixels, screenYpixels, analysis_folder);
 
 
 %% todo: questionaire answers (look for cutoff)

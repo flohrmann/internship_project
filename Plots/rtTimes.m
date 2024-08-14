@@ -39,6 +39,7 @@ function rt_table = rtTimes(cutData, analysis_folder)
     boxplot(all_rts, all_conditions);
     title('Reaction Times by Condition');
     xlabel('Condition');
+    set(gca, 'YScale', 'log')
     ylabel('Reaction Time (s)');
     saveas(gcf,strcat(analysis_folder, '\rt_per_condition.png'));
 end

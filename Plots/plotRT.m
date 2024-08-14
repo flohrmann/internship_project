@@ -25,6 +25,7 @@ end
 
 % Add labels and legend
 xlabel('Trial Number');
+set(gca, 'YScale', 'log')
 ylabel('Reaction Time (s)');
 title('Reaction Time Colored by Condition');
 legend(unique_conditions, 'Location', 'best');

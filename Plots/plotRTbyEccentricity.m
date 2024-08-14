@@ -1,8 +1,20 @@
-function plotRTbyEccentricity(trial_results, eye_rt, screenXpixels, screenYpixels, analysis_folder)
-    % Define a threshold for inner vs. outer circle (in pixels)
-    centerX = screenXpixels / 2;
-    centerY = screenYpixels / 2;
-    distanceThreshold = min(centerX, centerY) * 0.3; % 30% of the distance to the edge for inner circle
+function plotRTbyEccentricity(trial_results, eye_rt, screenXpixels, screenYpixels, n_rows, n_columns, analysis_folder)
+    % Calculate center row and column
+    centerRow = round(n_rows / 2);
+    centerCol = round(n_columns / 2);
+    
+    % Define inner positions as a 3x3 block around the center
+    innerPositions = [
+        centerRow-1, centerCol-1;
+        centerRow-1, centerCol;
+        centerRow-1, centerCol+1;
+        centerRow,   centerCol-1;
+        centerRow,   centerCol;
+        centerRow,   centerCol+1;
+        centerRow+1, centerCol-1;
+        centerRow+1, centerCol;
+        centerRow+1, centerCol+1
+    ];
 
     % Initialize arrays to store RTs for inner and outer circle positions
     RT_inner = [];
@@ -10,18 +22,15 @@ function plotRTbyEccentricity(trial_results, eye_rt, screenXpixels, screenYpixel
 
     % Loop through each trial in trial_results
     for trial = 1:size(trial_results, 1)
-        % Extract the target position (center of the stimulus position)
-        targetX = trial_results.x_centers{1}(trial_results.TargetPosition(trial, 2), trial_results.TargetPosition(trial, 1));
-        targetY = trial_results.y_centers{1}(trial_results.TargetPosition(trial, 2), trial_results.TargetPosition(trial, 1));
+        % Extract the target position (row and column)
+        targetRow = trial_results.TargetPosition(trial, 2);
+        targetCol = trial_results.TargetPosition(trial, 1);
         
-        % Calculate the distance from the center of the screen
-        distanceFromCenter = sqrt((targetX - centerX)^2 + (targetY - centerY)^2);
-
         % Extract the RT for the current trial
         rt_matlab = eye_rt.RTmatlab(trial);
 
-        % Categorize RT based on the distance from the center
-        if distanceFromCenter <= distanceThreshold
+        % Check if the target position is one of the inner positions
+        if ismember([targetRow, targetCol], innerPositions, 'rows')
             RT_inner = [RT_inner; rt_matlab];
         else
             RT_outer = [RT_outer; rt_matlab];
@@ -31,18 +40,19 @@ function plotRTbyEccentricity(trial_results, eye_rt, screenXpixels, screenYpixel
     % Plot the RTs for inner vs. outer circle positions
     figure;
     hold on;
-    scatter(ones(size(RT_inner)), RT_inner, 'filled', 'MarkerFaceColor', 'b', 'DisplayName', 'Inner Circle');
-    scatter(ones(size(RT_outer)) * 2, RT_outer, 'filled', 'MarkerFaceColor', 'r', 'DisplayName', 'Outer Circle');
+    scatter(ones(size(RT_inner)), RT_inner, 50, 'b', 'filled', 'DisplayName', 'Inner Positions');
+    scatter(ones(size(RT_outer)) * 2, RT_outer, 50, 'r', 'filled', 'DisplayName', 'Outer Positions');
     xlim([0 3]);
     xticks([1 2]);
-    xticklabels({'Inner Circle', 'Outer Circle'});
-    title('Reaction Times by Eccentricity (Inner vs. Outer Circle)');
+    xticklabels({'Inner Positions', 'Outer Positions'});
+    title('Reaction Times by Eccentricity (Inner vs. Outer Positions)');
     xlabel('Eccentricity');
     ylabel('Reaction Time (s)');
+    ylim([0 max([RT_inner; RT_outer]) + 0.5]); % Adjust y-limits based on data
     grid on;
     legend show;
     hold off;
 
     % Save the plot
-    saveas(gcf, fullfile(analysis_folder, 'RT_by_eccentricity.png'));
+    saveas(gcf, fullfile(analysis_folder, 'RT_by_eccentricity_positions.png'));
 end

@@ -14,6 +14,7 @@ function plotRTDistributionPerCondition(trial_results, analysis_folder)
     hold off;
     
     xlabel('Reaction Time (s)');
+    set(gca, 'YScale', 'log')
     ylabel('Density');
     title('Reaction Time Distribution per Condition');
     legend('show');
