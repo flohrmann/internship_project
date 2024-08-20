@@ -8,10 +8,10 @@ condition_nonadhd = {};
 % Loop through the struct to gather data for ADHD and non-ADHD groups
 for i = 1:length(data)
     if strcmp(data(i).group, 'ADHD')
-        rt_adhd_conditions = [rt_adhd_conditions, data(i).normalized_rt];
+        rt_adhd_conditions = [rt_adhd_conditions, data(i).rt];
         condition_adhd = [condition_adhd, data(i).Condition];
     elseif strcmp(data(i).group, 'nonADHD')
-        rt_nonadhd_conditions = [rt_nonadhd_conditions, data(i).normalized_rt];
+        rt_nonadhd_conditions = [rt_nonadhd_conditions, data(i).rt];
         condition_nonadhd = [condition_nonadhd, data(i).Condition];
     end
 end
@@ -43,6 +43,7 @@ subplot(1, 2, 1);
 ylabel('log(Reaction Time (s))');
 xlabel('Condition');
 title('non-ADHD');
+ylim_nonadhd = ylim();
 
 % Subplot for ADHD group
 subplot(1, 2, 2);
@@ -51,9 +52,24 @@ ylabel('log(Reaction Time (s))');
 xlabel('Condition');
 title('ADHD');
 
+
+ylim_adhd = ylim();
+
+% Determine the global y-axis limits
+global_ylim = [min(ylim_nonadhd(1), ylim_adhd(1)), max(ylim_nonadhd(2), ylim_adhd(2))];
+
+% Apply the global y-axis limits to both subplots
+subplot(1, 2, 1);
+ylim(global_ylim);
+
+subplot(1, 2, 2);
+ylim(global_ylim);
+
+
+
 sgtitle('Comparison of Reaction Times per Condition');
 if safe == 1
     set(gcf, 'Units', 'normalized', 'OuterPosition', [0 0 1 1]);
-    saveas(gcf, fullfile(comparison_results_folder, 'violin_condition_group_normalized_rt.png'));
+    saveas(gcf, fullfile(comparison_results_folder, 'violin_condition_group_rt.png'));
 else
 end

@@ -46,6 +46,7 @@ xlabel('Condition');
 ylabel('Mean Accuracy');
 title('Mean Accuracy Comparison Between ADHD and nonADHD Groups per Condition');
 legend(unique_groups, 'Location', 'northeastoutside');
+hold off;
 
 % Save the figure
 if safe == 1
@@ -53,5 +54,4 @@ if safe == 1
     saveas(gcf, fullfile(comparison_results_folder, 'mean_accuracy_group_condition.png'));
 else
 end
-hold off;
 end

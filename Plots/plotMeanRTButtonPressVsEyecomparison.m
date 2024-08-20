@@ -1,170 +1,192 @@
 function plotMeanRTButtonPressVsEyecomparison(data, color_map, comparison_results_folder, safe)
-    % Manually set the x-axis labels
-    x_labels = {'a', 'a simple', 'b', 'b simple'};
-
-    rt_button_press = [];
-    norm_rt_button_press = [];
-    rt_eye = [];
-    norm_rt_eye = [];
-    condition_all = [];
-    group_all = {};
-
-    % Loop through the struct to gather data for RT comparison
+    % Initialize empty arrays to hold the overall mean RTs and SEMs per condition for each group
+    mean_rt_adhd = [];
+    mean_rt_eye_adhd = [];
+    mean_rt_diff_adhd = [];
+    
+    mean_rt_nonadhd = [];
+    mean_rt_eye_nonadhd = [];
+    mean_rt_diff_nonadhd = [];
+    
+    mean_nrt_adhd = [];
+    mean_nrt_eye_adhd = [];
+    mean_nrt_diff_adhd = [];
+    
+    mean_nrt_nonadhd = [];
+    mean_nrt_eye_nonadhd = [];
+    mean_nrt_diff_nonadhd = [];
+    
+    % Initialize variables for conditions
+    conditions = {'a', 'a_simple', 'b', 'b_simple'};
+    
+    % Loop through each participant and aggregate the mean RT and accuracy per condition
     for i = 1:length(data)
-        % Filter out trials where rt_eye is NaN
-        valid_trials = ~isnan(data(i).rt_eye);
-        
-        % Only use data from valid trials
-        rt_button_press = [rt_button_press; data(i).rt(valid_trials)];
-        norm_rt_button_press = [norm_rt_button_press; data(i).normalized_rt(valid_trials)];
-        
-        rt_eye = [rt_eye; data(i).rt_eye(valid_trials)];
-        norm_rt_eye = [norm_rt_eye; data(i).normalized_rt_eye(valid_trials)];
-
-        condition_all = [condition_all; data(i).Condition(valid_trials)];
-        group_all = [group_all; repmat({data(i).group}, sum(valid_trials), 1)];
-    end
-
-    % Convert group and condition labels to categorical
-    condition_all = categorical(condition_all);
-    group_all = categorical(group_all);
-
-    % Calculate mean RT per condition and group
-    [unique_conditions, ~, cond_idx] = unique(condition_all);
-    [unique_groups, ~, group_idx] = unique(group_all);
-
-    mean_rt_button_press = zeros(length(unique_conditions), length(unique_groups));
-    mean_norm_rt_button_press = zeros(length(unique_conditions), length(unique_groups));
-    mean_rt_eye = zeros(length(unique_conditions), length(unique_groups));
-    mean_norm_rt_eye = zeros(length(unique_conditions), length(unique_groups));
-    mean_rt_diff = zeros(length(unique_conditions), length(unique_groups));
-    mean_norm_rt_diff = zeros(length(unique_conditions), length(unique_groups));
-
-    for i = 1:length(unique_conditions)
-        for j = 1:length(unique_groups)
-            idx = cond_idx == i & group_idx == j;
-            mean_rt_button_press(i, j) = mean(rt_button_press(idx));  % Use mean since NaNs are removed
-            mean_norm_rt_button_press(i, j) = mean(norm_rt_button_press(idx));  % Use mean since NaNs are removed
+        if strcmp(data(i).group, 'ADHD')
+            mean_rt_adhd = [mean_rt_adhd; data(i).RTa, data(i).RTasimple, data(i).RTb, data(i).RTbsimple];
+            mean_rt_eye_adhd = [mean_rt_eye_adhd; data(i).RTa_eye, data(i).RTasimple_eye, data(i).RTb_eye, data(i).RTbsimple_eye];
+            mean_rt_diff_adhd = [mean_rt_diff_adhd; data(i).RTa - data(i).RTa_eye, data(i).RTasimple - data(i).RTasimple_eye, ...
+                data(i).RTb - data(i).RTb_eye, data(i).RTbsimple - data(i).RTbsimple_eye];
             
-            mean_rt_eye(i, j) = mean(rt_eye(idx));  % Use mean since NaNs are removed
-            mean_norm_rt_eye(i, j) = mean(norm_rt_eye(idx));  % Use mean since NaNs are removed
+            mean_nrt_adhd = [mean_nrt_adhd; data(i).nRTa, data(i).nRTasimple, data(i).nRTb, data(i).nRTbsimple];
+            mean_nrt_eye_adhd = [mean_nrt_eye_adhd; data(i).nRTa_eye, data(i).nRTasimple_eye, data(i).nRTb_eye, data(i).nRTbsimple_eye];
+            mean_nrt_diff_adhd = [mean_nrt_diff_adhd; data(i).nRTa - data(i).nRTa_eye, data(i).nRTasimple - data(i).nRTasimple_eye, ...
+                data(i).nRTb - data(i).nRTb_eye, data(i).nRTbsimple - data(i).nRTbsimple_eye];
+        elseif strcmp(data(i).group, 'nonADHD')
+            mean_rt_nonadhd = [mean_rt_nonadhd; data(i).RTa, data(i).RTasimple, data(i).RTb, data(i).RTbsimple];
+            mean_rt_eye_nonadhd = [mean_rt_eye_nonadhd; data(i).RTa_eye, data(i).RTasimple_eye, data(i).RTb_eye, data(i).RTbsimple_eye];
+            mean_rt_diff_nonadhd = [mean_rt_diff_nonadhd; data(i).RTa - data(i).RTa_eye, data(i).RTasimple - data(i).RTasimple_eye, ...
+                data(i).RTb - data(i).RTb_eye, data(i).RTbsimple - data(i).RTbsimple_eye];
             
-            mean_rt_diff(i, j) = mean_rt_button_press(i, j) - mean_rt_eye(i, j);
-            mean_norm_rt_diff(i, j) = mean_norm_rt_button_press(i, j) - mean_norm_rt_eye(i, j);
+            mean_nrt_nonadhd = [mean_nrt_nonadhd; data(i).nRTa, data(i).nRTasimple, data(i).nRTb, data(i).nRTbsimple];
+            mean_nrt_eye_nonadhd = [mean_nrt_eye_nonadhd; data(i).nRTa_eye, data(i).nRTasimple_eye, data(i).nRTb_eye, data(i).nRTbsimple_eye];
+            mean_nrt_diff_nonadhd = [mean_nrt_diff_nonadhd; data(i).nRTa - data(i).nRTa_eye, data(i).nRTasimple - data(i).nRTasimple_eye, ...
+                data(i).nRTb - data(i).nRTb_eye, data(i).nRTbsimple - data(i).nRTbsimple_eye];
         end
     end
-
-    % Create figure with 3x2 subplots
+    
+    % Calculate the overall mean and SEM for each condition and group
+    overall_mean_rt_adhd = mean(mean_rt_adhd, 1, 'omitnan');
+    overall_mean_rt_eye_adhd = mean(mean_rt_eye_adhd, 1, 'omitnan');
+    overall_mean_rt_diff_adhd = mean(mean_rt_diff_adhd, 1, 'omitnan');
+    
+    overall_mean_rt_nonadhd = mean(mean_rt_nonadhd, 1, 'omitnan');
+    overall_mean_rt_eye_nonadhd = mean(mean_rt_eye_nonadhd, 1, 'omitnan');
+    overall_mean_rt_diff_nonadhd = mean(mean_rt_diff_nonadhd, 1, 'omitnan');
+    
+    overall_sem_rt_adhd = std(mean_rt_adhd, 0, 1, 'omitnan') / sqrt(size(mean_rt_adhd, 1));
+    overall_sem_rt_eye_adhd = std(mean_rt_eye_adhd, 0, 1, 'omitnan') / sqrt(size(mean_rt_eye_adhd, 1));
+    overall_sem_rt_diff_adhd = std(mean_rt_diff_adhd, 0, 1, 'omitnan') / sqrt(size(mean_rt_diff_adhd, 1));
+    
+    overall_sem_rt_nonadhd = std(mean_rt_nonadhd, 0, 1, 'omitnan') / sqrt(size(mean_rt_nonadhd, 1));
+    overall_sem_rt_eye_nonadhd = std(mean_rt_eye_nonadhd, 0, 1, 'omitnan') / sqrt(size(mean_rt_eye_nonadhd, 1));
+    overall_sem_rt_diff_nonadhd = std(mean_rt_diff_nonadhd, 0, 1, 'omitnan') / sqrt(size(mean_rt_diff_nonadhd, 1));
+    
+    % Repeat for normalized data
+    overall_mean_nrt_adhd = mean(mean_nrt_adhd, 1, 'omitnan');
+    overall_mean_nrt_eye_adhd = mean(mean_nrt_eye_adhd, 1, 'omitnan');
+    overall_mean_nrt_diff_adhd = mean(mean_nrt_diff_adhd, 1, 'omitnan');
+    
+    overall_mean_nrt_nonadhd = mean(mean_nrt_nonadhd, 1, 'omitnan');
+    overall_mean_nrt_eye_nonadhd = mean(mean_nrt_eye_nonadhd, 1, 'omitnan');
+    overall_mean_nrt_diff_nonadhd = mean(mean_nrt_diff_nonadhd, 1, 'omitnan');
+    
+    overall_sem_nrt_adhd = std(mean_nrt_adhd, 0, 1, 'omitnan') / sqrt(size(mean_nrt_adhd, 1));
+    overall_sem_nrt_eye_adhd = std(mean_nrt_eye_adhd, 0, 1, 'omitnan') / sqrt(size(mean_nrt_eye_adhd, 1));
+    overall_sem_nrt_diff_adhd = std(mean_nrt_diff_adhd, 0, 1, 'omitnan') / sqrt(size(mean_nrt_diff_adhd, 1));
+    
+    overall_sem_nrt_nonadhd = std(mean_nrt_nonadhd, 0, 1, 'omitnan') / sqrt(size(mean_nrt_nonadhd, 1));
+    overall_sem_nrt_eye_nonadhd = std(mean_nrt_eye_nonadhd, 0, 1, 'omitnan') / sqrt(size(mean_nrt_eye_nonadhd, 1));
+    overall_sem_nrt_diff_nonadhd = std(mean_nrt_diff_nonadhd, 0, 1, 'omitnan') / sqrt(size(mean_nrt_diff_nonadhd, 1));
+    
+    % Create a 3x2 subplot
     figure;
-
-    % Subplot 1: Eye movement RTs
+    
+    % Subplot 1: Mean Button Press RTs (Non-normalized)
     subplot(3, 2, 1);
     hold on;
-    for j = 1:length(unique_groups)
-        group = char(unique_groups(j));
-        x_data = 1:length(unique_conditions);
-        y_data_eye = mean_rt_eye(:, j);
-        plot(x_data, y_data_eye, '-o', 'Color', color_map(group), ...
-            'MarkerFaceColor', color_map(group), 'LineWidth', 2, 'MarkerSize', 8);
-    end
+    errorbar(1:length(conditions), overall_mean_rt_adhd, overall_sem_rt_adhd, '-o', 'Color', color_map('ADHD'), ...
+        'DisplayName', 'ADHD', 'LineWidth', 2, 'MarkerSize', 8);
+    errorbar(1:length(conditions), overall_mean_rt_nonadhd, overall_sem_rt_nonadhd, '-o', 'Color', color_map('nonADHD'), ...
+        'DisplayName', 'nonADHD', 'LineWidth', 2, 'MarkerSize', 8);
     hold off;
-    xticks(1:length(x_labels));
-    xticklabels(x_labels);
-    ylabel('Eye RT (s)');
-    title('Eye Movement Reaction Time');
-    legend(unique_groups, 'Orientation', 'horizontal');
+    xticks(1:length(conditions));
+    xticklabels(conditions);
+    ylabel('Mean Button Press RT (s)');
+    title('Button Press RT');
     grid on;
-
-    % Subplot 2: Normalized Eye movement RTs
+    legend('Orientation', 'horizontal');
+    
+    % Subplot 2: Normalized Button Press RTs
     subplot(3, 2, 2);
     hold on;
-    for j = 1:length(unique_groups)
-        group = char(unique_groups(j));
-        x_data = 1:length(unique_conditions);
-        y_data_norm_eye = mean_norm_rt_eye(:, j);
-        plot(x_data, y_data_norm_eye, '-o', 'Color', color_map(group), ...
-            'MarkerFaceColor', color_map(group), 'LineWidth', 2, 'MarkerSize', 8);
-    end
+    errorbar(1:length(conditions), overall_mean_nrt_adhd, overall_sem_nrt_adhd, '-o', 'Color', color_map('ADHD'), ...
+        'DisplayName', 'ADHD', 'LineWidth', 2, 'MarkerSize', 8);
+    errorbar(1:length(conditions), overall_mean_nrt_nonadhd, overall_sem_nrt_nonadhd, '-o', 'Color', color_map('nonADHD'), ...
+        'DisplayName', 'nonADHD', 'LineWidth', 2, 'MarkerSize', 8);
     hold off;
-    xticks(1:length(x_labels));
-    xticklabels(x_labels);
-    ylabel('Normalized Eye RT (s)');
-    title('Normalized Eye Movement Reaction Time');
+    xticks(1:length(conditions));
+    xticklabels(conditions);
+    ylabel('Normalized Button Press RT (s)');
+    title('Normalized Button Press RT');
     grid on;
-
-    % Subplot 3: Button press RTs
+    
+    % Subplot 3: Mean Eye RTs (Non-normalized)
     subplot(3, 2, 3);
     hold on;
-    for j = 1:length(unique_groups)
-        group = char(unique_groups(j));
-        x_data = 1:length(unique_conditions);
-        y_data_button_press = mean_rt_button_press(:, j);
-        plot(x_data, y_data_button_press, '-s', 'Color', color_map(group), ...
-            'MarkerFaceColor', color_map(group), 'LineWidth', 2, 'MarkerSize', 8);
-    end
+    errorbar(1:length(conditions), overall_mean_rt_eye_adhd, overall_sem_rt_eye_adhd, '-o', 'Color', color_map('ADHD'), ...
+        'DisplayName', 'ADHD', 'LineWidth', 2, 'MarkerSize', 8);
+    errorbar(1:length(conditions), overall_mean_rt_eye_nonadhd, overall_sem_rt_eye_nonadhd, '-o', 'Color', color_map('nonADHD'), ...
+        'DisplayName', 'nonADHD', 'LineWidth', 2, 'MarkerSize', 8);
     hold off;
-    xticks(1:length(x_labels));
-    xticklabels(x_labels);
-    ylabel('Button Press RT (s)');
-    title('Button Press Reaction Time');
+    xticks(1:length(conditions));
+    xticklabels(conditions);
+    ylabel('Mean Eye RT (s)');
+    title('Eye Movement RT');
     grid on;
-
-    % Subplot 4: Normalized Button press RTs
+    
+    % Subplot 4: Normalized Eye RTs
     subplot(3, 2, 4);
     hold on;
-    for j = 1:length(unique_groups)
-        group = char(unique_groups(j));
-        x_data = 1:length(unique_conditions);
-        y_data_norm_button_press = mean_norm_rt_button_press(:, j);
-        plot(x_data, y_data_norm_button_press, '-s', 'Color', color_map(group), ...
-            'MarkerFaceColor', color_map(group), 'LineWidth', 2, 'MarkerSize', 8);
-    end
+    errorbar(1:length(conditions), overall_mean_nrt_eye_adhd, overall_sem_nrt_eye_adhd, '-o', 'Color', color_map('ADHD'), ...
+        'DisplayName', 'ADHD', 'LineWidth', 2, 'MarkerSize', 8);
+    errorbar(1:length(conditions), overall_mean_nrt_eye_nonadhd, overall_sem_nrt_eye_nonadhd, '-o', 'Color', color_map('nonADHD'), ...
+        'DisplayName', 'nonADHD', 'LineWidth', 2, 'MarkerSize', 8);
     hold off;
-    xticks(1:length(x_labels));
-    xticklabels(x_labels);
-    ylabel('Normalized Button Press RT (s)');
-    title('Normalized Button Press Reaction Time');
+    xticks(1:length(conditions));
+    xticklabels(conditions);
+    ylabel('Normalized Eye RT (s)');
+    title('Normalized Eye Movement RT');
     grid on;
-
-    % Subplot 5: Difference between button press RT and eye RT
+    
+    % Subplot 5: Mean Difference Between Button Press RT and Eye RT (Non-normalized)
     subplot(3, 2, 5);
     hold on;
-    for j = 1:length(unique_groups)
-        group = char(unique_groups(j));
-        x_data = 1:length(unique_conditions);
-        y_data_diff = mean_rt_diff(:, j);
-        plot(x_data, y_data_diff, '-^', 'Color', color_map(group), ...
-            'MarkerFaceColor', color_map(group), 'LineWidth', 2, 'MarkerSize', 8);
-    end
+    errorbar(1:length(conditions), overall_mean_rt_diff_adhd, overall_sem_rt_diff_adhd, '-o', 'Color', color_map('ADHD'), ...
+        'DisplayName', 'ADHD', 'LineWidth', 2, 'MarkerSize', 8);
+    errorbar(1:length(conditions), overall_mean_rt_diff_nonadhd, overall_sem_rt_diff_nonadhd, '-o', 'Color', color_map('nonADHD'), ...
+        'DisplayName', 'nonADHD', 'LineWidth', 2, 'MarkerSize', 8);
     hold off;
-    xticks(1:length(x_labels));
-    xticklabels(x_labels);
-    xlabel('Condition');
-    ylabel('Button Press RT - Eye RT (s)');
-    title('Difference Between Button Press RT and Eye RT');
+    xticks(1:length(conditions));
+    xticklabels(conditions);
+    ylabel('Mean Difference RT (s)');
+    title('Difference: Button Press RT - Eye RT');
     grid on;
-
-    % Subplot 6: Difference between normalized button press RT and normalized eye RT
+    
+    % Subplot 6: Normalized Difference Between Button Press RT and Eye RT
     subplot(3, 2, 6);
     hold on;
-    for j = 1:length(unique_groups)
-        group = char(unique_groups(j));
-        x_data = 1:length(unique_conditions);
-        y_data_norm_diff = mean_norm_rt_diff(:, j);
-        plot(x_data, y_data_norm_diff, '-^', 'Color', color_map(group), ...
-            'MarkerFaceColor', color_map(group), 'LineWidth', 2, 'MarkerSize', 8);
-    end
+    errorbar(1:length(conditions), overall_mean_nrt_diff_adhd, overall_sem_nrt_diff_adhd, '-o', 'Color', color_map('ADHD'), ...
+        'DisplayName', 'ADHD', 'LineWidth', 2, 'MarkerSize', 8);
+    errorbar(1:length(conditions), overall_mean_nrt_diff_nonadhd, overall_sem_nrt_diff_nonadhd, '-o', 'Color', color_map('nonADHD'), ...
+        'DisplayName', 'nonADHD', 'LineWidth', 2, 'MarkerSize', 8);
     hold off;
-    xticks(1:length(x_labels));
-    xticklabels(x_labels);
-    xlabel('Condition');
-    ylabel('Norm Button RT - Norm Eye RT (s)');
-    title('Difference Normalized Button Press RT and Normalized Eye RT');
+    xticks(1:length(conditions));
+    xticklabels(conditions);
+    ylabel('Normalized Difference RT (s)');
+    title('Normalized Difference: Button Press RT - Eye RT');
     grid on;
-
+    
+    % Manually set the y-axis limits to be the same for corresponding plots
+    % Get all subplot handles
+    h1 = subplot(3, 2, 1); h2 = subplot(3, 2, 2);
+    h3 = subplot(3, 2, 3); h4 = subplot(3, 2, 4);
+    h5 = subplot(3, 2, 5); h6 = subplot(3, 2, 6);
+    
+    % Set y-limits for Button Press RTs (Subplot 1 and 2)
+    all_ys_button_press = [get(h1, 'YLim'), get(h2, 'YLim')];
+    set([h1, h2], 'YLim', [min(all_ys_button_press), max(all_ys_button_press)]);
+    
+    % Set y-limits for Eye RTs (Subplot 3 and 4)
+    all_ys_eye = [get(h3, 'YLim'), get(h4, 'YLim')];
+    set([h3, h4], 'YLim', [min(all_ys_eye), max(all_ys_eye)]);
+    
+    % Set y-limits for Difference RTs (Subplot 5 and 6)
+    all_ys_diff = [get(h5, 'YLim'), get(h6, 'YLim')];
+    set([h5, h6], 'YLim', [min(all_ys_diff), max(all_ys_diff)]);
+    
     % Save the figure if safe is set to 1
     if safe == 1
         set(gcf, 'Units', 'normalized', 'OuterPosition', [0 0 1 1]);
-        saveas(gcf, fullfile(comparison_results_folder, 'mean_rt_comparison_per_condition_group.png'));
+        saveas(gcf, fullfile(comparison_results_folder, 'mean_of_means_RT_per_condition_group.png'));
     end
 end
