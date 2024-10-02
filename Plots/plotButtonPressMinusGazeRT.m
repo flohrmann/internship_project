@@ -41,6 +41,7 @@ function plotButtonPressMinusGazeRT(trial_results, eye_rt, analysis_folder)
     title('Button Press RT - Gaze RT per Trial');
     xlabel('Trial');
     ylabel('RT Difference (Button Press - Gaze RT) (s)');
+    
     grid on;
 
     % Save the plot
