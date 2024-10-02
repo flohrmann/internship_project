@@ -1,4 +1,4 @@
-function plotAvgBeforeAfterStimFound(result_table, tnf, conditions, id, analysis_folder, color_map, num_before, num_after)
+function plotAvgBeforeAfterStimFound(result_table, conditions, id, analysis_folder, color_map, num_before, num_after)
 
 total_points = num_before + num_after;
 
@@ -57,8 +57,15 @@ for method = {'Mean', 'Median'}  % Create separate plots for mean and median
     xlabel('Time (s) before and after target found');
     ylabel([method_name,' Pupil Diameter (mm)']);
     used_trials = height(result_table);
-    title(['Average Pupil Diameter Once Gaze Reaches Target - Participant ', num2str(id), ...
-        ' (', num2str(used_trials), ' trials)']);
+    
+%     if id == 0 % for groups (adhd/nonadhd)
+%         title('Average Pupil Diameter Once Gaze Reaches Target - ADHD');
+%     elseif id == 100
+%         title('Average Pupil Diameter Once Gaze Reaches Target - nonADHD');
+%     else % for individual participants
+        title(['Average Pupil Diameter Once Gaze Reaches Target - Participant ', num2str(id), ...
+            ' (', num2str(used_trials), ' trials)']);
+%     end
     
     % Manually set the legend with the line and the shaded error regions
     legend_objects = findobj(gca, 'Type', 'Line');  % Find all line objects in the plot
