@@ -21,8 +21,8 @@ for i = 1:length(folders)
     label = group_labels{i};
     
     % Extract the ID from the folder name (the number after the last backslash)
-    [~, folder_name] = fileparts(folder);
-    id = sscanf(folder_name, '%d_%*s'); % Extract the leading number (ID)
+    %[~, folder_name] = fileparts(folder);
+    id = i;%sscanf(folder_name, '%d_%*s'); % Extract the leading number (ID)
     
     % Find the CSV file that matches the pattern 'questionnaire*.csv' in the folder
     file = dir(fullfile(folder, 'questionnaire*.csv'));
