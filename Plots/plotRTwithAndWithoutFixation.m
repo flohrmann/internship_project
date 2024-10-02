@@ -1,4 +1,4 @@
-function plotRTwithAndWithoutFixation(trial_results, eye_rt, lookedAtFixation, analysis_folder)
+function plotRTwithAndWithoutFixation(id, trial_results, eye_rt, lookedAtFixation, analysis_folder)
     % Compute fixation summary
     fixationSummary = any(lookedAtFixation, 2);
     fixationSummary = double(fixationSummary); % Convert logical array to double for 1 and 0 output
@@ -57,7 +57,7 @@ function plotRTwithAndWithoutFixation(trial_results, eye_rt, lookedAtFixation, a
         hold on;
         scatter(trialIndices(fixationSummary(trialIndices) == 1), RTs(fixationSummary(trialIndices) == 1), 50, 'g', 'filled', 'DisplayName', 'Fixation');
         scatter(trialIndices(fixationSummary(trialIndices) == 0), RTs(fixationSummary(trialIndices) == 0), 50, 'r', 'filled', 'DisplayName', 'No Fixation');
-        title(['RT per Trial - Condition: ', condition, ' (No Fixation: ', num2str(percentageNoFixation, '%.1f'), '%)']);
+        title(['Subject ', num2str(id), ': RT per Trial - ', condition, ' ( No Fixation: ', num2str(percentageNoFixation, '%.1f'), '%)']);
         xlabel('Trial');
         ylabel('Reaction Time (s)');
         grid on;
@@ -67,6 +67,6 @@ function plotRTwithAndWithoutFixation(trial_results, eye_rt, lookedAtFixation, a
         hold off;
     end
 
-    % Save the combined figure
-    saveas(gcf, fullfile(analysis_folder, 'RT_per_trial_with_fixation_status_by_condition.png'));
+set(gcf, 'Units', 'normalized', 'OuterPosition', [0 0 1 1])
+saveas(gcf, fullfile(analysis_folder, 'RT_per_trial_with_fixation_status_by_condition.png'));
 end
