@@ -15,8 +15,6 @@ function [right_eye_arrival_time, left_eye_arrival_time] = plotGazePathWithColor
     x_mean = mean([x_r; x_l], 1);
     y_mean = mean([y_r; y_l], 1);
 
-    % Detect saccades (this is a placeholder; you should use your actual saccade detection)
-    % Assume you have variables `saccade_onsets` and `saccade_offsets`
     [saccade_onsets, saccade_offsets] = detectSaccades(x_mean, y_mean, t_r);  % Replace with your saccade detection function
 
     % Plot each saccade with a different color

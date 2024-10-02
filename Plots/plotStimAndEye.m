@@ -74,9 +74,9 @@ function [right_eye_arrival_time, left_eye_arrival_time] = plot_lines_with_gaze(
 
             % Determine the color based on whether this is the target position
             if i == targetRow && j == targetCol
-                line_color = 'y'; % Yellow for the target position
+                line_color = 'y'; % yellow for the target position
             else
-                line_color = 'k'; % Black for other positions
+                line_color = 'k'; % black for other positions
             end
 
             % Loop through each angle and plot the corresponding line
@@ -178,20 +178,20 @@ function [right_eye_arrival_time, left_eye_arrival_time]  = annotateTime(trial_r
     
     % Change stimulus color if either eye reaches the target
     if ~isempty(targetIndex_r) || ~isempty(targetIndex_l)
-        changeStimulusColor(trial_results, targetRow, targetCol, 'g');
+        changeStimulusColor(trial_results, targetRow, targetCol, 'm');
         
         if ~isempty(targetIndex_r)
             right_eye_arrival_time = targetIndex_r; %t_r(targetIndex_r) - t_r(1);  % Time from trial start to target reach in s
             timeToTarget_r = t_r(targetIndex_r) - t_r(1);  % Time from trial start to target reach in s
             text(screenXpixels - 500, -40, sprintf('Right Eye Found: %.2f s', timeToTarget_r), 'Color', 'black');
-            plot(x_r(targetIndex_r), y_r(targetIndex_r), 'o', 'MarkerFaceColor', 'g');
+            plot(x_r(targetIndex_r), y_r(targetIndex_r), 'o', 'MarkerFaceColor', 'm');
         end
         
         if ~isempty(targetIndex_l)
             left_eye_arrival_time = targetIndex_l;% t_l(targetIndex_l) - t_l(1);  % Time from trial start to target reach in s
             timeToTarget_l = t_l(targetIndex_l) - t_l(1);  % Time from trial start to target reach in s
             text(screenXpixels - 500, -80, sprintf('Left Eye Found: %.2f s', timeToTarget_l), 'Color', 'black');
-            plot(x_l(targetIndex_l), y_l(targetIndex_l), 'o', 'MarkerFaceColor', 'g');
+            plot(x_l(targetIndex_l), y_l(targetIndex_l), 'o', 'MarkerFaceColor', 'm');
         end
     end
 
