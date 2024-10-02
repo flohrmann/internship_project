@@ -1,11 +1,20 @@
-function [result_table, tnf] = findTargetAndExtractData(cutData, screenXpixels, screenYpixels, id, analysis_folder, tolerance, num_before, num_after)
-    result_table = {};  % Initialize the result cell array
-    tnf = 0;  % Counter for trials where the target was not found
+function [result_table, tnf] = findTargetAndExtractData(cutData, screenXpixels, screenYpixels, analysis_folder, tolerance, num_before, num_after)
+    result_table = {}; 
+    tnf = 0;  % Counter for trials where the target not found
 
     % Loop through each trial in the cutData
     for trial = 1:size(cutData, 1)
         trial_data = cutData(trial, :);
         condition = trial_data.Condition{1};  % Extract the condition for the trial
+        % get the pupil diameter during blank screen for baseline
+        blank_start = cutData.blankStartTime(trial);
+        timestamps = double(trial_data.eyeTrial.systemTimeStamp) / 1e6;
+        [~, idx_blank] = min(abs(timestamps - blank_start)); % get start of blank screen
+        blank_d_l = trial_data.eyeTrial.left.pupil.diameter;
+        blank_d_r = trial_data.eyeTrial.right.pupil.diameter; 
+        blank_d_avg = nanmean([blank_d_l; blank_d_r], 1); % avg over both eyes
+        blank_diam_mean = nanmean(blank_d_avg(idx_blank:idx_blank+9)); % avg over time of blank screen (10 datapoints)
+        blank_diam_median = nanmedian(blank_d_avg(idx_blank:idx_blank+9)); % avg over time of blank screen (10 datapoints)
 
         % Extract target position    
         targetPos = trial_data.TargetPosition;
@@ -17,17 +26,17 @@ function [result_table, tnf] = findTargetAndExtractData(cutData, screenXpixels, 
         targetY = screenYpixels - trial_data.y_centers{1}(targetRow, targetCol);
 
         % Right eye data
-        a_r = trial_data.eyeTrial.right.gazePoint.onDisplayArea;
+        a_r = trial_data.stimulusTrial.right.gazePoint.onDisplayArea;
         x_r = a_r(1,:) * screenXpixels;
         y_r = screenYpixels - (a_r(2,:) * screenYpixels);  % Inverting y-axis
-        t_r = double(trial_data.eyeTrial.systemTimeStamp) / 1e6;  % Converts timestamp to seconds
-        d_r = trial_data.eyeTrial.right.pupil.diameter; % pupil diameter
+        t_r = double(trial_data.stimulusTrial.systemTimeStamp) / 1e6;  % Converts timestamp to seconds
+        d_r = trial_data.stimulusTrial.right.pupil.diameter; % pupil diameter
         % Left eye data
-        a_l = trial_data.eyeTrial.left.gazePoint.onDisplayArea;
+        a_l = trial_data.stimulusTrial.left.gazePoint.onDisplayArea;
         x_l = a_l(1,:) * screenXpixels;
         y_l = screenYpixels - (a_l(2,:) * screenYpixels);  % Inverting y-axis
-        t_l = double(trial_data.eyeTrial.systemTimeStamp) / 1e6;  % Converts timestamp to seconds
-        d_l = trial_data.eyeTrial.left.pupil.diameter; % pupil diameter
+        t_l = double(trial_data.stimulusTrial.systemTimeStamp) / 1e6;  % Converts timestamp to seconds
+        d_l = trial_data.stimulusTrial.left.pupil.diameter; % pupil diameter
         
         % Calculate the average gaze position between both eyes
         x_avg = nanmean([x_r; x_l], 1);
@@ -69,11 +78,11 @@ function [result_table, tnf] = findTargetAndExtractData(cutData, screenXpixels, 
         end
 
         % Save the trial number, condition, and datapoints in a row
-        result_table = [result_table; {trial, condition, points_before_stim, points_after_stim}];
+        result_table = [result_table; {trial, condition, points_before_stim, points_after_stim, blank_diam_mean, blank_diam_median}];
     end
 
     % Convert the cell array to a table for easier processing
-    result_table = cell2table(result_table, 'VariableNames', {'TrialNumber', 'Condition', 'DataPointsBefore', 'DataPointsAfter'});
+    result_table = cell2table(result_table, 'VariableNames', {'TrialNumber', 'Condition', 'DataPointsBefore', 'DataPointsAfter', 'MeanDiamBlank', 'MedianDiamBlank'});
 
     % Save the table to a file
     save(fullfile(analysis_folder, '\pupil_before_after_finding_stim.mat'), 'result_table');
