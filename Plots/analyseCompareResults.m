@@ -15,23 +15,37 @@ color_map = containers.Map({'a', 'a_simple', 'b', 'b_simple', 'ADHD', 'nonADHD'}
 
 folders = {
     'C:\Users\flohrmann\Documents\Results\1_20240714_140048'; % alex
-    'C:\Users\flohrmann\Documents\Results\2_20240726_191755'; % mara adhd
-    'C:\Users\flohrmann\Documents\Results\3_20240805_105213'; % tilo adhd
-    'C:\Users\flohrmann\Documents\Results\4_20240811_131601'; % anu adhd
-    'C:\Users\flohrmann\Documents\Results\5_20240813_114700'; % kieran adhd
+    'C:\Users\flohrmann\Documents\Results\2_20240726_191755'; % mara 
+    'C:\Users\flohrmann\Documents\Results\3_20240805_105213'; % tilo 
+    'C:\Users\flohrmann\Documents\Results\4_20240811_131601'; % anu 
+    'C:\Users\flohrmann\Documents\Results\5_20240813_114700'; % kieran 
+    'C:\Users\flohrmann\Documents\Results\6_20240821_191408'; % sura 
+    'C:\Users\flohrmann\Documents\Results\7_20240821_194651'; % hamit
+    'C:\Users\flohrmann\Documents\Results\7_20240823_162058'; % jannik
+    'C:\Users\flohrmann\Documents\Results\9_20240829_101613'; % farn 
+    'C:\Users\flohrmann\Documents\Results\10_20240929_151434'; % julia
     };
 
 % Define the classification of the folders (ADHD or non-ADHD)
 group_labels = {
     'nonADHD';  % alex
-    'ADHD';     % mara adhd
-    'ADHD';     % tilo adhd
-    'ADHD';     % anu adhd
-    'ADHD';     % kieran adhd
+    'ADHD';     % mara 
+    'ADHD';     % tilo 
+    'ADHD';     % anu 
+    'ADHD';     % kieran 
+    'ADHD';     % sura 
+    'nonADHD';  % hamit
+    'nonADHD';  % jannik
+    'ADHD';     % farn 
+    'nonADHD';  % julia 
     };
 
 conditions = {'a', 'a_simple', 'b', 'b_simple'};
 groups = {'ADHD', 'nonADHD'};
+
+% experiment screen size
+screenXpixels = 3240;
+screenYpixels = 2160;
 
 
 data_struct = struct();
@@ -43,6 +57,7 @@ for i = 1:length(folders)
     data_file   = dir(fullfile(folder, '\results\trial_results*.mat')); % original data
     eye_rt_file = dir(strcat(folder, '\analysis\eye_rt.mat')); % calculated eye rt from analyseResults.m
     eyetracking_file = dir(fullfile(folder, '\analysis\cut_trials*.mat'));
+    pupil_file = dir(strcat(folder, '\analysis\pupil_before_after_finding_stim.mat'));
     if ~isempty(data_file)
         load(fullfile(data_file.folder, data_file.name), 'trial_results');
         data_struct(i).id                = i;
@@ -50,8 +65,8 @@ for i = 1:length(folders)
         data_struct(i).Condition         = trial_results.Condition;
         data_struct(i).rt                = trial_results.rt;
         data_struct(i).accuracy          = trial_results.correct;
-        data_struct(i).StimulusOnsetTime = double(trial_results.StimulusOnsetTime/ 1e6);
-        data_struct(i).trialEndTime      = double(trial_results.trialEndTime/ 1e6);
+        data_struct(i).StimulusOnsetTime = trial_results.StimulusOnsetTime;
+        data_struct(i).trialEndTime      = trial_results.trialEndTime;
         % eye reaction times
         load(fullfile(eye_rt_file.folder, eye_rt_file.name), 'eye_rt');
         data_struct(i).rt_right          = eye_rt.RightEyeRT;
@@ -59,10 +74,13 @@ for i = 1:length(folders)
         % eyetracking data cut into trials
         load(fullfile(eyetracking_file.folder, eyetracking_file.name), 'cutData');
         data_struct(i).eyeTrial           = cutData.eyeTrial;
-        data_struct(i).stimulusTrial      = cutData.stimulusTrial;
+        data_struct(i).stimulusTrial      = cutData.stimulusTrial; % cut to start stim
         data_struct(i).TargetPosition     = cutData.TargetPosition;
         data_struct(i).x_centers          = cutData.x_centers;
         data_struct(i).y_centers          = cutData.y_centers;
+        % pupil dilation data
+        load(fullfile(pupil_file.folder, pupil_file.name), 'res');
+        
     else
         warning(['Data file not found in folder: ', folder]);
     end
@@ -82,7 +100,220 @@ data = data_struct_norm_mean;
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%% PLOTS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%% PLOTS/ANALYSIS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% --- EYE-TRACKING DATA ---
+
+
+%% analyse saccades (unzufriedenstellend)
+% sampling rate too low to really get the saccades this way - only kind of works
+%analyseSaccades(data, screenXpixels, screenYpixels, safe, comparison_results_folder)
+
+%% --- detect fixations ---
+%safe = 1;
+% params to define fixations
+dist_threshold = 50; % max distance between consecutive points (in pixels)
+min_duration = 3; % min num of consecutive points to count as a fixation
+
+all_fixations = struct();
+for participant=1:size(data,2)
+    analysis_folder = strcat(folders{participant}, '\analysis\'); % save per participant
+    fixations = analyseFixation(data(participant), dist_threshold, min_duration, screenXpixels, screenYpixels, safe, analysis_folder);
+    all_fixations(participant).id        = data(participant).id;    
+    all_fixations(participant).fixations = fixations;    
+end
+save(strcat(comparison_results_folder, 'all_fixations.mat'), 'all_fixations'); % save for all participants
+
+% plot some fixations for checking 
+plot_these = [1, 160]; % just plot two for checking
+for participant = 1:size(data, 2) % size(plot_these, 2)
+    participant_data = data(participant);
+    participant_fixations = all_fixations(participant).fixations; %.stimulusFixations;
+    analysis_folder = strcat(folders{participant}, '\analysis\'); 
+    plotFixations(participant_data, participant_fixations, screenXpixels, screenYpixels, plot_these, analysis_folder, safe);
+end
+
+% get fixation durations, counts per trial and average over conditions
+fixation_stats = getFixationDuration(all_fixations, data, comparison_results_folder);
+
+
+%% --- reverse engineer "saccades" from fixation clusters ---
+all_saccades = struct();
+for participant = 1:size(data, 2)
+    saccades = struct();
+    for trial = 1:size(data(participant).stimulusTrial, 1)
+        saccades(trial).trial = trial;
+        participant_data = data(participant).stimulusTrial(trial);
+        participant_fixations = all_fixations(participant).fixations.stimulusFixations(trial).fixations; %.stimulusFixations;
+        saccades(trial).saccades = detectSaccadesFromFixations(participant_fixations, screenXpixels, screenYpixels);
+        saccades(trial).saccadeDurations = getSaccadeTimes(participant_fixations, participant_data);
+    end
+    all_saccades(participant).id = data(participant).id; 
+    all_saccades(participant).saccades = saccades;
+end
+save(fullfile(comparison_results_folder, 'all_saccades.mat'), 'saccades');% save the saccades data
+
+% plot saccades
+plot_these = [1,160];
+for participant = 1:size(data, 2)
+    analysis_folder = strcat(folders{participant}, '\analysis\'); 
+    participant_data = data(participant).stimulusTrial;
+    participant_fixations = all_fixations(participant).fixations.stimulusFixations;
+    plotFixationSaccades(data(participant), all_saccades(participant), all_fixations(participant), screenXpixels, screenYpixels, plot_these, analysis_folder, safe);
+end
+
+
+%% --- get distance from starting point in trial to target center --- 
+for participant = 1:size(data, 2)
+    for trial=1:size(data(participant).stimulusTrial, 1)
+        participant_data = data(participant).stimulusTrial(trial);
+        participant_fixations = all_fixations(participant).fixations.stimulusFixations(trial).fixations; %.stimulusFixations;
+        participant_saccades = all_saccades(participant).saccades(trial).saccades;
+        
+        % coordinates first gaze of trial
+        first_gaze_x = participant_data.left.gazePoint.onDisplayArea(1, 1) * screenXpixels;
+        first_gaze_y = screenYpixels - (participant_data.left.gazePoint.onDisplayArea(2, 1) * screenYpixels);
+        % coordinates target
+        target_x = all_fixations(participant).fixations.targetCenters(1, trial);
+        target_y = all_fixations(participant).fixations.targetCenters(2, trial);
+        % number of saccades in trial 
+        n_sac = size(participant_saccades, 2);
+        % sum distance of saccades
+        distance_sac = sum([participant_saccades.distance]);
+        mean_distance_sac = mean([participant_saccades.distance]);
+        % sum of entire gaze path
+        %distance_trial = sum();
+    end
+end
+
+
+%% --- Fixation Duration and Distribution ---
+%fixation_stats = getFixationDuration(all_fixations, data, conditions, comparison_results_folder);
+% get fixation durations, counts per trial 
+fixation_stats = getFixationDuration(all_fixations, data, comparison_results_folder);
+%  average over conditions
+meanFixationDurations = getMeanFixationDurationPerCondition(fixation_stats, conditions);
+
+% Fixation Duration: Compare the average duration of fixations between ADHD 
+% and non-ADHD participants. ADHD individuals often have shorter fixation durations, 
+% indicating less stable attention on specific areas of interest.
+plotGroupFixationDurations(fixation_stats, group_labels, conditions, color_map);% line
+plotFixationDifferences(fixation_stats, group_labels, conditions, color_map); % line
+plotViolinFixationStats(fixation_stats, group_labels, conditions, color_map, comparison_results_folder, safe);
+
+% Fixation Distribution: Analyze the spatial distribution of fixations. 
+% ADHD participants might have a more scattered fixation pattern, with less 
+% focus on task-relevant areas compared to non-ADHD participants, 
+% who might show more concentrated fixations on targets.
+% this just plots mean of all the fixations per condition (useless)
+%plotFixationSpatialDistribution(fixationStats, group_labels, conditions, comparison_results_folder, safe);
+
+
+%% trash
+% % distance of first gaze trial to targer
+% trial_distance = sqrt((endCenter(1) - startCenter(1)).^2 + (endCenter(2) - startCenter(2)).^2);
+% % distance of all saccades in trial 
+% saccade_distance = sqrt((endCenter(1) - startCenter(1)).^2 + (endCenter(2) - startCenter(2)).^2);
+% % total distance of gaze in trial
+% total_distance = sqrt((endCenter(1) - startCenter(1)).^2 + (endCenter(2) - startCenter(2)).^2);
+
+
+
+
+%% --- Saccade Metrics ---
+% Saccade Amplitude and Velocity: ADHD participants may exhibit larger saccade 
+% amplitudes and higher velocities, reflecting more erratic or less controlled eye movements.
+saccadeStats = analyzeSaccadeAmplitudeAndVelocity(all_saccades, data, conditions);
+plotSaccadeDifferences(saccadeStats, group_labels, conditions, color_map);
+% same but as violin
+plotSaccadesViolin(saccadeStats, group_labels, conditions, color_map, comparison_results_folder, safe)
+
+% Saccade Frequency: Higher saccade frequency might indicate more frequent 
+% shifts in attention, which is often characteristic of ADHD.
+plotSaccadeCount(saccadeStats, group_labels, conditions, color_map);
+
+ttestFixationDuration(group_labels, fixation_stats, saccadeStats, conditions)
+
+
+%% --- Pupil Diameter ---
+% check target coords/eye coords (+ tolerance)
+% get 30 datapoints before target is reached with eyes + 10 datapoints after
+% padded with NaNs if not enough datapoints
+tolerance = 100;  % Tolerance in pixels for detecting gaze near the target
+num_before = 30; % Number of datapoints before target found
+num_after = 10;  % Number of datapoints after target found
+
+
+[diam_around_stim_table, tnf] = findTargetAndExtractData(cutData, screenXpixels, screenYpixels, id, analysis_folder, tolerance, num_before, num_after);
+
+% plot 30 datapoints before target was reached with gaze and 10 after, average per condition
+plotAvgBeforeAfterStimFound(diam_around_stim_table, tnf, conditions, id, analysis_folder, color_map, num_before, num_after)
+
+
+
+
+
+
+%% --- Search Efficiency ---
+% Path Efficiency: Measure the efficiency of the visual search path. 
+% Non-ADHD participants might display more direct paths towards the target, 
+% whereas ADHD participants could show more erratic paths with unnecessary movements.
+
+
+% Time to First Fixation on Target: Assess the time taken for the first 
+% fixation on the target. Delays in this metric could suggest differences 
+% in how quickly participants orient their attention to relevant stimuli.
+
+
+%% --- Search Strategy Analysis ---
+% Systematic vs. Random Search Patterns: Assess whether participants use a systematic 
+% search strategy (e.g., scanning in a structured way) versus a more random or 
+% chaotic approach. ADHD participants might be less likely to use systematic strategies.
+
+% Search Latency: Analyze the latency before initiating a search, and how quickly 
+% participants give up on a search (indicative of persistence and focus).
+searchLatencyStats = analyzeSearchLatency(all_fixations, data, conditions, comparison_results_folder);
+
+
+
+
+
+
+%% --- Attention Shifts and Disengagement ---
+% Task Engagement Over Time: Evaluate how task engagement changes over time. 
+% ADHD participants might show a decline in performance or more frequent disengagement from the task as it progresses.
+
+% Revisits: Track how often participants revisit previously searched areas. 
+% Frequent revisits might indicate memory deficits or difficulties in sustaining attention.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -96,11 +327,42 @@ data = data_struct_norm_mean;
 % H: ADHD participants might show different reaction time patterns compared
 % to non-ADHD participants, especially in harder conditions
 
-% correlation analysis: RTeye, RTbuttonpress and accuracy
+
+%% RT variability
+% TODO Add y label einheit, vairnace, seconds squared/make more clear
+% Use individual colours per person
+
+measure = 'var';  % var/std
+rt_variability = getRTvariability(data, conditions, groups, measure, color_map, comparison_results_folder);
+rt_variability_2 = getAndPlotRTV_ParticipantLines(data, conditions, measure, groups, color_map, comparison_results_folder);
+
+
+%% correlation analysis: RTeye, RTbuttonpress and accuracy
 [R, P] = correlationRTbuttonRTeyeAccuracy(data, comparison_results_folder);
 
-% BAR and LINE plot: mean RT and error bars (~variability) per group and condition
-plotBarSEMMeanRTConditonGroup(groups, conditions, data, color_map, safe, comparison_results_folder)
+
+%% condition-Specific Correlation Analysis
+[R_condition, P_condition] = correlationByCondition(data, conditions, comparison_results_folder);
+
+% correlation has nans in b_simple since theres only 1 incorrect trial for
+% all participants/trials
+checkAccuracyDistributionByCondition(data, conditions);
+
+
+%% ADHD vs. non-ADHD Group Correlation Analysis
+[R_group, P_group] = correlationByGroup(data, groups, comparison_results_folder);
+
+%% BOTH TODO look this up
+[R_group_condition, P_group_condition] = correlationByGroupCondition(data, groups, conditions, comparison_results_folder);
+% TODO corr of groups by condition
+% TODO add Rtbutton-rteye (lapse?) 
+plotGroupConditionCorrelations(R_group_condition, groups, conditions)
+compareGroupCorrelations(R_group_condition, groups, data, conditions)
+
+
+
+%% BAR and LINE plot: mean RT and error bars (~variability) per group and condition
+% plotBarSEMMeanRTConditonGroup(groups, conditions, data, color_map, safe, comparison_results_folder)
 
 % rt over time per participant
 %% TODO change to subplots per condition
@@ -117,9 +379,11 @@ plotViolinRTGroupCondition(data, color_map, comparison_results_folder, safe)
 plotRTButtonPressVsEye(data, comparison_results_folder, safe)
 
 % 3x3 subplots: rt button press vs rt eyes; means of groups per condition
+% TODO Raw data: Ratio between a and b (lapse time between a and b; a/b)
 plotMeanRTButtonPressVsEyecomparison(data, color_map, comparison_results_folder, safe)
 
 %% Confusion/ RTa - RTb or RTa/RTb
+% TODO add errorbars, add button press,, Do for eye rt, ttest
 plotConfusion(data, color_map, comparison_results_folder, safe)
 
 
@@ -143,23 +407,6 @@ for i = 1:length(data)
 end
 xlabel('Reaction Time'); ylabel('Accuracy'); title('Accuracy vs. Reaction Time');
 legend('Location', 'northeastoutside'); hold off;
-
-% TODO  outlier analysis
-% all_rt = [];
-% all_conditions = [];
-% all_group = [];
-% for i = 1:length(data)
-%     n = length(data(i).rt);
-%     all_rt = [all_rt; data(i).rt];
-%     all_conditions = [all_conditions; data(i).Condition];
-%     all_group = [all_group; repmat({data(i).group}, n, 1)];
-% end
-%
-% % Identify outliers
-% is_outlier = isoutlier(all_rt);
-% outlier_data = table(all_group(is_outlier), all_conditions(is_outlier), all_rt(is_outlier), ...
-%     'VariableNames', {'Group', 'Condition', 'ReactionTime'});
-% disp(outlier_data);
 
 
 %% Interaction Between Group, Condition (Difficulty), and RT:
@@ -198,6 +445,11 @@ end
 
 % Visualize Reaction Times Across Conditions and Groups
 plotScatterRTeyeRTbuttonGroupCondition(groups, conditions, rt_eye_conditions, rt_button_press_conditions, color_map, safe, comparison_results_folder)
+
+
+
+
+
 
 %% ANOVA
 % Two-way ANOVA, where one factor is the group (ADHD vs. non-ADHD)
@@ -291,8 +543,14 @@ quest_scores = questionnaireScale(quest_table, comparison_results_folder);
 
 %% plots
 % Pie Chart for overall response proportions for (non)ADHD group
-plotQPieChart(adhd_numeric, 'ADHD', color_map, safe, comparison_results_folder);
-plotQPieChart(non_adhd_numeric, 'nonADHD', color_map, safe, comparison_results_folder);
+plotQPieChart(adhd_numeric, 'ADHD', color_map, 'all', safe, comparison_results_folder);
+plotQPieChart(non_adhd_numeric, 'nonADHD', color_map, 'all', safe, comparison_results_folder);
+
+% Pie Chart for first 6 responses: proportions for (non)ADHD group
+plotQPieChart(adhd_numeric(:,1:6), 'ADHD', color_map, '6', safe, comparison_results_folder);
+plotQPieChart(non_adhd_numeric(:,1:6), 'nonADHD', color_map, '6', safe, comparison_results_folder);
+
+
 
 % Answers per question with a unique color for each participant
 plotQParticipantAnswers(quest_table, color_map, safe, comparison_results_folder);
@@ -310,9 +568,11 @@ data_table = struct2table(data);
 % Merge questionnaire data with RT/accuracy data based on ID
 merged_data = innerjoin(data_table, quest_table, 'Keys', 'id');
 merged_data = innerjoin(merged_data, quest_scores, 'Keys', 'id');
+merged_data = innerjoin(merged_data, struct2table(rt_variability_2), 'Keys', 'id');
 
-%% define if adhd or not (make function based on questionnaire!!)
-% Define thresholds for categorizing attention levels (these are arbitrary and can be adjusted)
+
+%% define attentional levels based on ASRS guidelines
+% define thresholds for categorizing attention levels (based on guidelines)
 thresholds = [0.5, 3.5, 4.5, 5.5];  % Thresholds between categories
 attention_levels = discretize(merged_data.PartASymptomsCount, thresholds, 'categorical', {'Low', 'Moderate', 'High'});
 
@@ -323,353 +583,115 @@ merged_data.InattentionLevel = attention_levels;
 mean_rt_adhd = [];
 mean_accuracy_adhd = [];
 mean_rt_nonadhd = [];
+mean_rt_a_adhd = [];
+mean_rt_b_adhd = [];
+mean_rt_asimple_adhd = [];
+mean_rt_bsimple_adhd = [];
+mean_rt_a_nonadhd = [];
+mean_rt_b_nonadhd = [];
+mean_rt_asimple_nonadhd = [];
+mean_rt_bsimple_nonadhd = [];
 mean_accuracy_nonadhd = [];
-mean_inatt_adhd = [];
+mean_6inatt_adhd = [];
+count_6inatt_adhd = [];
+mean_allinatt_adhd = [];
 mean_inatt_nonadhd = [];
+count_6inatt_nonadhd = [];
+mean_allinatt_nonadhd = [];
 mean_con_adhd = [];
 mean_con_nonadhd = [];
+rtv_a_adhd = [];
+rtv_b_adhd = [];
+rtv_asimple_adhd = [];
+rtv_bsimple_adhd = [];
+rtv_a_nonadhd = [];
+rtv_b_nonadhd = [];
+rtv_asimple_nonadhd = [];
+rtv_bsimple_nonadhd = [];
+
 
 % Loop through each participant and calculate mean RT and accuracy
 for i = 1:size(merged_data,1)
     % Check if the participant belongs to the ADHD group
-    %if strcmp(merged_data.group{i}, 'ADHD')
-    % the mean RT
-    rt_values = [merged_data.nRTa(i), merged_data.nRTb(i), merged_data.nRTasimple(i), merged_data.nRTbsimple(i)];
-    mean_rt_adhd = [mean_rt_adhd; mean(rt_values, 'omitnan')];
-    % mean accuracy
-    mean_accuracy_adhd = [mean_accuracy_adhd; mean(merged_data.accuracy{i}, 'omitnan')];
-    % confusion
-    mean_con_adhd  = [mean_con_adhd; merged_data.nRTa(i)/merged_data.nRTb(i)];
-    % inattention level
-    mean_inatt_adhd = [mean_inatt_adhd; merged_data.PartAMeanSymptoms(i)];
-    
+    if strcmp(merged_data.group_merged_data{i}, 'ADHD')
+        % the mean RT
+        mean_rt_a_adhd = [mean_rt_a_adhd; merged_data.nRTa(i)];
+        mean_rt_b_adhd = [mean_rt_b_adhd; merged_data.nRTb(i)];
+        mean_rt_asimple_adhd = [mean_rt_asimple_adhd; merged_data.nRTasimple(i)];
+        mean_rt_bsimple_adhd = [mean_rt_bsimple_adhd; merged_data.nRTbsimple(i)];
+        % rtv
+        rtv_a_adhd = [rtv_a_adhd; merged_data.a(i).RT_ButtonPress_var];
+        rtv_b_adhd = [rtv_b_adhd; merged_data.b(i).RT_ButtonPress_var];
+        rtv_asimple_adhd = [rtv_asimple_adhd; merged_data.a_simple(i).RT_ButtonPress_var];
+        rtv_bsimple_adhd = [rtv_bsimple_adhd; merged_data.b_simple(i).RT_ButtonPress_var];
+        % mean accuracy
+        mean_accuracy_adhd = [mean_accuracy_adhd; mean(merged_data.accuracy{i}, 'omitnan')];
+        % confusion
+        mean_con_adhd  = [mean_con_adhd; merged_data.nRTa(i)/merged_data.nRTb(i)];
+        % inattention level
+        mean_6inatt_adhd  = [mean_6inatt_adhd; merged_data.PartAMeanSymptoms(i)];
+        count_6inatt_adhd = [count_6inatt_adhd; merged_data.PartASymptomsCount(i)];
+        mean_allinatt_adhd = [mean_allinatt_adhd; merged_data.MeanSymptoms(i)];      
+        
     % Check if the participant belongs to the non-ADHD group
-    %elseif strcmp(merged_data.group{i}, 'nonADHD')
-    % mean RT
-    %         rt_values = [merged_data.nRTa(i), merged_data.nRTb(i), merged_data.nRTasimple(i), merged_data.nRTbsimple(i)];
-    %         mean_rt_nonadhd = [mean_rt_nonadhd; mean(rt_values, 'omitnan')];
-    %         % confusion
-    %         mean_con_nonadhd  = [mean_con_nonadhd; merged_data.nRTa(i)/merged_data.nRTb(i)];
-    %         % mean accuracy
-    %         mean_accuracy_nonadhd = [mean_accuracy_nonadhd; mean(merged_data.accuracy{i}, 'omitnan')];
-    %         % inattention level
-    %         mean_inatt_nonadhd = [mean_inatt_nonadhd; merged_data.PartAMeanSymptoms(i)];
-    %     end
+    elseif strcmp(merged_data.group_merged_data{i}, 'nonADHD')
+        % mean RT
+        %rt_values = [merged_data.nRTa(i), merged_data.nRTb(i), merged_data.nRTasimple(i), merged_data.nRTbsimple(i)];
+        %mean_rt_nonadhd = [mean_rt_nonadhd; rt_values]; % mean(rt_values, 'omitnan')];
+        mean_rt_a_nonadhd = [mean_rt_a_nonadhd; merged_data.nRTa(i)];
+        mean_rt_b_nonadhd = [mean_rt_b_nonadhd; merged_data.nRTb(i)];
+        mean_rt_asimple_nonadhd = [mean_rt_asimple_nonadhd; merged_data.nRTasimple(i)];
+        mean_rt_bsimple_nonadhd = [mean_rt_bsimple_nonadhd; merged_data.nRTbsimple(i)];
+        % rtv
+        rtv_a_nonadhd = [rtv_a_nonadhd; merged_data.a(i).RT_ButtonPress_var];
+        rtv_b_nonadhd = [rtv_b_nonadhd; merged_data.b(i).RT_ButtonPress_var];
+        rtv_asimple_nonadhd = [rtv_asimple_nonadhd; merged_data.a_simple(i).RT_ButtonPress_var];
+        rtv_bsimple_nonadhd = [rtv_bsimple_nonadhd; merged_data.b_simple(i).RT_ButtonPress_var];
+        % confusion
+        mean_con_nonadhd  = [mean_con_nonadhd; merged_data.nRTa(i)/merged_data.nRTb(i)];
+        % mean accuracy
+        mean_accuracy_nonadhd = [mean_accuracy_nonadhd; mean(merged_data.accuracy{i}, 'omitnan')];
+        % inattention level
+        mean_inatt_nonadhd = [mean_inatt_nonadhd; merged_data.PartAMeanSymptoms(i)];
+        count_6inatt_nonadhd = [count_6inatt_nonadhd; merged_data.PartASymptomsCount(i)];
+        mean_allinatt_nonadhd = [mean_allinatt_nonadhd; merged_data.MeanSymptoms(i)];
+    end
 end
+
+
+%% ttest 
+ttestResults = runTTests_ADHD_vs_nonADHD(...
+    mean_rt_a_adhd, mean_rt_b_adhd, ...
+    mean_rt_asimple_adhd, mean_rt_bsimple_adhd, ...
+    mean_rt_a_nonadhd, mean_rt_b_nonadhd, ...
+    mean_rt_asimple_nonadhd, mean_rt_bsimple_nonadhd, ...
+    rtv_a_adhd, rtv_a_nonadhd,...
+    rtv_b_adhd,rtv_b_nonadhd, ... 
+    rtv_asimple_adhd,rtv_asimple_nonadhd,... 
+    rtv_bsimple_adhd,rtv_bsimple_nonadhd, ...
+    mean_accuracy_adhd, mean_accuracy_nonadhd, ...
+    mean_con_adhd, mean_con_nonadhd, ...
+    mean_6inatt_adhd, mean_inatt_nonadhd, ...
+    count_6inatt_adhd, count_6inatt_nonadhd, ...
+    mean_allinatt_adhd, mean_allinatt_nonadhd);
+
 
 %% Correlation Analysis
+% Plot both correlations
+
 % Correlation Analysis for BOTH group
-[r_adhd_rt, p_adhd_rt] = corr(mean_inatt_adhd, mean_rt_adhd);
-[r_adhd_con, p_adhd_con] = corr(mean_inatt_adhd, mean_con_adhd);
-[r_adhd_acc, p_adhd_acc] = corr(mean_inatt_adhd, mean_accuracy_adhd);
+% [r_adhd_rt, p_adhd_rt] = corr(mean_inatt_adhd, [mean_rt_a_adhd, mean_rt_b_adhd, mean_rt_asimple_adhd, mean_rt_bsimple_adhd]);
+% [r_adhd_rtv, p_adhd_rtv] = corr(mean_inatt_adhd, [rtv_a_adhd, rtv_b_adhd, rtv_asimple_adhd, rtv_bsimple_adhd]);
+% [r_adhd_con, p_adhd_con] = corr(mean_inatt_adhd, mean_con_adhd);
+% [r_adhd_acc, p_adhd_acc] = corr(mean_inatt_adhd, mean_accuracy_adhd);
+% 
+% % Display results for BOTH group
+% fprintf('Correlation between inattention levels and RT: r = %.2f, p = %.3f\n', r_adhd_rt, p_adhd_rt);
+% fprintf('Correlation between inattention levels and RTV: r = %.2f, p = %.3f\n', r_adhd_rtv, p_adhd_rtv);
+% fprintf('Correlation between inattention levels and Accuracy: r = %.2f, p = %.3f\n', r_adhd_acc, p_adhd_acc);
+% fprintf('Correlation between inattention levels and Confusion: r = %.2f, p = %.3f\n', r_adhd_con, p_adhd_con);
 
-% Display results for BOTH group
-fprintf('Correlation between inattention levels and RT: r = %.2f, p = %.3f\n', r_adhd_rt, p_adhd_rt);
-fprintf('Correlation between inattention levels and Accuracy: r = %.2f, p = %.3f\n', r_adhd_acc, p_adhd_acc);
-fprintf('Correlation between inattention levels and Confusion: r = %.2f, p = %.3f\n', r_adhd_con, p_adhd_con);
 
 
-% % Correlation Analysis for non-ADHD group
-% [r_nonadhd_rt, p_nonadhd_rt] = corr(mean_inatt_nonadhd, mean_rt_nonadhd);
-% [r_nonadhd_con, p_nonadhd_con] = corr(mean_inatt_nonadhd, mean_con_nonadhd);
-% [r_nonadhd_acc, p_nonadhd_acc] = corr(mean_inatt_nonadhd, mean_accuracy_nonadhd);
-%
-% % Display results for non-ADHD group
-% fprintf('Correlation between non-ADHD questionnaire scores and RT: r = %.2f, p = %.3f\n', r_nonadhd_rt, p_nonadhd_rt);
-% fprintf('Correlation between non-ADHD questionnaire scores and Accuracy: r = %.2f, p = %.3f\n', r_nonadhd_acc, p_nonadhd_acc);
-
-
-
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Saccades
-
-
-%% interpolated saccade data
-
-% Example timestamps vector (your actual data will be different)
-timestamps = double(data(1).eyeTrial(1).systemTimeStamp) / 1000;  % Convert to milliseconds
-
-% Check the range of your timestamps
-start_time = timestamps(1);
-end_time = timestamps(end);
-time_range = end_time - start_time;
-
-% Decide on step size based on range
-if time_range < 8
-   % step_size = 1;  % Use 1 ms steps if the range is too small
-   disp('not enough data/too short interval/trial');
-else
-    step_size = 8;  % Otherwise, use 8 ms steps
-end
-
-% Generate new timestamps for interpolation
-new_timestamps = start_time:step_size:end_time;
-
-% Display the size and contents of new_timestamps to confirm
-disp(['new_timestamps has ', num2str(length(new_timestamps)), ' elements.']);
-
-% Interpolate the mean gaze coordinates to match the new temporal resolution
-x_mean_interp = interp1(timestamps, x_mean, new_timestamps, 'linear');
-y_mean_interp = interp1(timestamps, y_mean, new_timestamps, 'linear');
-
-
-%% plot interpolated gaze data
-figure; hold on;
-plot(x_mean, y_mean, 'bo-', 'MarkerSize', 3, 'DisplayName', 'Original Gaze Path');
-plot(x_mean_interp, y_mean_interp, 'r.-', 'MarkerSize', 10, 'DisplayName', 'Interpolated Gaze Path');
-xlabel('Horizontal Gaze Position (pixels)');
-ylabel('Vertical Gaze Position (pixels)');
-title('Interpolated Gaze Path Visualization');
-legend('Original', 'Interpolated');
-grid on; hold off;
-
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Saccades (try 2)
-% size of stimulation screen for plotting
-%% TODO make loop instead of placeholder
-trial = 1;
-screenXpixels = 3240;
-screenYpixels = 2160;
-
-% 1. Preprocessing the Eye-Tracking Data
-% Interpolate NaN values for left eye
-x_left = data(1).eyeTrial(trial).left.gazePoint.onDisplayArea(1, :) * screenXpixels;
-y_left = screenYpixels -  data(1).eyeTrial(trial).left.gazePoint.onDisplayArea(2, :) * screenYpixels; % Inverting y-axis
-x_left_interpolated = fillmissing(x_left, 'linear');
-y_left_interpolated = fillmissing(y_left, 'linear');
-
-% Interpolate NaN values for right eye
-x_right = data(1).eyeTrial(trial).right.gazePoint.onDisplayArea(1, :) * screenXpixels;
-y_right = screenYpixels -  data(1).eyeTrial(trial).right.gazePoint.onDisplayArea(2, :) * screenYpixels; % Inverting y-axis
-x_right_interpolated = fillmissing(x_right, 'linear');
-y_right_interpolated = fillmissing(y_right, 'linear');
-
-% mean gaze coordinates between the left and right eyes
-x_mean = mean([x_left_interpolated; x_right_interpolated], 1);
-y_mean = mean([y_left_interpolated; y_right_interpolated], 1);
-
-% interpolate to double the data
-%timestamps = double(data(1).eyeTrial(1).systemTimeStamp) / 1000000; % Convert to milliseconds
-timestamps = double(data(1).eyeTrial(trial).systemTimeStamp) / 1000;
-% Generate new timestamps that are halfway between each of the original timestamps
-new_timestamps = linspace(timestamps(1), timestamps(end), 2 * length(timestamps) - 1);
-% Interpolate the gaze coordinates to match the new temporal resolution
-x_mean_interp = interp1(timestamps, x_mean, new_timestamps, 'linear');
-y_mean_interp = interp1(timestamps, y_mean, new_timestamps, 'linear');
-
-
-
-
-
-
-
-%% 2. Saccade detection
-% Define a velocity threshold for saccade detection
-% For 30 Hz data, a good detection threshold might be around 30°/s to 50°/s.
-% Saccades at this sampling rate will have larger apparent velocities due to fewer data points representing each movement.
-threshold_vel = 100;
-threshold_dist = 30;
-
-
-% --- smooth vs non-smoothed data (unused) --- 
-% timestamps = double(data(1).eyeTrial(1).systemTimeStamp) / 1000;
-% step_size = 8; threshold_vel = 100; threshold_dist = 30;
-% % --- unsmoothed data ---
-% [x_mean_interp, y_mean_interp, new_timestamps] = interpolateGazeData(x_mean, y_mean, timestamps, step_size);
-% % Original data saccades detection
-% [saccade_onsets_dist, saccade_offsets_dist] = detectSaccades(x_mean_interp, y_mean_interp, new_timestamps, 'distance', threshold_dist);
-% [saccade_onsets_vel, saccade_offsets_vel] = detectSaccades(x_mean_interp, y_mean_interp, new_timestamps, 'velocity', threshold_vel);
-% % --- smoothed data ---
-% window_size = 5;  % Define the Gaussian window size
-% [x_mean_smoothed, y_mean_smoothed] = smoothGazeData(x_mean, y_mean, window_size);
-% % smoothed and interpolated
-% [x_mean_smooth_interp, y_smooth_mean_interp, new_smooth_timestamps] = interpolateGazeData(x_mean_smoothed, y_mean_smoothed, timestamps, step_size);
-% % Smoothed data saccades detection
-% [saccade_onsets_dist_smoothed, saccade_offsets_dist_smoothed] = detectSaccades(x_mean_smooth_interp, y_smooth_mean_interp, new_smooth_timestamps, 'distance', threshold_dist);
-% [saccade_onsets_vel_smoothed, saccade_offsets_vel_smoothed] = detectSaccades(x_mean_smooth_interp, y_smooth_mean_interp, new_smooth_timestamps, 'velocity', threshold_vel);
-% figure;
-% subplot(2, 2, 1); % Distance-Based Saccades (Original Data) 
-% plotSaccades(x_mean_interp, y_mean_interp, saccade_onsets_dist, saccade_offsets_dist, sprintf('Original Data: Distance-Based Saccades (Threshold: %d pixels)', threshold_dist));
-% subplot(2, 2, 2); % Velocity-Based Saccades (Original Data)
-% plotSaccades(x_mean_interp, y_mean_interp, saccade_onsets_vel, saccade_offsets_vel, sprintf('Original Data: Velocity-Based Saccades (Threshold: %d deg/s)', threshold_vel));
-% subplot(2, 2, 3); % Distance-Based Saccades (Smoothed Data)
-% plotSaccades(x_mean_smooth_interp, y_smooth_mean_interp, saccade_onsets_dist_smoothed, saccade_offsets_dist_smoothed, sprintf('Smoothed Data: Distance-Based Saccades (Threshold: %d pixels)', threshold_dist));
-% subplot(2, 2, 4); % Velocity-Based Saccades (Smoothed Data)
-% plotSaccades(x_mean_smooth_interp, y_smooth_mean_interp, saccade_onsets_vel_smoothed, saccade_offsets_vel_smoothed, sprintf('Smoothed Data: Velocity-Based Saccades (Threshold: %d deg/s)', threshold_vel));
-% sgtitle('Comparison of Saccade Detection Methods for Original and Smoothed Data'); saveas(gcf, 'saccade_comparison_smoothed_plot.png');  % Save the figure as a PNG file
-
-
-%% --- distance and velocity based saccades --- 
-
-% --- Distances and velocities for non-interpolated data ---
-dx = diff(x_mean);  % Difference in x-coordinates (non-interpolated)
-dy = diff(y_mean);  % Difference in y-coordinates (non-interpolated)
-distance_non_interp = sqrt(dx.^2 + dy.^2);  % Euclidean distance
-
-dt_non_interp = diff(timestamps) / 1000;  % Convert time differences to seconds
-velocity_non_interp = distance_non_interp ./ dt_non_interp;  % Velocity
-
-% --- Distances and velocities for interpolated data ---
-dx_interp = diff(x_mean_interp);  % Difference in x-coordinates (interpolated)
-dy_interp = diff(y_mean_interp);  % Difference in y-coordinates (interpolated)
-distance_interp = sqrt(dx_interp.^2 + dy_interp.^2);  % Euclidean distance
-
-dt_interp = diff(new_timestamps) / 1000;  % Convert time differences to seconds
-velocity_interp = distance_interp ./ dt_interp;  % Velocity
-
-
-
-% ---  Create histograms and log y-axis ---
-figure;
-% Subplot 1: Histogram of Distances (Non-Interpolated Data)
-subplot(2, 2, 1);
-histogram(distance_non_interp, 'Normalization', 'probability');
-xlabel('Distance (pixels)');
-ylabel('Probability');
-title('Non-Interpolated Data: Distance');
-set(gca, 'YScale', 'log');  % Set y-axis to logarithmic scale
-% Subplot 2: Histogram of Velocities (Non-Interpolated Data)
-subplot(2, 2, 2);
-histogram(velocity_non_interp, 'Normalization', 'probability');
-xlabel('Velocity (pixels/second)');
-ylabel('Probability');
-title('Non-Interpolated Data: Velocity');
-set(gca, 'YScale', 'log');  % Set y-axis to logarithmic scale
-% Subplot 3: Histogram of Distances (Interpolated Data)
-subplot(2, 2, 3);
-histogram(distance_interp, 'Normalization', 'probability');
-xlabel('Distance (pixels)');
-ylabel('Probability');
-title('Interpolated Data: Distance');
-set(gca, 'YScale', 'log');  % Set y-axis to logarithmic scale
-% Subplot 4: Histogram of Velocities (Interpolated Data)
-subplot(2, 2, 4);
-histogram(velocity_interp, 'Normalization', 'probability');
-xlabel('Velocity (pixels/second)');
-ylabel('Probability');
-title('Interpolated Data: Velocity');
-set(gca, 'YScale', 'log');  % Set y-axis to logarithmic scale
-sgtitle('Histograms of Distances and Velocities');
-saveas(gcf, 'histogram_comparison_plot_log_y.png');  % Save the figure as a PNG file
-
-
-
-%% get threshholds for distances/velocities
-% --- Calculate the KDE/global minimum thresholds ---
-% distributions are bimodal in both cases (slow non saccades vs fast saccades)
-% find global minimum and use it as threshhold for detecting saccades
-smoothness = 0.4;
-smoothness_dist = 0.1;
-% Non-interpolated data - Distance
-% Fit a Kernel Density Estimate (KDE)
-[dni_f, dni_xi] = ksdensity(distance_non_interp, 'Bandwidth', smoothness_dist); % Adjust bandwidth for smoothness
-% Find the global minimum in the KDE
-[dni_global_min_value, dni_idx] = min(dni_f); % Find the minimum value of f and its index
-threshold_dist_non_interp = dni_xi(dni_idx);  % The corresponding x value (threshold)
-
-% Non-interpolated data - Velocity
-[vni_f, vni_xi] = ksdensity(velocity_non_interp, 'Bandwidth', smoothness); 
-[vni_global_min_value, vni_idx] = min(vni_f);  % Find the global minimum in the KDE
-threshold_vel_non_interp = vni_xi(vni_idx);  % The corresponding x value (threshold)
-
-% Interpolated data - Distance
-[di_f, di_xi] = ksdensity(distance_interp, 'Bandwidth', smoothness_dist); 
-[di_global_min_value, di_idx] = min(di_f);  % Find the global minimum in the KDE
-threshold_dist_interp = di_xi(di_idx);  % The corresponding x value (threshold)
-
-% Interpolated data - Velocity
-[vi_f, vi_xi] = ksdensity(velocity_interp, 'Bandwidth', smoothness); 
-[vi_global_min_value, vi_idx] = min(vi_f);  % Find the global minimum in the KDE
-threshold_vel_interp = vi_xi(vi_idx);  % The corresponding x value (threshold)
-
-fprintf('Non-Interpolated Data: Global Minimum Thresholds:\nDistance: %.2f pixels\nVelocity: %.2f pixels/second\n', threshold_dist_non_interp, threshold_vel_non_interp);
-fprintf('Interpolated Data: Global Minimum Thresholds:\nDistance: %.2f pixels\nVelocity: %.2f pixels/second\n', threshold_dist_interp, threshold_vel_interp);
-
-% 2x2 plot: KDEs and the global minimum
-plotKDEWithGlobalMin(dni_f, dni_xi, threshold_dist_non_interp, dni_global_min_value, ...
-                     vni_f, vni_xi, threshold_vel_non_interp, vni_global_min_value, ...
-                     di_f, di_xi, threshold_dist_interp, di_global_min_value, ...
-                     vi_f, vi_xi, threshold_vel_interp, vi_global_min_value, ...
-                     safe, comparison_results_folder, trial);
-% TODO change folder above to participant folder or sth 
-
-
-% --- Detect saccades using calculated thresholds ---
-% Non-interpolated data
-[saccade_onsets_dist, saccade_offsets_dist] = detectSaccades(dx, dy, timestamps, 'distance', threshold_dist_non_interp);
-[saccade_onsets_vel, saccade_offsets_vel] = detectSaccades(dx, dy, timestamps, 'velocity', threshold_vel_non_interp );
-
-% Interpolated data
-[saccade_onsets_dist_interp, saccade_offsets_dist_interp] = detectSaccades(dx_interp, dy_interp, new_timestamps, 'distance', threshold_dist_interp);
-[saccade_onsets_vel_interp, saccade_offsets_vel_interp] = detectSaccades(dx_interp, dy_interp, new_timestamps, 'velocity', threshold_vel_interp);
-
-% --- Step 6: Plot saccades detected for both datasets ---
-figure;
-% Subplot 1: Distance-Based Saccades (Non-Interpolated Data)
-subplot(2, 2, 1);
-plotSaccades(x_mean, y_mean, saccade_onsets_dist, saccade_offsets_dist, sprintf('Non-Interpolated Data: Distance-Based Saccades (Threshold: %.2f pixels)', threshold_dist));
-% Subplot 2: Velocity-Based Saccades (Non-Interpolated Data)
-subplot(2, 2, 2);
-plotSaccades(x_mean, y_mean, saccade_onsets_vel, saccade_offsets_vel, sprintf('Non-Interpolated Data: Velocity-Based Saccades (Threshold: %.2f deg/s)', threshold_vel));
-% Subplot 3: Distance-Based Saccades (Interpolated Data)
-subplot(2, 2, 3);
-plotSaccades(x_mean_interp, y_mean_interp, saccade_onsets_dist_interp, saccade_offsets_dist_interp, sprintf('Interpolated Data: Distance-Based Saccades (Threshold: %.2f pixels)', threshold_dist_interp));
-% Subplot 4: Velocity-Based Saccades (Interpolated Data)
-subplot(2, 2, 4);
-plotSaccades(x_mean_interp, y_mean_interp, saccade_onsets_vel_interp, saccade_offsets_vel_interp, sprintf('Interpolated Data: Velocity-Based Saccades (Threshold: %.2f deg/s)', threshold_vel_interp));
-sgtitle('Comparison of Saccade Detection Methods (Interpolated vs Non-Interpolated Data)');
-saveas(gcf, 'saccade_comparison_plot.png');  % Save the figure as a PNG file
-
-
-
-
-
-
-
-%% --- Step 4: Calculate the 95th percentile thresholds ---
-% Interpolated data
-%perc = 85;
-%threshold_dist_interp = prctile(distance_interp, perc);
-%threshold_vel_interp = prctile(velocity_interp, perc);
-threshold_dist_interp = 200; threshold_vel_interp  = 3000;
-fprintf('Interpolated Data: %.2ft h Percentile Thresholds:\nDistance: %.2f pixels\nVelocity: %.2f pixels/second\n', perc, threshold_dist_interp, threshold_vel_interp);
-
-% Non-interpolated data
-%threshold_dist = prctile(distance_non_interp, perc);
-%threshold_vel = prctile(velocity_non_interp, perc);
-threshold_dist = 400; threshold_vel  = 3000;
-fprintf('Non-Interpolated Data: %.2f th Percentile Thresholds:\nDistance: %.2f pixels\nVelocity: %.2f pixels/second\n', perc, threshold_dist, threshold_vel);
-
-% --- Step 5: Detect saccades using calculated thresholds ---
-% Non-interpolated data
-[saccade_onsets_dist, saccade_offsets_dist] = detectSaccades(x_mean, y_mean, timestamps, 'distance', threshold_dist);
-[saccade_onsets_vel, saccade_offsets_vel] = detectSaccades(x_mean, y_mean, timestamps, 'velocity', threshold_vel);
-
-% Interpolated data
-[saccade_onsets_dist_interp, saccade_offsets_dist_interp] = detectSaccades(x_mean_interp, y_mean_interp, new_timestamps, 'distance', threshold_dist_interp);
-[saccade_onsets_vel_interp, saccade_offsets_vel_interp] = detectSaccades(x_mean_interp, y_mean_interp, new_timestamps, 'velocity', threshold_vel_interp);
-
-% --- Step 6: Plot saccades detected for both datasets ---
-figure;
-% Subplot 1: Distance-Based Saccades (Non-Interpolated Data)
-subplot(2, 2, 1);
-plotSaccades(x_mean, y_mean, saccade_onsets_dist, saccade_offsets_dist, sprintf('Non-Interpolated Data: Distance-Based Saccades (Threshold: %.2f pixels)', threshold_dist));
-% Subplot 2: Velocity-Based Saccades (Non-Interpolated Data)
-subplot(2, 2, 2);
-plotSaccades(x_mean, y_mean, saccade_onsets_vel, saccade_offsets_vel, sprintf('Non-Interpolated Data: Velocity-Based Saccades (Threshold: %.2f deg/s)', threshold_vel));
-% Subplot 3: Distance-Based Saccades (Interpolated Data)
-subplot(2, 2, 3);
-plotSaccades(x_mean_interp, y_mean_interp, saccade_onsets_dist_interp, saccade_offsets_dist_interp, sprintf('Interpolated Data: Distance-Based Saccades (Threshold: %.2f pixels)', threshold_dist_interp));
-% Subplot 4: Velocity-Based Saccades (Interpolated Data)
-subplot(2, 2, 4);
-plotSaccades(x_mean_interp, y_mean_interp, saccade_onsets_vel_interp, saccade_offsets_vel_interp, sprintf('Interpolated Data: Velocity-Based Saccades (Threshold: %.2f deg/s)', threshold_vel_interp));
-sgtitle('Comparison of Saccade Detection Methods (Interpolated vs Non-Interpolated Data)');
-saveas(gcf, 'saccade_comparison_plot.png');  % Save the figure as a PNG file
 
 
