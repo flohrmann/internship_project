@@ -1,9 +1,10 @@
-function plotAvgPupilDiamsBeforeAfterStimFoundByGroupByCondition(mean_diam_around_stim_adhd, mean_diam_around_stim_nonadhd, conditions, analysis_folder)
+function plotAvgPupilDiamsBeforeAfterStimFoundByGroupByCondition(average, mean_diam_around_stim_adhd, mean_diam_around_stim_nonadhd, conditions, color_map, comparison_results_folder)
     % Create a tiled layout for the 4 plots and 1 legend tile
     figure;
-    t = tiledlayout(3, 2, 'TileSpacing', 'compact', 'Padding', 'compact'); % 4 tiles for plots, 1 for the legend
-
-    % Loop through each condition
+    %t = tiledlayout(3, 2, 'TileSpacing', 'compact', 'Padding', 'compact'); % 4 tiles for plots, 1 for the legend
+    t = tiledlayout('flow','TileSpacing','compact');
+    title(t, [average, ' Pupil Diameter Per Condition Before and After Looking at the Target'], 'FontSize', 14, 'FontWeight', 'bold');
+        
     for condIdx = 1:length(conditions)
         condition = conditions{condIdx};  % Current condition
 
@@ -36,24 +37,24 @@ function plotAvgPupilDiamsBeforeAfterStimFoundByGroupByCondition(mean_diam_aroun
         x_values = [x_before, x_after];  % Combine x-values before and after target found
 
         % Plot ADHD group data
-        plot(x_values, [avg_adhd_before, avg_adhd_after], 'r', 'LineWidth', 2);
+        plot(x_values, [avg_adhd_before, avg_adhd_after], 'Color', color_map('ADHD'), 'MarkerFaceColor', color_map('ADHD'), 'LineWidth', 2);
         % Plot the shaded error region (mean +/- standard error) for ADHD
         fill([x_values, fliplr(x_values)], ...
              [avg_adhd_before, avg_adhd_after, fliplr([avg_adhd_before + std_error_adhd_before, avg_adhd_after + std_error_adhd_after])], ...
-             'r', 'FaceAlpha', 0.2, 'EdgeColor', 'none');  % Upper bound
+             color_map('ADHD'), 'FaceAlpha', 0.2, 'EdgeColor', 'none');  % Upper bound
         fill([x_values, fliplr(x_values)], ...
              [avg_adhd_before - std_error_adhd_before, avg_adhd_after - std_error_adhd_after, fliplr([avg_adhd_before, avg_adhd_after])], ...
-             'r', 'FaceAlpha', 0.2, 'EdgeColor', 'none');  % Lower bound
+             color_map('ADHD'), 'FaceAlpha', 0.2, 'EdgeColor', 'none');  % Lower bound
 
         % Plot Non-ADHD group data
-        plot(x_values, [avg_nonadhd_before, avg_nonadhd_after], 'b', 'LineWidth', 2);
+        plot(x_values, [avg_nonadhd_before, avg_nonadhd_after], 'Color', color_map('nonADHD'), 'MarkerFaceColor', color_map('nonADHD'), 'LineWidth', 2);
         % Plot the shaded error region (mean +/- standard error) for Non-ADHD
         fill([x_values, fliplr(x_values)], ...
              [avg_nonadhd_before, avg_nonadhd_after, fliplr([avg_nonadhd_before + std_error_nonadhd_before,  avg_nonadhd_after + std_error_nonadhd_after])], ...
-             'b', 'FaceAlpha', 0.2, 'EdgeColor', 'none');  % Upper bound
+             color_map('nonADHD'), 'FaceAlpha', 0.2, 'EdgeColor', 'none');  % Upper bound
         fill([x_values, fliplr(x_values)], ...
              [avg_nonadhd_before - std_error_nonadhd_before, avg_nonadhd_after - std_error_nonadhd_after, fliplr([avg_nonadhd_before, avg_nonadhd_after])], ...
-             'b', 'FaceAlpha', 0.2, 'EdgeColor', 'none');  % Lower bound
+             color_map('nonADHD'), 'FaceAlpha', 0.2, 'EdgeColor', 'none');  % Lower bound
 
         % Add a vertical line at x = 0 (time point where the target is found)
         plot([0, 0], ylim, '--k', 'LineWidth', 1.5, 'DisplayName', 'Gaze Reached Target');
@@ -66,12 +67,15 @@ function plotAvgPupilDiamsBeforeAfterStimFoundByGroupByCondition(mean_diam_aroun
         hold off;
     end
 
-    % Add a tile for the legend
-    nexttile;
-    hold on;
-    % Create the legend
-    legend({'ADHD', 'Non-ADHD', 'Gaze Reached Target'}, 'Location', 'best', 'Orientation', 'vertical');
+    %% Add the legend and global title outside the subplots
+    legend_objects = findobj(gca, 'Type', 'Line');  % Find all line objects in the plot
 
-    % Save the plot
-    saveas(gcf, fullfile(analysis_folder, 'pupil_diameter_comparison_by_condition_group.png'));
+    lgd = legend(legend_objects(end:-1:1), {'ADHD', 'nonADHD', 'Gaze Reaches Target',}, ...
+        'Orientation', 'horizontal');
+    lgd.NumColumns = 1;
+    lgd.Layout.Tile = 5;
+    lgd.Location = 'bestoutside';
+
+    set(gcf, 'Units', 'normalized', 'OuterPosition', [0 0 1 1])
+    saveas(gcf, fullfile(comparison_results_folder, 'pupil_diameter_comparison_by_condition_group.png'));
 end
