@@ -1,13 +1,14 @@
-function plotPupilDiameterOverTime(cutData, eye_tracking_data, trial_results, analysis_folder)
+function plotPupilDiameterOverTime(id, cutData, eye_tracking_data, trial_results, analysis_folder)
 % Close any existing figures
 close all;
 
 % Create a new figure
 figure;
 hold on;
-title('Pupil Diameter Over Time');
+title(['Subject ', num2str(id),': Pupil Diameter Over Time']);
+%title('Pupil Diameter Over Time');
 xlabel('Time (s)');
-ylabel('Pupil Diameter (mm)');
+ylabel('Left and Right Eye: Pupil Diameter (mm)');
 
 % Define colors for plotting
 color_blue = [0, 0.4470, 0.7410]; % Blue
@@ -76,6 +77,7 @@ legend_y = legend_y - (ylims(2) - ylims(1)) * 0.05;
 plot([legend_x_start, legend_x_end], [legend_y, legend_y], 'Color', color_grey, 'LineWidth', 2);
 text(legend_x_end + (xlims(2) - xlims(1)) * 0.01, legend_y, 'Gap', 'VerticalAlignment', 'middle');
 
+set(gcf, 'Units', 'normalized', 'OuterPosition', [0 0 1 1])
 saveas(gcf,strcat(analysis_folder, '\pupil_diam_over_time.png'));
 
 
