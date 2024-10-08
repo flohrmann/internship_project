@@ -55,7 +55,7 @@ for method = {'Mean', 'Median'}  % Create separate plots for mean and median
     xlim([-0.016 * (num_before - 1), 0.016 * num_after]);
     
     xlabel('Time (s) before and after target found');
-    ylabel([method_name,' Pupil Diameter (mm)']);
+    ylabel([method_name,' Pupil Diameter Normalized']);
     used_trials = height(result_table);
     
 %     if id == 0 % for groups (adhd/nonadhd)

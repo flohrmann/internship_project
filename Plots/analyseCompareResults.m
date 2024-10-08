@@ -24,6 +24,8 @@ folders = {
     'C:\Users\flohrmann\Documents\Results\7_20240823_162058'; % jannik
     'C:\Users\flohrmann\Documents\Results\9_20240829_101613'; % farn 
     'C:\Users\flohrmann\Documents\Results\10_20240929_151434'; % julia
+    'C:\Users\flohrmann\Documents\Results\11_20241006_153704'; % felix
+    'C:\Users\flohrmann\Documents\Results\12_20241006_150321'; % florian
     };
 
 % Define the classification of the folders (ADHD or non-ADHD)
@@ -38,6 +40,8 @@ group_labels = {
     'nonADHD';  % jannik
     'ADHD';     % farn 
     'nonADHD';  % julia 
+    'ADHD';     % felix 
+    'nonADHD';  % florian 
     };
 
 conditions = {'a', 'a_simple', 'b', 'b_simple'};
@@ -79,8 +83,8 @@ for i = 1:length(folders)
         data_struct(i).x_centers          = cutData.x_centers;
         data_struct(i).y_centers          = cutData.y_centers;
         % pupil dilation data
-        load(fullfile(pupil_file.folder, pupil_file.name), 'res');
-        
+        load(fullfile(pupil_file.folder, pupil_file.name), 'result_table');
+        data_struct(i).pupilDiam          = result_table;
     else
         warning(['Data file not found in folder: ', folder]);
     end
@@ -112,7 +116,7 @@ data = data_struct_norm_mean;
 %analyseSaccades(data, screenXpixels, screenYpixels, safe, comparison_results_folder)
 
 %% --- detect fixations ---
-%safe = 1;
+safe = 1;
 % params to define fixations
 dist_threshold = 50; % max distance between consecutive points (in pixels)
 min_duration = 3; % min num of consecutive points to count as a fixation
@@ -133,6 +137,7 @@ for participant = 1:size(data, 2) % size(plot_these, 2)
     participant_fixations = all_fixations(participant).fixations; %.stimulusFixations;
     analysis_folder = strcat(folders{participant}, '\analysis\'); 
     plotFixations(participant_data, participant_fixations, screenXpixels, screenYpixels, plot_these, analysis_folder, safe);
+    close all
 end
 
 % get fixation durations, counts per trial and average over conditions
@@ -163,7 +168,7 @@ for participant = 1:size(data, 2)
     participant_fixations = all_fixations(participant).fixations.stimulusFixations;
     plotFixationSaccades(data(participant), all_saccades(participant), all_fixations(participant), screenXpixels, screenYpixels, plot_these, analysis_folder, safe);
 end
-
+close all
 
 %% --- get distance from starting point in trial to target center --- 
 for participant = 1:size(data, 2)
@@ -241,15 +246,25 @@ ttestFixationDuration(group_labels, fixation_stats, saccadeStats, conditions)
 % check target coords/eye coords (+ tolerance)
 % get 30 datapoints before target is reached with eyes + 10 datapoints after
 % padded with NaNs if not enough datapoints
-tolerance = 100;  % Tolerance in pixels for detecting gaze near the target
+% these 3 are set in analyseResults.m just fyi here:
+% tolerance = 100;  % Tolerance in pixels for detecting gaze near the target
 num_before = 30; % Number of datapoints before target found
-num_after = 10;  % Number of datapoints after target found
+num_after = 20;  % Number of datapoints after target found
 
+% per participant: normalize pupil diameter by baseline: mean and median during blank screen
+% each trial preceding the stimulation
+% returns: 
+normalized_data = calcProportionalPupilChange(data);
 
-[diam_around_stim_table, tnf] = findTargetAndExtractData(cutData, screenXpixels, screenYpixels, id, analysis_folder, tolerance, num_before, num_after);
+% get averages 
+[norm_mean_diam_around_stim_adhd, norm_mean_diam_around_stim_nonadhd] = getPupilDiamsPerGroup(normalized_data, 'mean', group_labels, conditions);
+[norm_median_diam_around_stim_adhd, norm_median_diam_around_stim_nonadhd] = getPupilDiamsPerGroup(normalized_data, 'median', group_labels, conditions);
 
-% plot 30 datapoints before target was reached with gaze and 10 after, average per condition
-plotAvgBeforeAfterStimFound(diam_around_stim_table, tnf, conditions, id, analysis_folder, color_map, num_before, num_after)
+% plot 30 datapoints before target was reached with gaze and 10 after
+% average per participant/group/condition
+plotAvgPupilDiamsBeforeAfterStimFoundByGroupByCondition('Mean', norm_mean_diam_around_stim_adhd, norm_mean_diam_around_stim_nonadhd, conditions, color_map, num_before, num_after, comparison_results_folder);
+plotAvgPupilDiamsBeforeAfterStimFoundByGroupByCondition('Median', norm_median_diam_around_stim_adhd, norm_median_diam_around_stim_nonadhd, conditions, color_map, num_before, num_after, comparison_results_folder);
+
 
 
 

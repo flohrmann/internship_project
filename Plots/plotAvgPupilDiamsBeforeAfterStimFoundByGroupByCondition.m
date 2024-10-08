@@ -1,10 +1,11 @@
-function plotAvgPupilDiamsBeforeAfterStimFoundByGroupByCondition(average, mean_diam_around_stim_adhd, mean_diam_around_stim_nonadhd, conditions, color_map, comparison_results_folder)
+function plotAvgPupilDiamsBeforeAfterStimFoundByGroupByCondition(average, mean_diam_around_stim_adhd, mean_diam_around_stim_nonadhd, conditions, color_map, num_before, num_after, comparison_results_folder)
     % Create a tiled layout for the 4 plots and 1 legend tile
     figure;
     %t = tiledlayout(3, 2, 'TileSpacing', 'compact', 'Padding', 'compact'); % 4 tiles for plots, 1 for the legend
     t = tiledlayout('flow','TileSpacing','compact');
     title(t, [average, ' Pupil Diameter Per Condition Before and After Looking at the Target'], 'FontSize', 14, 'FontWeight', 'bold');
-        
+    condition_names = {'a', 'a simple', 'b', 'b simple'};
+    
     for condIdx = 1:length(conditions)
         condition = conditions{condIdx};  % Current condition
 
@@ -32,8 +33,8 @@ function plotAvgPupilDiamsBeforeAfterStimFoundByGroupByCondition(average, mean_d
         nexttile;
         hold on;
         % X-axis: time points (before and after the stimulus)
-        x_before = linspace(-0.016 * 29, 0, 30);  % 30 data points before
-        x_after = linspace(0.016, 0.016 * 10, 10);  % 10 data points after
+        x_before = linspace(-0.016 * num_before, 0, num_before);  % 30 data points before
+        x_after = linspace(0.016, 0.016 * num_after, num_after);  % 10/20 data points after
         x_values = [x_before, x_after];  % Combine x-values before and after target found
 
         % Plot ADHD group data
@@ -58,11 +59,14 @@ function plotAvgPupilDiamsBeforeAfterStimFoundByGroupByCondition(average, mean_d
 
         % Add a vertical line at x = 0 (time point where the target is found)
         plot([0, 0], ylim, '--k', 'LineWidth', 1.5, 'DisplayName', 'Gaze Reached Target');
+        % X-axis adjustments: remove white space on the left
+        xlim([-0.016 * num_before, 0.016 * num_after]);
+
 
         % Add labels and title for each condition
         xlabel('Time (s)');
         ylabel('Average Pupil Diameter (mm)');
-        title(['Condition: ', condition]);
+        title(condition_names(condIdx));
 
         hold off;
     end
@@ -77,5 +81,5 @@ function plotAvgPupilDiamsBeforeAfterStimFoundByGroupByCondition(average, mean_d
     lgd.Location = 'bestoutside';
 
     set(gcf, 'Units', 'normalized', 'OuterPosition', [0 0 1 1])
-    saveas(gcf, fullfile(comparison_results_folder, 'pupil_diameter_comparison_by_condition_group.png'));
+    saveas(gcf, fullfile(comparison_results_folder, 'norm_pupil_diameter_comparison_by_condition_group.png'));
 end

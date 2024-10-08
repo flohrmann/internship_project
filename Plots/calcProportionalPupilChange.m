@@ -1,4 +1,3 @@
-
 function normalized_data = calcProportionalPupilChange(data)
 % Initialize a new struct to store the normalized (percentage change) data
 normalized_data = data;
@@ -37,9 +36,9 @@ for i = 1:length(data)
     end
 end
 % Convert the cell arrays to regular double arrays
-normalized_data.MeanNormDataPointsBefore = cell2mat(normalized_data.MeanNormDataPointsBefore);
-normalized_data.MeanNormDataPointsAfter = cell2mat(normalized_data.MeanNormDataPointsAfter);
-normalized_data.MedianNormDataPointsBefore = cell2mat(normalized_data.MedianNormDataPointsBefore);
-normalized_data.MedianNormDataPointsAfter = cell2mat(normalized_data.MedianNormDataPointsAfter);
+% normalized_data.MeanNormDataPointsBefore = cell2mat(normalized_data.pupilDiam.MeanNormDataPointsBefore);
+% normalized_data.MeanNormDataPointsAfter = cell2mat(normalized_data.pupilDiam.MeanNormDataPointsAfter);
+% normalized_data.MedianNormDataPointsBefore = cell2mat(normalized_data.pupilDiam.MedianNormDataPointsBefore);
+% normalized_data.MedianNormDataPointsAfter = cell2mat(normalized_data.pupilDiam.MedianNormDataPointsAfter);
 
 end

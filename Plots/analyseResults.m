@@ -5,18 +5,18 @@
 % analysis_folder = strcat(folder_name, '\analysis');
 % mkdir(analysis_folder);
 color_map = containers.Map({'a', 'a_simple', 'b', 'b_simple'}, {
-    [0.9, 0.5, 0],  % orange
-    [1.0, 0  , 0],  % red
-    [0  , 0  , 1],  % blue
+    [0.9, 0.5, 0]  % orange
+    [1.0, 0  , 0]  % red
+    [0  , 0  , 1]  % blue
     [0  , 0.5, 0]   % green
     });
 % slightly transparent colours
 alpha = 0.2;
 color_map_trans = containers.Map({'a', 'a_simple', 'b', 'b_simple'}, {
-    [0.9 0.5 0 alpha],  % orange
-    [1.0 0   0 alpha],  % red
-    [0   0   1 alpha],  % blue
-    [0   0.5 0 alpha]   % green
+    [0.9 0.5 0 alpha]  % orange
+    [1.0 0   0 alpha]  % red
+    [0   0   1 alpha]  % blue
+    [0   0.5 0 alpha]  % green
     });
 
 conditions = {'a', 'a_simple', 'b', 'b_simple'};
@@ -42,9 +42,11 @@ subfolders = { ...
     '7_20240823_162058', ... % jannik
     '9_20240829_101613', ... % farn
     '10_20240929_151434' ... % julia
+    '11_20241006_153704' ... % felix
+    '12_20241006_150321' ... % florian
     };
 
-ids = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]; 
+ids = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]; 
 
 
 for i = 1:length(subfolders)
@@ -97,7 +99,7 @@ for i = 1:length(subfolders)
         %show = false; % show plot (very slow)?
         show = true; % show plot (very slow)?
         num_plots = size(cutData, 1); % how many trials you want plotted, starts with first
-        eye_rt = plotStimAndEye(analysis_folder, cutData, 200, show);
+        eye_rt = plotStimAndEye(analysis_folder, cutData, num_plots, show);
     end
     
     %% plot  button press - gaze rt (speed of pressing button once stim found)
@@ -151,7 +153,7 @@ for i = 1:length(subfolders)
     
     %% --- pupil diameter ---
     % all trials appended to one another
-    plotPupilDiameterOverTime(id, cutData, samp, trial_results, analysis_folder);
+    %plotPupilDiameterOverTime(id, cutData, samp, trial_results, analysis_folder);
     
     %% data split into fixation screen, blank screen and stimulation screen
     % interpolated (mistakes in interpolation??)
@@ -184,18 +186,24 @@ for i = 1:length(subfolders)
     % slope represents how much the pupil diameter changes per unit time before the stimulus is found
     slope_table = analyzeSlopesByCondition(avg_stim_30, conditions, id, analysis_folder, color_map);
     
+    
+    
+    
+    
+    
+    
     %% only stimulation data (until target found with gaze)
     % check target coords/eye coords (+ tolerance)
     % get 30 datapoints before target is reached with eyes + 10 datapoints after
     % padded with NaNs if not enough datapoints
     tolerance = 100;  % Tolerance in pixels for detecting gaze near the target
     num_before = 30; % Number of datapoints before target found
-    num_after = 10;  % Number of datapoints after target found
+    num_after = 20;  % Number of datapoints after target found
     
-    [diam_around_stim_table, tnf] = findTargetAndExtractData(cutData, screenXpixels, screenYpixels, id, analysis_folder, tolerance, num_before, num_after);
+    [diam_around_stim_table, tnf] = findTargetAndExtractData(cutData, screenXpixels, screenYpixels, analysis_folder, tolerance, num_before, num_after);
     
     % plot 30 datapoints before target was reached with gaze and 10 after, average per condition
-    plotAvgBeforeAfterStimFound(diam_around_stim_table, tnf, conditions, id, analysis_folder, color_map, num_before, num_after)
+    plotAvgBeforeAfterStimFound(diam_around_stim_table, conditions, id, analysis_folder, color_map, num_before, num_after)
     
     
     

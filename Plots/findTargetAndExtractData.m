@@ -44,7 +44,9 @@ function [result_table, tnf] = findTargetAndExtractData(cutData, screenXpixels, 
         d_avg = nanmean([d_r; d_l], 1);
 
         % Determine the index where the eyes first "find" the target
-        found_target_idx = find(sqrt((x_avg - targetX).^2 + (y_avg - targetY).^2) <= tolerance, 1, 'first');
+        %found_target_idx = find(sqrt((x_avg - targetX).^2 + (y_avg - targetY).^2) <= tolerance, 1, 'first');
+        % TODO make it the last time!
+        found_target_idx = find(sqrt((x_avg - targetX).^2 + (y_avg - targetY).^2) <= tolerance, 1, 'last');
 
         % Check if the target was found
         if isempty(found_target_idx)
