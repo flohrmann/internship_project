@@ -6,24 +6,30 @@ function meanFixationDurations = getMeanFixationDurationPerCondition(fixationSta
     numConditions = length(conditions);
     
     % Loop through each participant
-    for participant = 1:length(fixationStats)
+    for participant = 1:size(fixationStats,2)
         % Get the participant ID and initialize storage for condition means
         meanFixationDurations(participant).id = fixationStats(participant).id;
         meanFixationDurations(participant).conditionMeans = NaN(1, numConditions);  % Preallocate means array
 
+        conditions_list = []; % to get a mask per condition
+        for trial = 1:length(fixationStats(participant).trials)
+            conditions_list = [conditions_list; string(fixationStats(participant).trials(trial).conditions)];
+        end
+            
         % Loop through each condition
         for c = 1:numConditions
             % Find the fixations for the current condition
-            conditionName = conditions{c};
-            conditionIdx = find(strcmp({fixationStats(participant).trials.conditions}, conditionName));
+            condition = conditions{c};
+            conditionIdx = strcmp(condition, conditions_list);
             
-            if ~isempty(conditionIdx)
-                % Extract fixation durations for this condition
-                fixationDurations = fixationStats(participant).trials(conditionIdx).fixationDurations;
+            if ~isempty(conditionIdx) % Extract fixation durations for this condition
+                for trial = 1:length(fixationStats(participant).trials)
+                    fixationDurations = fixationStats(participant).trials(conditionIdx(trial, 1)).durations;
+                end
                 
                 if ~isempty(fixationDurations)
                     % Calculate the mean fixation duration for this condition
-                    meanFixationDurations(participant).conditionMeans(c) = mean(fixationDurations, 'omitnan');
+                    meanFixationDurations(participant).conditionMeans(c) = nanmean(fixationDurations, 'omitnan');
                 else
                     meanFixationDurations(participant).conditionMeans(c) = NaN;
                 end

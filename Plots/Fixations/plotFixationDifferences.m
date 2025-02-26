@@ -22,21 +22,4 @@ function plotFixationDifferences(fixationStats, group_labels, conditions, color_
     adhdMeans = mean(adhdData, 2, 'omitnan');
     nonAdhdMeans = mean(nonAdhdData, 2, 'omitnan');
     
-    % Calculate the difference between ADHD and non-ADHD means
-    fixationDifferences = adhdMeans - nonAdhdMeans;
-    
-    % Plot the differences
-    figure;
-    hold on;
-    
-    % Plot differences as bars
-    bar(1:numConditions, fixationDifferences, 'FaceColor', color_map('ADHD'), 'EdgeColor', 'none');
-    
-    % Customize the plot
-    xticks(1:numConditions);
-    xticklabels(conditions);
-    xlabel('Condition');
-    ylabel('Difference in Average Fixation Duration (ms)');
-    title('Difference in Fixation Durations (ADHD - nonADHD)');
-    hold off;
 end

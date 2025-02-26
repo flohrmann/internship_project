@@ -1,4 +1,4 @@
-function plotFixations(data, fixations, screenXpixels, screenYpixels, plot_these, analysis_folder, safe)
+function plotFixations(data, fixations, screenXpixels, screenYpixels, plot_these, analysis_folder, length_fixation, safe)
     % This function visualizes the gaze points and detected fixations for specified trials.
     % data: eye-tracking data structure
     % fixations: detected fixations structure
@@ -39,18 +39,31 @@ function plotFixations(data, fixations, screenXpixels, screenYpixels, plot_these
             % Mark the center of the fixation
             p3 = plot(trial.center(1), trial.center(2), 'x', 'Color', cm(fixIdx,:), 'MarkerSize', 10, 'LineWidth', 2, 'DisplayName', 'Fixation Center');
         end
-        
         % Mark the center of the target
         targetCenters = fixations.targetCenters(:, trialIdx);
         %targetCenterY = fixations(trialIdx).targetCenters(2);
-        p4 = plot(targetCenters(1), targetCenters(2), 'g*', 'MarkerSize', 10, 'LineWidth', 2, 'DisplayName', 'Target Center');
+        p4 = plot(targetCenters(1), targetCenters(2), 'm*', 'MarkerSize', 10, 'LineWidth', 2, 'DisplayName', 'Target Center');
         
+        try
+        id = num2str(fixations.id);
+        catch
+          id = num2str(data.id) ; 
+        end
         % Customize the plot
-        title(['Participant ', num2str(data.id), ' - Trial ', num2str(trialIdx)]);
+        try
+            title(['Participant ', id, ': Trial ', num2str(trialIdx), ' - Fixation Length: ', length_fixation]);
+        catch
+            %title(['Participant ', id, ' - Trial ', num2str(trialIdx), 'Fixations: ', length_fixation]);
+        end
         xlabel('X Coordinate (pixels)');
         ylabel('Y Coordinate (pixels)');
         %legend('show');
-        legend([p1, p3, p4], {'Gaze Path', 'Fixation Centers', 'Target Center'}); 
+        
+        try
+            legend([p1, p3, p4], {'Gaze Path', 'Fixation Centers', 'Target Center'}); 
+        catch % if no fixations in trial
+            legend([p1, p4], {'Gaze Path', 'Target Center'}); 
+        end
         %grid on;
         
         % Set axis limits based on screen resolution
@@ -59,7 +72,11 @@ function plotFixations(data, fixations, screenXpixels, screenYpixels, plot_these
         % Save the plot if "safe" is true
         if safe == 1
             set(gcf, 'Units', 'normalized', 'OuterPosition', [0 0 1 1]);
-            saveas(gcf, fullfile(analysis_folder, ['Fixations_Participant_', num2str(data.id), '_Trial_', num2str(trialIdx), '.png']));
+            try
+                saveas(gcf, fullfile(analysis_folder, ['Fixations_Participant_', id, '_Trial_', num2str(trialIdx), '_FixLength_', length_fixation, '.png']));
+            catch
+                %saveas(gcf, fullfile(analysis_folder, ['Fixations_Participant_', id, '_Trial_', num2str(trialIdx), '_FixLength_', length_fixation, '.png']));               
+            end
             %close(gcf); % Close the figure after saving
         end
     end

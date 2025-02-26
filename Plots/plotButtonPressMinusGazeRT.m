@@ -37,11 +37,19 @@ function plotButtonPressMinusGazeRT(trial_results, eye_rt, analysis_folder)
 
     % Plot the RT differences
     figure;
-    scatter(1:length(RT_differences), RT_differences, 50, colors, 'filled');
+    scatter(1:length(RT_differences), RT_differences, 50, colors, 'filled', 'DisplayName', 'Correct Button Pressed');
     title('Button Press RT - Gaze RT per Trial');
     xlabel('Trial');
     ylabel('RT Difference (Button Press - Gaze RT) (s)');
     
+    % Create dummy scatter plots for the legend with correct colors
+    hold on;
+    scatter(NaN, NaN, 50, [1 0 0], 'filled', 'DisplayName', 'Wrong Button Pressed');
+    %scatter(NaN, NaN, 50, [0 1 0], 'filled', 'DisplayName', 'Correct Button Pressed');
+    hold off;
+    
+    % Show legend
+    legend('show');
     grid on;
 
     % Save the plot

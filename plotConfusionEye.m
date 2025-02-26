@@ -1,4 +1,4 @@
-function plotConfusion(data, color_map, comparison_results_folder, safe)
+function data = plotConfusionEye(data, color_map, comparison_results_folder, safe)
     % Initialize arrays to hold the differences and ratios
     diff_adhd = [];
     diff_nonadhd = [];
@@ -8,14 +8,18 @@ function plotConfusion(data, color_map, comparison_results_folder, safe)
     % Loop through each participant and calculate differences and ratios
     for i = 1:length(data)
         if strcmp(data(i).group, 'ADHD')
-            diff_adhd = [diff_adhd; data(i).RTa - data(i).RTb];
-            ratio_adhd = [ratio_adhd; data(i).RTa / data(i).RTb];
+            diff_adhd                   = [diff_adhd; data(i).RTa_eye - data(i).RTb_eye];
+            ratio_adhd                  = [ratio_adhd; data(i).RTa_eye / data(i).RTb_eye];
+            data(i).confusion_diff_eye  = data(i).RTa_eye - data(i).RTb_eye;
+            data(i).confusion_ratio_eye = data(i).RTa_eye / data(i).RTb_eye;
         elseif strcmp(data(i).group, 'nonADHD')
-            diff_nonadhd = [diff_nonadhd; data(i).RTa - data(i).RTb];
-            ratio_nonadhd = [ratio_nonadhd; data(i).RTa / data(i).RTb];
+            diff_nonadhd                = [diff_nonadhd; data(i).RTa_eye - data(i).RTb_eye];
+            ratio_nonadhd               = [ratio_nonadhd; data(i).RTa_eye / data(i).RTb_eye];
+            data(i).confusion_diff_eye  = data(i).RTa_eye - data(i).RTb_eye;
+            data(i).confusion_ratio_eye = data(i).RTa_eye / data(i).RTb_eye;
         end
     end
-
+    
     % Calculate means and SEMs
     mean_diff_adhd = mean(diff_adhd, 'omitnan');
     mean_diff_nonadhd = mean(diff_nonadhd, 'omitnan');
@@ -40,7 +44,7 @@ function plotConfusion(data, color_map, comparison_results_folder, safe)
     xticks([1 2]);
     xticklabels({'ADHD', 'nonADHD'});
     ylabel('RTa - RTb (s)');
-    title('Confusion (Difference)');
+    title('Time until Gaze reached Target: Confusion (Difference)');
     hold off;
     grid on;
     
@@ -54,13 +58,13 @@ function plotConfusion(data, color_map, comparison_results_folder, safe)
     xticks([1 2]);
     xticklabels({'ADHD', 'nonADHD'});
     ylabel('RTa / RTb');
-    title('Confusion (Ratio)');
+    title('Time until Gaze reached Target: Confusion (Ratio)');
     hold off;
     grid on;
     
     % Save the figure if safe is set to 1
     if safe == 1
         set(gcf, 'Units', 'normalized', 'OuterPosition', [0 0 1 1]);
-        saveas(gcf, fullfile(comparison_results_folder, 'bar_mean_confusion.png'));
+        saveas(gcf, fullfile(comparison_results_folder, 'bar_mean_confusion_eye.png'));
     end
 end

@@ -1,19 +1,26 @@
-function eye_rt = plotStimAndEye(analysis_folder, cutData, num_plots, show)
+function eye_rt = plotStimAndEye(analysis_folder, cutData, num_plots, show, whattodo)
     close all;
     %safe_name = strcat(analysis_folder, '\gaze_path_trial_start');
+    screenXpixels = 3240;
+    screenYpixels = 2160;
     
+    % if this has already been calculated only show plot of first trial instead
+    if strcmp(whattodo, 'onlyplots')
+        for trial = 1:num_plots
+            current_data = cutData(trial,:);
+            [~, ~]  = plot_lines_with_gaze(current_data, screenXpixels, screenYpixels, trial, show);
+        end
+    else % calc every trial and plot it (dont show bc its super slow)
+        
     %%% get stimulus onset time instead of trialstarttime
      cutData = renamevars(cutData, 'eyeTrial', 'eyeTrial1');
      cutData = renamevars(cutData, 'stimulusTrial', 'eyeTrial');
      safe_name = strcat(analysis_folder, '\gaze_path_stim_onset_');
-    %%%%
+
     eye_rt = table('Size', [0 7], 'VariableTypes', {'double', 'double', 'double', 'double', 'double', 'double', 'double'}, ...
                           'VariableNames', {'Trial', 'StartTime' 'RightEyeArrivalTime', 'LeftEyeArrivalTime', 'RTmatlab', 'RightEyeRT', 'LeftEyeRT'});
 
-    screenXpixels = 3240;
-    screenYpixels = 2160;
-
-    for trial = 1:num_plots%size(cutData,1)
+    for trial = 1:size(cutData,1)
         current_data = cutData(trial,:);
         [right_eye_arrival_idx, left_eye_arrival_idx]  = plot_lines_with_gaze(current_data, screenXpixels, screenYpixels, trial, show);
         start_time = double(current_data.eyeTrial.systemTimeStamp(1)) / 1e6;
@@ -34,7 +41,8 @@ function eye_rt = plotStimAndEye(analysis_folder, cutData, num_plots, show)
         eye_rt = [eye_rt; {trial, start_time, right_eye_arrival_idx, left_eye_arrival_idx, current_data.rt, right_eye_rt, left_eye_rt}];
         saveas(gcf,strcat(safe_name, num2str(trial),'.png'));
     end
-    save(fullfile(analysis_folder, 'eye_rt.mat'), 'eye_rt');
+    save(fullfile(analysis_folder, 'eye_rt.mat'), 'eye_rt'); 
+    end
 end
 
 function [right_eye_arrival_time, left_eye_arrival_time] = plot_lines_with_gaze(trial_data, screenXpixels, screenYpixels, t, show)
@@ -60,7 +68,7 @@ function [right_eye_arrival_time, left_eye_arrival_time] = plot_lines_with_gaze(
         hold on;
         axis equal;
     else
-        figure('Position', [0, 0, 3240, 2160], 'Visible', 'off');
+        figure('Position', [0, 0, 3240, 2160], 'Visible', 'on');
         hold on;
         axis equal;
     end
@@ -166,7 +174,7 @@ function plotGazePaths(x, y, colorMap)
 end
 
 function [right_eye_arrival_time, left_eye_arrival_time]  = annotateTime(trial_results, x_r, y_r, t_r, x_l, y_l, t_l, screenXpixels, screenYpixels, targetRow, targetCol)
-    proximityThreshold = 70; % Pixels within which the gaze is considered to reach the target
+    proximityThreshold = 200; % Pixels within which the gaze is considered to reach the target
     targetX = trial_results.x_centers{1}(targetRow, targetCol);
     targetY = screenYpixels - trial_results.y_centers{1}(targetRow, targetCol);
 

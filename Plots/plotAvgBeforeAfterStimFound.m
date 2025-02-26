@@ -1,9 +1,9 @@
-function plotAvgBeforeAfterStimFound(result_table, conditions, id, analysis_folder, color_map, num_before, num_after)
+function plotAvgBeforeAfterStimFound(result_table, conditions, id, analysis_folder, color_map, num_before, num_after, sr)
 
 total_points = num_before + num_after;
 
-% Create x_values with 30 points before (-0.016 * (num_before - 1) to 0) and 10 points after (0 to 0.016 * num_after)
-x_values = [-0.016 * (num_before - 1):0.016:0, 0.016 * (1:num_after)];
+% Create x_values with X points before (-0.016 * (num_before - 1) to 0) and Y points after (0 to 0.016 * num_after)
+x_values = [-sr * (num_before - 1):sr:0, sr * (1:num_after)];
 
 % Loop through each condition and compute the mean and median for the 30 data points before and 10 data points after
 for method = {'Mean', 'Median'}  % Create separate plots for mean and median
@@ -38,13 +38,15 @@ for method = {'Mean', 'Median'}  % Create separate plots for mean and median
             std_error = std(data_matrix, 0, 1, 'omitnan') / sqrt(num_trials);  % Standard error for median
         end
         
-        % Plot the average/median line for this condition
         color = color_map(condition);  % Get the color for the condition
-        plot(x_values, values, 'Color', color, 'LineWidth', 2);  % Plot the average/median
-        
         % Plot the shaded error region (mean/median +/- standard error)
         fill([x_values, fliplr(x_values)], [values + std_error, fliplr(values - std_error)], ...
             color, 'FaceAlpha', 0.2, 'EdgeColor', 'none');  % Shaded region with transparency
+        
+        % Plot the average/median line for this condition
+        plot(x_values, values, 'Color', color, 'LineWidth', 2);  % Plot the average/median
+        
+
     end
     
     % Plot the grey dashed line at 0 (gaze reaches target)
@@ -52,7 +54,7 @@ for method = {'Mean', 'Median'}  % Create separate plots for mean and median
     % hidden plot just for legend
     h = plot([0 0], ylim, '--', 'Color', [0.5, 0.5, 0.5], 'LineWidth', 1.5, 'Visible', 'off');
     % X-axis adjustments: remove white space on the left
-    xlim([-0.016 * (num_before - 1), 0.016 * num_after]);
+    xlim([-sr * (num_before - 1), sr * num_after]);
     
     xlabel('Time (s) before and after target found');
     ylabel([method_name,' Pupil Diameter Normalized']);

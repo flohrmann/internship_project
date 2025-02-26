@@ -1,119 +1,122 @@
-function plotPupilDiameterOverTime(id, cutData, eye_tracking_data, trial_results, analysis_folder)
-% Close any existing figures
-close all;
+function plotPupilDiameterOverTime(id, cutData, analysis_folder)
+    % Close any existing figures
+    close all;
 
-% Create a new figure
-figure;
-hold on;
-title(['Subject ', num2str(id),': Pupil Diameter Over Time']);
-%title('Pupil Diameter Over Time');
-xlabel('Time (s)');
-ylabel('Left and Right Eye: Pupil Diameter (mm)');
+    % Define colors for each segment of the trial
+    color_green = [0, 0.5, 0];        % Fixation
+    color_orange = [0.8500, 0.3250, 0.0980]; % Blank
+    color_light_orange = [0.9290, 0.6940, 0.1250]; % Stimulus
+    color_grey = [0.5, 0.5, 0.5];     % Gap (missing data)
 
-% Define colors for plotting
-color_blue = [0, 0.4470, 0.7410]; % Blue
-color_green = [0, 0.5, 0]; % Green
-color_orange = [0.8500, 0.3250, 0.0980]; % Orange
-color_light_orange = [0.9290, 0.6940, 0.1250];
-color_grey = [0.5, 0.5, 0.5]; % Grey
+    % Initialize arrays for a common time base
+    resampled_time = linspace(-3, 1, 1000); % Example common time base
 
-% Create arrays to store the indices that are already plotted
-plotted_indices = false(size(double(eye_tracking_data.systemTimeStamp) / 1e6));
+    % Create figure with two subplots
+    figure;
 
-% Loop through each trial in cutData
-for trial = 1:size(cutData, 1)
-    % Extract the current trial data
-    current_data = trial_results(trial, :);
-    
-    % Extract the relevant times
-    trialStartTime = current_data.trialStartTime;
-    fixStartTime = current_data.fixStartTime;
-    blankStartTime = current_data.blankStartTime;
-    StimulusOnsetTime = current_data.StimulusOnsetTime;
-    trial_resp_time = current_data.trialEndTime;
-    
-    % Extract system timestamps and pupil diameters for both eyes
-    timestamps = double(eye_tracking_data.systemTimeStamp) / 1e6;
-    
-    % Plot continuous eyetracking data in different colors for each time segment
-    plotted_indices = plot_segment(timestamps, eye_tracking_data.right.pupil.diameter, trialStartTime, fixStartTime, color_blue, plotted_indices);
-    plotted_indices = plot_segment(timestamps, eye_tracking_data.right.pupil.diameter, fixStartTime, blankStartTime, color_green, plotted_indices);
-    plotted_indices = plot_segment(timestamps, eye_tracking_data.right.pupil.diameter, blankStartTime, StimulusOnsetTime, color_orange, plotted_indices);
-    plotted_indices = plot_segment(timestamps, eye_tracking_data.right.pupil.diameter, StimulusOnsetTime, trial_resp_time, color_light_orange, plotted_indices);
-    
-    plotted_indices = plot_segment(timestamps, eye_tracking_data.left.pupil.diameter, trialStartTime, fixStartTime, color_blue, plotted_indices);
-    plotted_indices = plot_segment(timestamps, eye_tracking_data.left.pupil.diameter, fixStartTime, blankStartTime, color_green, plotted_indices);
-    plotted_indices = plot_segment(timestamps, eye_tracking_data.left.pupil.diameter, blankStartTime, StimulusOnsetTime, color_orange, plotted_indices);
-    plotted_indices = plot_segment(timestamps, eye_tracking_data.left.pupil.diameter, StimulusOnsetTime, trial_resp_time, color_light_orange, plotted_indices);
-end
+    % First subplot: Individual Eyes
+    subplot(2,1,1);
+    hold on;
+    title(['Subject ', num2str(id), ': Pupil Diameter Across Trials (Individual Eyes)']);
+    xlabel('Time (s)');
+    ylabel('Pupil Diameter (mm)');
 
-% Plot the data points not already plotted in grey
-plot_gaps(timestamps, eye_tracking_data.right.pupil.diameter, ~plotted_indices, color_grey);
-plot_gaps(timestamps, eye_tracking_data.left.pupil.diameter, ~plotted_indices, color_grey);
+    % Second subplot: Average of Both Eyes
+    subplot(2,1,2);
+    hold on;
+    title(['Subject ', num2str(id), ': Average Pupil Diameter Across Trials']);
+    xlabel('Time (s)');
+    ylabel('Average Pupil Diameter (mm)');
 
-% Create a handmade legend
-ylims = get(gca, 'ylim');
-xlims = get(gca, 'xlim');
-legend_y = ylims(2) - (ylims(2) - ylims(1)) * 0.05;
-legend_x_start = xlims(1) + (xlims(2) - xlims(1)) * 0.01;
-legend_x_end = legend_x_start + (xlims(2) - xlims(1)) * 0.05;
+    % Loop through each trial in cutData
+    for trial = 1:size(cutData, 1)
+        % Extract the current trial data
+        current_data = cutData(trial, :);
 
-plot([legend_x_start, legend_x_end], [legend_y, legend_y], 'Color', color_blue, 'LineWidth', 2);
-text(legend_x_end + (xlims(2) - xlims(1)) * 0.01, legend_y, 'Press Any Button', 'VerticalAlignment', 'middle');
+        % Extract relevant times
+        trialStartTime = current_data.trialStartTime;
+        fixStartTime = current_data.fixStartTime;
+        blankStartTime = current_data.blankStartTime;
+        StimulusOnsetTime = current_data.StimulusOnsetTime;
+        trial_resp_time = current_data.trialEndTime;
 
-legend_y = legend_y - (ylims(2) - ylims(1)) * 0.05;
-plot([legend_x_start, legend_x_end], [legend_y, legend_y], 'Color', color_green, 'LineWidth', 2);
-text(legend_x_end + (xlims(2) - xlims(1)) * 0.01, legend_y, 'Fixation', 'VerticalAlignment', 'middle');
+        % Extract system timestamps and pupil diameters for both eyes
+        timestamps = double(current_data.eyeTrial.systemTimeStamp) / 1e6;
+        pupil_right = current_data.eyeTrial.right.pupil.diameter;
+        pupil_left = current_data.eyeTrial.left.pupil.diameter;
 
-legend_y = legend_y - (ylims(2) - ylims(1)) * 0.05;
-plot([legend_x_start, legend_x_end], [legend_y, legend_y], 'Color', color_orange, 'LineWidth', 2);
-text(legend_x_end + (xlims(2) - xlims(1)) * 0.01, legend_y, 'Blank', 'VerticalAlignment', 'middle');
+        % Resample the data to a common time base
+        resampled_pupil_right = interp1(timestamps - StimulusOnsetTime, pupil_right, resampled_time, 'linear', 'extrap');
+        resampled_pupil_left = interp1(timestamps - StimulusOnsetTime, pupil_left, resampled_time, 'linear', 'extrap');
 
-legend_y = legend_y - (ylims(2) - ylims(1)) * 0.05;
-plot([legend_x_start, legend_x_end], [legend_y, legend_y], 'Color', color_light_orange, 'LineWidth', 2);
-text(legend_x_end + (xlims(2) - xlims(1)) * 0.01, legend_y, 'Stimulus', 'VerticalAlignment', 'middle');
+        % Calculate average of both eyes
+        resampled_pupil_both = (resampled_pupil_right + resampled_pupil_left) / 2;
 
-legend_y = legend_y - (ylims(2) - ylims(1)) * 0.05;
-plot([legend_x_start, legend_x_end], [legend_y, legend_y], 'Color', color_grey, 'LineWidth', 2);
-text(legend_x_end + (xlims(2) - xlims(1)) * 0.01, legend_y, 'Gap', 'VerticalAlignment', 'middle');
+        % Plot each segment for both eyes in the first subplot
+        subplot(2,1,1);
+        plot_segment(resampled_time, resampled_pupil_right, trialStartTime - StimulusOnsetTime, fixStartTime - StimulusOnsetTime, color_grey);
+        plot_segment(resampled_time, resampled_pupil_right, fixStartTime - StimulusOnsetTime, blankStartTime - StimulusOnsetTime, color_green);
+        plot_segment(resampled_time, resampled_pupil_right, blankStartTime - StimulusOnsetTime, StimulusOnsetTime - StimulusOnsetTime, color_orange);
+        plot_segment(resampled_time, resampled_pupil_right, StimulusOnsetTime - StimulusOnsetTime, trial_resp_time - StimulusOnsetTime, color_light_orange);
 
-set(gcf, 'Units', 'normalized', 'OuterPosition', [0 0 1 1])
-saveas(gcf,strcat(analysis_folder, '\pupil_diam_over_time.png'));
+        plot_segment(resampled_time, resampled_pupil_left, trialStartTime - StimulusOnsetTime, fixStartTime - StimulusOnsetTime, color_grey);
+        plot_segment(resampled_time, resampled_pupil_left, fixStartTime - StimulusOnsetTime, blankStartTime - StimulusOnsetTime, color_green);
+        plot_segment(resampled_time, resampled_pupil_left, blankStartTime - StimulusOnsetTime, StimulusOnsetTime - StimulusOnsetTime, color_orange);
+        plot_segment(resampled_time, resampled_pupil_left, StimulusOnsetTime - StimulusOnsetTime, trial_resp_time - StimulusOnsetTime, color_light_orange);
 
+        % Plot average in the second subplot
+        subplot(2,1,2);
+        plot_segment(resampled_time, resampled_pupil_both, trialStartTime - StimulusOnsetTime, fixStartTime - StimulusOnsetTime, color_grey);
+        plot_segment(resampled_time, resampled_pupil_both, fixStartTime - StimulusOnsetTime, blankStartTime - StimulusOnsetTime, color_green);
+        plot_segment(resampled_time, resampled_pupil_both, blankStartTime - StimulusOnsetTime, StimulusOnsetTime - StimulusOnsetTime, color_orange);
+        plot_segment(resampled_time, resampled_pupil_both, StimulusOnsetTime - StimulusOnsetTime, trial_resp_time - StimulusOnsetTime, color_light_orange);
+    end
 
+    % Add legend manually
+    subplot(2,1,1);
+    add_legend(gca, color_grey, color_green, color_orange, color_light_orange);
 
-%% Function to plot segments with gaps filled with grey
-    function plotted_indices = plot_segment(timestamps, data, start_time, end_time, color, plotted_indices)
+    subplot(2,1,2);
+    add_legend(gca, color_grey, color_green, color_orange, color_light_orange);
+
+    hold off;
+    saveas(gcf, fullfile(analysis_folder, 'pupil_diam_over_time.png'));
+
+    %% Function to plot segments with gaps filled in grey
+    function plot_segment(timestamps, data, start_time, end_time, color)
         idx_segment = timestamps >= start_time & timestamps < end_time;
         idx_gaps = timestamps >= start_time & timestamps < end_time & isnan(data);
-        
+
         % Plot the data segment
-        plot(timestamps(idx_segment), data(idx_segment), 'Color', color, 'LineWidth', 1.5);
-        plotted_indices = plotted_indices | idx_segment;
-        
+        plot(timestamps(idx_segment), data(idx_segment), 'Color', color, 'LineWidth', 0.5);
+
         % Plot gaps in grey
         if any(idx_gaps)
-            plot(timestamps(idx_gaps), data(idx_gaps), 'Color', color_grey, 'LineWidth', 1.5);
+            plot(timestamps(idx_gaps), data(idx_gaps), 'Color', color_grey, 'LineWidth', 0.5);
         end
     end
 
-%% Function to plot gaps in grey
-    function plot_gaps(timestamps, data, idx_gaps, color)
-        segments = find(idx_gaps);
-        if isempty(segments)
-            return; % If all are NaNs, skip
-        end
-        
-        for i = 1:length(segments)-1
-            if segments(i+1) - segments(i) == 1  % Adjacent points are valid
-                line(timestamps(segments(i):segments(i+1)), data(segments(i):segments(i+1)), 'Color', color, 'LineWidth', 1.5);
-            else  % There's a gap
-                %                 xi = [timestamps(segments(i)), timestamps(segments(i+1))];
-                %                 yi = [data(segments(i)), data(segments(i+1))];
-                %                 plot(xi, yi, '--', 'Color', color);  % Grey dashed line
-            end
-        end
-    end
+    %% Function to add a legend with custom colors for each segment
+    function add_legend(axis_handle, color_grey, color_green, color_orange, color_light_orange)
+        ylims = get(axis_handle, 'ylim');
+        xlims = get(axis_handle, 'xlim');
+        legend_y = ylims(2) - (ylims(2) - ylims(1)) * 0.05;
+        legend_x_start = xlims(1) + (xlims(2) - xlims(1)) * 0.01;
+        legend_x_end = legend_x_start + (xlims(2) - xlims(1)) * 0.05;
 
-hold off;
+        plot([legend_x_start, legend_x_end], [legend_y, legend_y], 'Color', color_green, 'LineWidth', 1);
+        text(legend_x_end + (xlims(2) - xlims(1)) * 0.01, legend_y, 'Fixation', 'VerticalAlignment', 'middle');
+
+        legend_y = legend_y - (ylims(2) - ylims(1)) * 0.05;
+        plot([legend_x_start, legend_x_end], [legend_y, legend_y], 'Color', color_orange, 'LineWidth', 1);
+        text(legend_x_end + (xlims(2) - xlims(1)) * 0.01, legend_y, 'Blank', 'VerticalAlignment', 'middle');
+
+        legend_y = legend_y - (ylims(2) - ylims(1)) * 0.05;
+        plot([legend_x_start, legend_x_end], [legend_y, legend_y], 'Color', color_light_orange, 'LineWidth', 1);
+        text(legend_x_end + (xlims(2) - xlims(1)) * 0.01, legend_y, 'Stimulus', 'VerticalAlignment', 'middle');
+
+        legend_y = legend_y - (ylims(2) - ylims(1)) * 0.05;
+        plot([legend_x_start, legend_x_end], [legend_y, legend_y], 'Color', color_grey, 'LineWidth', 1);
+        text(legend_x_end + (xlims(2) - xlims(1)) * 0.01, legend_y, 'Gap', 'VerticalAlignment', 'middle');
+    end
 end

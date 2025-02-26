@@ -7,10 +7,18 @@ function plotFixationSaccades(data, all_saccades, all_fixations, screenXpixels, 
 % plot_these: vector of trial indices to plot
 % analysis_folder: folder where plots should be saved
 % safe: 1/0 indicating whether to save the plots
+try
+    participant_id = data.id;
+catch
+    participant_id = all_fixations.id;
+end
 
-participant_id = data.id;
-participant_fixations = all_fixations.fixations;
-participant_saccades = all_saccades.saccades;
+try
+    participant_fixations = all_fixations.fixations;
+catch
+    participant_fixations = all_fixations; %.stimulusFixations.fixations;
+end
+
 
 for i = 1:length(plot_these)
     trialIdx = plot_these(i);
@@ -32,7 +40,13 @@ for i = 1:length(plot_these)
         end
         
         % Overlay saccades
-        saccades = participant_saccades(trialIdx).saccades;
+        try
+            saccades = all_saccades(trialIdx).saccades;
+        catch
+            participant_saccades = all_saccades.saccades;
+            saccades = participant_saccades(trialIdx).saccades;
+        end
+        
         for saccIdx = 1:length(saccades)
             %saccadeStartIdx = saccades(saccIdx).startIdx;
             %saccadeEndIdx = saccades(saccIdx).endIdx;
@@ -46,9 +60,9 @@ for i = 1:length(plot_these)
     catch
     end
     targetCenters = participant_fixations.targetCenters(:, trialIdx);
-    p4 = plot(targetCenters(1), targetCenters(2), 'g*', 'MarkerSize', 10, 'LineWidth', 2, 'DisplayName', 'Target Center');
+    p4 = plot(targetCenters(2), targetCenters(1), 'm*', 'MarkerSize', 10, 'LineWidth', 2, 'DisplayName', 'Target Center');
     
-    title(['Participant ', num2str(participant_id), ' - Trial ', num2str(trialIdx)]);
+    title(['Participant ', num2str(participant_fixations.id), ': Trial ', num2str(trialIdx), ' - Fixation Length: ', participant_fixations.length]);
     xlabel('X Coordinate (pixels)');
     ylabel('Y Coordinate (pixels)');
     %legend('show');
@@ -61,7 +75,7 @@ for i = 1:length(plot_these)
     end
     if safe == 1
         set(gcf, 'Units', 'normalized', 'OuterPosition', [0 0 1 1]);
-        saveas(gcf, fullfile(analysis_folder, ['Saccades_Participant_', num2str(participant_id), '_Trial_', num2str(trialIdx), '.png']));
+        saveas(gcf, fullfile(analysis_folder, ['Saccades_Participant_', num2str(participant_id), '_Trial_', num2str(trialIdx), '_FixLength_', participant_fixations.length, '.png']));
         close(gcf);
     end
 end

@@ -1,57 +1,50 @@
-function plotMeanAccuracyPerGroupCondition(data, color_map, safe, comparison_results_folder)
-accuracy_all = [];
-group_all = {};
-condition_all = {};
+function [mistakes, accuracy] = plotMeanAccuracyPerGroupCondition(data, group_labels, ids, unique_conditions, condition_labels, color_map,color_map_individual, comp_results_fix, safe)
 
-for i = 1:length(data)
-    accuracy_all = [accuracy_all; data(i).accuracy];
-    group_all = [group_all; repmat({data(i).group}, length(data(i).accuracy), 1)];
-    condition_all = [condition_all; data(i).Condition];
-end
+numParticipants = length(data); % Number of participants
+accuracy = zeros(numParticipants, length(unique_conditions));
+mistakes = zeros(numParticipants, length(unique_conditions));
+% Loop through each participant
+for p = 1:numParticipants
+    % Loop through each condition
+    for c = 1:length(unique_conditions)
+        condition = unique_conditions{c};
+        condition_trials = strcmp(data(p).Condition, condition);
 
-% Convert group and condition labels to categorical for easier comparison
-group_all = categorical(group_all);
-condition_all = categorical(condition_all);
-
-% Calculate mean accuracy per condition and group
-[unique_conditions, ~, cond_idx] = unique(condition_all);
-[unique_groups, ~, group_idx] = unique(group_all);
-
-mean_accuracy = zeros(length(unique_conditions), length(unique_groups));
-
-for i = 1:length(unique_conditions)
-    for j = 1:length(unique_groups)
-        idx = cond_idx == i & group_idx == j;
-        mean_accuracy(i, j) = mean(accuracy_all(idx));
+        acc_cond = data(p).accuracy(condition_trials);
+        
+        
+        mistakes(p, c) = height(acc_cond) - sum(acc_cond);
+        accuracy(p, c) = sum(acc_cond)/height(acc_cond);
     end
 end
 
-% Create figure
-figure;
-hold on;
 
-% Plot mean points and connect them with lines for each group
-for j = 1:length(unique_groups)
-    group = char(unique_groups(j));
-    x_data = 1:length(unique_conditions);
-    y_data = mean_accuracy(:, j);
-    plot(x_data, y_data, '-o', 'Color', color_map(group), 'MarkerFaceColor', color_map(group), ...
-        'LineWidth', 2, 'MarkerSize', 8);
-end
+%% num mistakes
+adhd_condition_avgs    = mistakes(strcmp(group_labels, 'ADHD'), :);
+nonadhd_condition_avgs = mistakes(strcmp(group_labels, 'nonADHD'), :);
+adhd_median    = median(adhd_condition_avgs, 1, 'omitnan');
+adhd_sem       = std(adhd_condition_avgs, 1, 'omitnan')./ sqrt(size(adhd_condition_avgs, 1));
+nonAdhd_median = median(nonadhd_condition_avgs, 1, 'omitnan');
+nonAdhd_sem    = std(nonadhd_condition_avgs, 1, 'omitnan')./ sqrt(size(nonadhd_condition_avgs, 1));
 
-% Customize the plot
-xticks(1:length(unique_conditions));
-xticklabels(unique_conditions);
-xlabel('Condition');
-ylabel('Mean Accuracy');
-title('Mean Accuracy Comparison Between ADHD and nonADHD Groups per Condition');
-legend(unique_groups, 'Location', 'northeastoutside');
-hold off;
+plotADHDnonADHDVariance('Mistakes Per Condition',...
+    adhd_condition_avgs, adhd_median, adhd_sem, 'ADHD', 'northeast', ...
+    nonadhd_condition_avgs, nonAdhd_median, nonAdhd_sem, 'nonADHD', 'northeast', ...
+    ids, condition_labels, 'Number of Wrong Trials', group_labels, unique_conditions, color_map, color_map_individual, ...
+    fullfile(comp_results_fix, '11_mistakes_allinone_median.png'));
 
-% Save the figure
-if safe == 1
-    set(gcf, 'Units', 'normalized', 'OuterPosition', [0 0 1 1]);
-    saveas(gcf, fullfile(comparison_results_folder, 'mean_accuracy_group_condition.png'));
-else
-end
+%% % accuracy
+adhd_condition_avgs    = accuracy(strcmp(group_labels, 'ADHD'), :);
+nonadhd_condition_avgs = accuracy(strcmp(group_labels, 'nonADHD'), :);
+adhd_median    = median(adhd_condition_avgs, 1, 'omitnan');
+adhd_sem       = std(adhd_condition_avgs, 1, 'omitnan')./ sqrt(size(adhd_condition_avgs, 1));
+nonAdhd_median = median(nonadhd_condition_avgs, 1, 'omitnan');
+nonAdhd_sem    = std(nonadhd_condition_avgs, 1, 'omitnan')./ sqrt(size(nonadhd_condition_avgs, 1));
+
+plotADHDnonADHDVariance('Accuracy Per Condition',...
+    adhd_condition_avgs, adhd_median, adhd_sem, 'ADHD', 'southeast', ...
+    nonadhd_condition_avgs, nonAdhd_median, nonAdhd_sem, 'nonADHD', 'southeast', ...
+    ids, condition_labels, '% of correct trials', group_labels, unique_conditions, color_map, color_map_individual, ...
+    fullfile(comp_results_fix, '11_accuracy_allinone_median.png'));
+
 end

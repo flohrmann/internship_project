@@ -11,59 +11,103 @@ function cutData = cutEyeTrackingData(folder_name, trial_results, eye_tracking_d
     for trial = 1:numTrials
         % Get the start and end times for the current trial
         current_data = trial_results(trial,:);
+        % trialStartTime: 'press any button to continue' screen
+        trialStartTime = current_data.trialStartTime;
+        blankStartTime = current_data.blankStartTime;
+        % fixSTartTime: 'fixation cross' screen
         fixStartTime = current_data.fixStartTime;
-        trialEndTime = current_data.trialEndTime;
+        % StimulusOnsetTime: 'stimulation' screen (0.7s after fixSTartTime)
         StimulusOnsetTime = current_data.StimulusOnsetTime;
+        % trialEndTime: time L/R button was pressed to end trial
+        trialEndTime = current_data.trialEndTime;
         
         % Find the closest timestamps to fixStartTime, StimulusOnsetTime, and trialEndTime
+        [~, trialStartIdx] = min(abs(timestamps - trialStartTime));
         [~, startIdx] = min(abs(timestamps - fixStartTime));
+        [~, blankIdx] = min(abs(timestamps - blankStartTime));
         [~, stimulusIdx] = min(abs(timestamps - StimulusOnsetTime));
         [~, endIdx] = min(abs(timestamps - trialEndTime));
-        
-        %%%
-%         figure(1); clf; plot(eye_tracking_data.systemTimeStamp/1e3, '.');
-%         hold on;
-%         plot(trial_results.fixStartTime*1000, '*');
-%         hold on;
-%         plot(trial_results.StimulusOnsetTime*1000, '.');
-% 
+
+        %% plot the two different timepoints (just a line with both of their point on it 
 %         figure(2); clf;
 %         plot(trial_results.fixStartTime*1000, 'r*'); hold on;
 %         plot(trial_results.StimulusOnsetTime*1000, 'b.');
 
         
-        %% plot test
-%         FixationStart_times = trial_results.fixStartTime; % seconds
-%         ButtonPress_times = trial_results.trialEndTime;
-%         StimulusStart_time  = trial_results.StimulusOnsetTime; % seconds
-%         
-%         eye_tracker_times = eye_tracking_data.systemTimeStamp; % microseconds
-%         eye_tracker_times_inSeconds  = double(eye_tracker_times)/1000000;
-%         NTrials = length(FixationStart_times);
-%         Fixation_Index_InEyeTrackerTimeStamps = zeros(1, NTrials);
-%         StimulusOnset_Index_InEyeTrackerTimeStamps = zeros(1, NTrials);
-%         ButtonPressend_Index_MatlabTimeStamp = zeros(1, NTrials);
-% 
-%         for t = 1:NTrials
-%                 [~, Fixation_Index_InEyeTrackerTimeStamps(t)] = min(abs(eye_tracker_times_inSeconds -FixationStart_times(t)));  
-%                 [~, StimulusOnset_Index_InEyeTrackerTimeStamps(t)] = min(abs(eye_tracker_times_inSeconds -StimulusStart_time(t)));
-%                 [~, ButtonPressend_Index_MatlabTimeStamp(t)] = min(abs(eye_tracker_times_inSeconds - ButtonPress_times(t)));
-%         end
+         %% plot test
+        FixationStart_times = trial_results.fixStartTime; % seconds
+        ButtonPress_times = trial_results.trialEndTime;
+        StimulusStart_time  = trial_results.StimulusOnsetTime; % seconds
+        
+        eye_tracker_times = eye_tracking_data.systemTimeStamp; % microseconds
+        eye_tracker_times_inSeconds  = double(eye_tracker_times)/1000000;
+        NTrials = length(FixationStart_times);
+        Fixation_Index_InEyeTrackerTimeStamps = zeros(1, NTrials);
+        StimulusOnset_Index_InEyeTrackerTimeStamps = zeros(1, NTrials);
+        ButtonPressend_Index_MatlabTimeStamp = zeros(1, NTrials);
+
+        for t = 1:NTrials
+                [~, Fixation_Index_InEyeTrackerTimeStamps(t)] = min(abs(eye_tracker_times_inSeconds -FixationStart_times(t)));  
+                [~, StimulusOnset_Index_InEyeTrackerTimeStamps(t)] = min(abs(eye_tracker_times_inSeconds -StimulusStart_time(t)));
+                [~, ButtonPressend_Index_MatlabTimeStamp(t)] = min(abs(eye_tracker_times_inSeconds - ButtonPress_times(t)));
+        end
+        
+        
 %         figure(10); clf; plot(eye_tracker_times_inSeconds, 'r.'); hold;
 %         plot(Fixation_Index_InEyeTrackerTimeStamps, eye_tracker_times_inSeconds(Fixation_Index_InEyeTrackerTimeStamps), 'b*');
 %         plot(StimulusOnset_Index_InEyeTrackerTimeStamps, eye_tracker_times_inSeconds(StimulusOnset_Index_InEyeTrackerTimeStamps), 'g>');
 %         plot(ButtonPressend_Index_MatlabTimeStamp, eye_tracker_times_inSeconds(ButtonPressend_Index_MatlabTimeStamp), 'ks');
 %         
+        % Assuming the rest of your code is the same up until the plotting part
+
+% %%  Clear figure and set it up
+% figure(10); clf;
+% hold on;
+% 
+% % Overlay Fixation Start points
+% plot(Fixation_Index_InEyeTrackerTimeStamps, eye_tracker_times_inSeconds(Fixation_Index_InEyeTrackerTimeStamps), ...
+%     'b*', 'MarkerSize', 8, 'DisplayName', 'Fixation Start');
+% 
+% % Overlay Stimulus Onset points
+% plot(StimulusOnset_Index_InEyeTrackerTimeStamps, eye_tracker_times_inSeconds(StimulusOnset_Index_InEyeTrackerTimeStamps), ...
+%     'g>', 'MarkerSize', 8, 'DisplayName', 'Stimulus Start');
+% 
+% % Overlay Button Press End points
+% plot(ButtonPressend_Index_MatlabTimeStamp, eye_tracker_times_inSeconds(ButtonPressend_Index_MatlabTimeStamp), ...
+%     'ks', 'MarkerSize', 8, 'DisplayName', 'Button Press End');
+% 
+% % Add labels and title
+% xlabel('Trial Index');
+% ylabel('Time (seconds)');
+% title('Trial Time Points per Trial: Fixation, Stimulus, Button Press');
+% 
+% % Add legend to identify each timepoint type
+% legend();
+% 
+% % Enhance plot with grid
+% grid on;
+% hold off;
+
+
 %         
-%         
-%         
-        cutData(trial).eyeTrial = extractEyeTrackingData(eye_tracking_data, startIdx, endIdx);
-        cutData(trial).stimulusTrial = extractEyeTrackingData(eye_tracking_data, stimulusIdx, endIdx);
-        
+        %% cut the data         
+        % complete trial
+        cutData(trial).startIdxWithInstructionScreen = trialStartIdx;
+        cutData(trial).completeTrial = extractEyeTrackingData(eye_tracking_data, trialStartIdx, endIdx);
+        % trial after user presses start trial button
         cutData(trial).startIdx = startIdx;
+        cutData(trial).eyeTrial = extractEyeTrackingData(eye_tracking_data, startIdx, endIdx);
+        %disp(size(cutData(trial).eyeTrial.systemTimeStamp, 2));
+        if size(cutData(trial).eyeTrial.systemTimeStamp, 2) < 25
+            disp('damn') %(blankIdx - trialStartIdx) +
+        else
+        end
+        cutData(trial).blankIdx = blankIdx; % blank screen index
+        % only data during stimulation presentatiopn
         cutData(trial).stimulusIdx = stimulusIdx;
+        cutData(trial).stimulusTrial = extractEyeTrackingData(eye_tracking_data, stimulusIdx, endIdx);
         cutData(trial).endIdx = endIdx;
-%         
+  
         % Only save for trials with eye tracking data
         if endIdx == startIdx
             cutData(trial).withTracking = 0;
@@ -103,6 +147,9 @@ function cutData = cutEyeTrackingData(folder_name, trial_results, eye_tracking_d
     disp('Eye tracking data cut into smaller structs per trial and saved as a table.');
 end
 
+
+
+%% restructure the struct into original eyetracker format
 function eyeTrackingData = extractEyeTrackingData(eye_tracking_data, startIdx, endIdx)
     eyeTrackingData = struct( ...
         'systemTimeStamp', eye_tracking_data.systemTimeStamp(startIdx:endIdx), ...

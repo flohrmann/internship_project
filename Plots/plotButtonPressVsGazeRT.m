@@ -18,7 +18,7 @@ function plotButtonPressVsGazeRT(trial_results, eye_rt, analysis_folder)
         elseif leftEyeRT == 0
             meanEyeRT = rightEyeRT;
         else
-            meanEyeRT = mean([rightEyeRT, leftEyeRT]);
+            meanEyeRT = nanmean([rightEyeRT, leftEyeRT]);
         end
 
         % Store the values in the arrays

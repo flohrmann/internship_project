@@ -1,50 +1,40 @@
-function plotGroupFixationDurations(fixationStats, group_labels, conditions, color_map)
-    % Initialize variables to store fixation data by group and condition
-    numConditions = length(conditions);
-    adhdData = zeros(numConditions, 0); % Store data for ADHD group
-    nonAdhdData = zeros(numConditions, 0); % Store data for non-ADHD group
-    
-    % Loop over participants to group data by ADHD status
-    for participant = 1:length(fixationStats)
-        conditionAverages = zeros(numConditions, 1);
-        for c = 1:numConditions
-            conditionAverages(c) = fixationStats(participant).conditions(c).avgFixationDuration;
-        end
-        
-        if strcmp(group_labels{participant}, 'ADHD')
-            adhdData = [adhdData, conditionAverages];
-        else
-            nonAdhdData = [nonAdhdData, conditionAverages];
-        end
+function plotGroupFixationDurations(fixationStats, ids, group_labels, labels, conditions, participant_map, color_map, comparison_results_folder, fixation_duration, safe)
+% Plot fixation durations for ADHD and nonADHD groups with individual participant data.
+% Arguments:
+%   fixationStats: Struct array with fixation data for each participant.
+%   group_labels: Cell array of group labels ('nonADHD' or 'ADHD').
+%   labels: Cell array of condition names.
+%   conditions: Array of condition names.
+%   participant_map: Map containing color and marker data for participants.
+%   color_map: Map containing predefined colors for conditions and groups.
+%   comparison_results_folder: Folder to save the plots.
+
+% Initialize variables to store fixation data by group and condition
+numConditions = length(conditions);
+adhd_medians = zeros(0, numConditions); % Store data for ADHD group
+nonadhd_medians = zeros(0, numConditions); % Store data for non-ADHD group
+
+% Loop over participants to group data by ADHD status
+for participant = 1:length(fixationStats)
+    if strcmp(group_labels{participant}, 'ADHD')
+        adhd_medians = [adhd_medians; [fixationStats(participant).a_median, fixationStats(participant).b_median, ...
+                                       fixationStats(participant).as_median,fixationStats(participant).bs_median]];
+    else
+        nonadhd_medians = [nonadhd_medians; [fixationStats(participant).a_median, fixationStats(participant).b_median, ...
+                                             fixationStats(participant).as_median,fixationStats(participant).bs_median]];
     end
-    
-    % Calculate means and standard deviations
-    adhdMeans = mean(adhdData, 2, 'omitnan');
-    adhdStds = std(adhdData, 0, 2, 'omitnan');
-    nonAdhdMeans = mean(nonAdhdData, 2, 'omitnan');
-    nonAdhdStds = std(nonAdhdData, 0, 2, 'omitnan');
-    
-    % Plot the results
-    figure;
-    hold on;
-    
-    % Plot non-ADHD data
-    errorbar(1:numConditions, nonAdhdMeans, nonAdhdStds, '-o', ...
-        'Color', color_map('nonADHD'), 'MarkerFaceColor', color_map('nonADHD'), ...
-        'DisplayName', 'nonADHD');
-    
-    % Plot ADHD data
-    errorbar(1:numConditions, adhdMeans, adhdStds, '-o', ...
-        'Color', color_map('ADHD'), 'MarkerFaceColor', color_map('ADHD'), ...
-        'DisplayName', 'ADHD');
-    
-    % Customize the plot
-    xticks(1:numConditions);
-    xticklabels(conditions);
-    xlabel('Condition');
-    ylabel('Average Fixation Duration (ms)');
-    legend('Location', 'Best');
-    title('Average Fixation Duration per Group and Condition');
-    %grid on;
-    hold off;
+end
+
+% Calculate means and standard deviations for each group
+median_adhdMedians = median(adhd_medians, 1, 'omitnan');
+sem_adhd = std(adhd_medians, 0, 1, 'omitnan')./ sqrt(size(adhd_medians, 1));
+median_nonAdhdMedians = median(nonadhd_medians, 1, 'omitnan');
+sem_nonadhd = std(nonadhd_medians, 0, 1, 'omitnan')./ sqrt(size(nonadhd_medians, 1));
+
+plotADHDnonADHDVariance('Average Fixation Duration',... % sgtitle
+                        adhd_medians, median_adhdMedians, sem_adhd, 'ADHD', 'northeast', ...       % adhd data
+                        nonadhd_medians, median_nonAdhdMedians, sem_nonadhd, 'nonADHD', 'northeast',...  % nonadhd data
+                        ids, labels, 'Median Fixation Duration (s)', ... % x, y axis labels
+                        group_labels, conditions, color_map, participant_map, ...
+                        fullfile(comparison_results_folder, '01_fixation_duration_condition_group_diff.png'));
 end

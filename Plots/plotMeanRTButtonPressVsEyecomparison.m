@@ -1,82 +1,79 @@
-function plotMeanRTButtonPressVsEyecomparison(data, color_map, comparison_results_folder, safe)
+function plotMeanRTButtonPressVsEyecomparison(data, color_map, conditions, comparison_results_folder, safe)
     % Initialize empty arrays to hold the overall mean RTs and SEMs per condition for each group
-    mean_rt_adhd = [];
-    mean_rt_eye_adhd = [];
-    mean_rt_diff_adhd = [];
+    avg_rt_adhd = [];
+    avg_rt_eye_adhd = [];
+    avg_rt_diff_adhd = [];
     
-    mean_rt_nonadhd = [];
-    mean_rt_eye_nonadhd = [];
-    mean_rt_diff_nonadhd = [];
+    avg_rt_nonadhd = [];
+    avg_rt_eye_nonadhd = [];
+    avg_rt_diff_nonadhd = [];
     
-    mean_nrt_adhd = [];
-    mean_nrt_eye_adhd = [];
-    mean_nrt_diff_adhd = [];
+    avg_nrt_adhd = [];
+    avg_nrt_eye_adhd = [];
+    avg_nrt_diff_adhd = [];
     
-    mean_nrt_nonadhd = [];
-    mean_nrt_eye_nonadhd = [];
-    mean_nrt_diff_nonadhd = [];
-    
-    % Initialize variables for conditions
-    conditions = {'a', 'a_simple', 'b', 'b_simple'};
+    avg_nrt_nonadhd = [];
+    avg_nrt_eye_nonadhd = [];
+    avg_nrt_diff_nonadhd = [];
     
     % Loop through each participant and aggregate the mean RT and accuracy per condition
     for i = 1:length(data)
         if strcmp(data(i).group, 'ADHD')
-            mean_rt_adhd = [mean_rt_adhd; data(i).RTa, data(i).RTasimple, data(i).RTb, data(i).RTbsimple];
-            mean_rt_eye_adhd = [mean_rt_eye_adhd; data(i).RTa_eye, data(i).RTasimple_eye, data(i).RTb_eye, data(i).RTbsimple_eye];
-            mean_rt_diff_adhd = [mean_rt_diff_adhd; data(i).RTa - data(i).RTa_eye, data(i).RTasimple - data(i).RTasimple_eye, ...
-                data(i).RTb - data(i).RTb_eye, data(i).RTbsimple - data(i).RTbsimple_eye];
+            avg_rt_adhd      = [avg_rt_adhd; data(i).RTa, data(i).RTasimple, data(i).RTb, data(i).RTbsimple];
+            avg_rt_eye_adhd  = [avg_rt_eye_adhd; data(i).RTa_eye, data(i).RTasimple_eye, data(i).RTb_eye, data(i).RTbsimple_eye];
+            avg_rt_diff_adhd = [avg_rt_diff_adhd; data(i).nRTa - data(i).nRTa_eye, data(i).nRTb - data(i).nRTb_eye, ...
+                                                  data(i).nRTasimple - data(i).nRTasimple_eye, data(i).nRTbsimple - data(i).nRTbsimple_eye];
             
-            mean_nrt_adhd = [mean_nrt_adhd; data(i).nRTa, data(i).nRTasimple, data(i).nRTb, data(i).nRTbsimple];
-            mean_nrt_eye_adhd = [mean_nrt_eye_adhd; data(i).nRTa_eye, data(i).nRTasimple_eye, data(i).nRTb_eye, data(i).nRTbsimple_eye];
-            mean_nrt_diff_adhd = [mean_nrt_diff_adhd; data(i).nRTa - data(i).nRTa_eye, data(i).nRTasimple - data(i).nRTasimple_eye, ...
-                data(i).nRTb - data(i).nRTb_eye, data(i).nRTbsimple - data(i).nRTbsimple_eye];
+            avg_nrt_adhd      = [avg_nrt_adhd; data(i).nRTa, data(i).nRTasimple, data(i).nRTb, data(i).nRTbsimple];
+            avg_nrt_eye_adhd  = [avg_nrt_eye_adhd; data(i).nRTa_eye, data(i).nRTasimple_eye, data(i).nRTb_eye, data(i).nRTbsimple_eye];
+            avg_nrt_diff_adhd = [avg_nrt_diff_adhd; data(i).nRTa - data(i).nRTa_eye, data(i).nRTb - data(i).nRTb_eye, ...
+                                                    data(i).nRTasimple - data(i).nRTasimple_eye, data(i).nRTbsimple - data(i).nRTbsimple_eye];
         elseif strcmp(data(i).group, 'nonADHD')
-            mean_rt_nonadhd = [mean_rt_nonadhd; data(i).RTa, data(i).RTasimple, data(i).RTb, data(i).RTbsimple];
-            mean_rt_eye_nonadhd = [mean_rt_eye_nonadhd; data(i).RTa_eye, data(i).RTasimple_eye, data(i).RTb_eye, data(i).RTbsimple_eye];
-            mean_rt_diff_nonadhd = [mean_rt_diff_nonadhd; data(i).RTa - data(i).RTa_eye, data(i).RTasimple - data(i).RTasimple_eye, ...
-                data(i).RTb - data(i).RTb_eye, data(i).RTbsimple - data(i).RTbsimple_eye];
+            avg_rt_nonadhd      = [avg_rt_nonadhd; data(i).RTa, data(i).RTasimple, data(i).RTb, data(i).RTbsimple];
+            avg_rt_eye_nonadhd  = [avg_rt_eye_nonadhd; data(i).RTa_eye, data(i).RTasimple_eye, data(i).RTb_eye, data(i).RTbsimple_eye];
+            avg_rt_diff_nonadhd = [avg_rt_diff_nonadhd; data(i).nRTa - data(i).nRTa_eye, data(i).nRTb - data(i).nRTb_eye, ...
+                                                        data(i).nRTasimple - data(i).nRTasimple_eye, data(i).nRTbsimple - data(i).nRTbsimple_eye];
             
-            mean_nrt_nonadhd = [mean_nrt_nonadhd; data(i).nRTa, data(i).nRTasimple, data(i).nRTb, data(i).nRTbsimple];
-            mean_nrt_eye_nonadhd = [mean_nrt_eye_nonadhd; data(i).nRTa_eye, data(i).nRTasimple_eye, data(i).nRTb_eye, data(i).nRTbsimple_eye];
-            mean_nrt_diff_nonadhd = [mean_nrt_diff_nonadhd; data(i).nRTa - data(i).nRTa_eye, data(i).nRTasimple - data(i).nRTasimple_eye, ...
-                data(i).nRTb - data(i).nRTb_eye, data(i).nRTbsimple - data(i).nRTbsimple_eye];
+            avg_nrt_nonadhd      = [avg_nrt_nonadhd; data(i).nRTa, data(i).nRTasimple, data(i).nRTb, data(i).nRTbsimple];
+            avg_nrt_eye_nonadhd  = [avg_nrt_eye_nonadhd; data(i).nRTa_eye, data(i).nRTasimple_eye, data(i).nRTb_eye, data(i).nRTbsimple_eye];
+            avg_nrt_diff_nonadhd = [avg_nrt_diff_nonadhd; data(i).nRTa - data(i).nRTa_eye, data(i).nRTb - data(i).nRTb_eye, ...
+                                                          data(i).nRTasimple - data(i).nRTasimple_eye, data(i).nRTbsimple - data(i).nRTbsimple_eye];
         end
     end
     
-    % Calculate the overall mean and SEM for each condition and group
-    overall_mean_rt_adhd = mean(mean_rt_adhd, 1, 'omitnan');
-    overall_mean_rt_eye_adhd = mean(mean_rt_eye_adhd, 1, 'omitnan');
-    overall_mean_rt_diff_adhd = mean(mean_rt_diff_adhd, 1, 'omitnan');
+    % Calculate the overall median and SEM for each condition and group
+    overall_mean_rt_adhd      = median(avg_rt_adhd, 1, 'omitnan');
+    overall_mean_rt_eye_adhd  = median(avg_rt_eye_adhd, 1, 'omitnan');
+    overall_mean_rt_diff_adhd = median(avg_rt_diff_adhd, 1, 'omitnan');
     
-    overall_mean_rt_nonadhd = mean(mean_rt_nonadhd, 1, 'omitnan');
-    overall_mean_rt_eye_nonadhd = mean(mean_rt_eye_nonadhd, 1, 'omitnan');
-    overall_mean_rt_diff_nonadhd = mean(mean_rt_diff_nonadhd, 1, 'omitnan');
+    overall_mean_rt_nonadhd      = median(avg_rt_nonadhd, 1, 'omitnan');
+    overall_mean_rt_eye_nonadhd  = median(avg_rt_eye_nonadhd, 1, 'omitnan');
+    overall_mean_rt_diff_nonadhd = median(avg_rt_diff_nonadhd, 1, 'omitnan');
     
-    overall_sem_rt_adhd = std(mean_rt_adhd, 0, 1, 'omitnan') / sqrt(size(mean_rt_adhd, 1));
-    overall_sem_rt_eye_adhd = std(mean_rt_eye_adhd, 0, 1, 'omitnan') / sqrt(size(mean_rt_eye_adhd, 1));
-    overall_sem_rt_diff_adhd = std(mean_rt_diff_adhd, 0, 1, 'omitnan') / sqrt(size(mean_rt_diff_adhd, 1));
+    overall_sem_rt_adhd      = std(avg_rt_adhd, 0, 1, 'omitnan') / sqrt(size(avg_rt_adhd, 1));
+    overall_sem_rt_eye_adhd  = std(avg_rt_eye_adhd, 0, 1, 'omitnan') / sqrt(size(avg_rt_eye_adhd, 1));
+    overall_sem_rt_diff_adhd = std(avg_rt_diff_adhd, 0, 1, 'omitnan') / sqrt(size(avg_rt_diff_adhd, 1));
     
-    overall_sem_rt_nonadhd = std(mean_rt_nonadhd, 0, 1, 'omitnan') / sqrt(size(mean_rt_nonadhd, 1));
-    overall_sem_rt_eye_nonadhd = std(mean_rt_eye_nonadhd, 0, 1, 'omitnan') / sqrt(size(mean_rt_eye_nonadhd, 1));
-    overall_sem_rt_diff_nonadhd = std(mean_rt_diff_nonadhd, 0, 1, 'omitnan') / sqrt(size(mean_rt_diff_nonadhd, 1));
+    overall_sem_rt_nonadhd      = std(avg_rt_nonadhd, 0, 1, 'omitnan') / sqrt(size(avg_rt_nonadhd, 1));
+    overall_sem_rt_eye_nonadhd  = std(avg_rt_eye_nonadhd, 0, 1, 'omitnan') / sqrt(size(avg_rt_eye_nonadhd, 1));
+    overall_sem_rt_diff_nonadhd = std(avg_rt_diff_nonadhd, 0, 1, 'omitnan') / sqrt(size(avg_rt_diff_nonadhd, 1));
     
     % Repeat for normalized data
-    overall_mean_nrt_adhd = mean(mean_nrt_adhd, 1, 'omitnan');
-    overall_mean_nrt_eye_adhd = mean(mean_nrt_eye_adhd, 1, 'omitnan');
-    overall_mean_nrt_diff_adhd = mean(mean_nrt_diff_adhd, 1, 'omitnan');
+    overall_mean_nrt_adhd = median(avg_nrt_adhd, 1, 'omitnan');
+    overall_mean_nrt_eye_adhd = median(avg_nrt_eye_adhd, 1, 'omitnan');
+    overall_mean_nrt_diff_adhd = median(avg_nrt_diff_adhd, 1, 'omitnan');
     
-    overall_mean_nrt_nonadhd = mean(mean_nrt_nonadhd, 1, 'omitnan');
-    overall_mean_nrt_eye_nonadhd = mean(mean_nrt_eye_nonadhd, 1, 'omitnan');
-    overall_mean_nrt_diff_nonadhd = mean(mean_nrt_diff_nonadhd, 1, 'omitnan');
+    overall_mean_nrt_nonadhd = median(avg_nrt_nonadhd, 1, 'omitnan');
+    overall_mean_nrt_eye_nonadhd = median(avg_nrt_eye_nonadhd, 1, 'omitnan');
+    overall_mean_nrt_diff_nonadhd = median(avg_nrt_diff_nonadhd, 1, 'omitnan');
     
-    overall_sem_nrt_adhd = std(mean_nrt_adhd, 0, 1, 'omitnan') / sqrt(size(mean_nrt_adhd, 1));
-    overall_sem_nrt_eye_adhd = std(mean_nrt_eye_adhd, 0, 1, 'omitnan') / sqrt(size(mean_nrt_eye_adhd, 1));
-    overall_sem_nrt_diff_adhd = std(mean_nrt_diff_adhd, 0, 1, 'omitnan') / sqrt(size(mean_nrt_diff_adhd, 1));
+    overall_sem_nrt_adhd = std(avg_nrt_adhd, 0, 1, 'omitnan') / sqrt(size(avg_nrt_adhd, 1));
+    overall_sem_nrt_eye_adhd = std(avg_nrt_eye_adhd, 0, 1, 'omitnan') / sqrt(size(avg_nrt_eye_adhd, 1));
+    overall_sem_nrt_diff_adhd = std(avg_nrt_diff_adhd, 0, 1, 'omitnan') / sqrt(size(avg_nrt_diff_adhd, 1));
     
-    overall_sem_nrt_nonadhd = std(mean_nrt_nonadhd, 0, 1, 'omitnan') / sqrt(size(mean_nrt_nonadhd, 1));
-    overall_sem_nrt_eye_nonadhd = std(mean_nrt_eye_nonadhd, 0, 1, 'omitnan') / sqrt(size(mean_nrt_eye_nonadhd, 1));
-    overall_sem_nrt_diff_nonadhd = std(mean_nrt_diff_nonadhd, 0, 1, 'omitnan') / sqrt(size(mean_nrt_diff_nonadhd, 1));
+    overall_sem_nrt_nonadhd = std(avg_nrt_nonadhd, 0, 1, 'omitnan') / sqrt(size(avg_nrt_nonadhd, 1));
+    overall_sem_nrt_eye_nonadhd = std(avg_nrt_eye_nonadhd, 0, 1, 'omitnan') / sqrt(size(avg_nrt_eye_nonadhd, 1));
+    overall_sem_nrt_diff_nonadhd = std(avg_nrt_diff_nonadhd, 0, 1, 'omitnan') / sqrt(size(avg_nrt_diff_nonadhd, 1));
     
     % Create a 3x2 subplot
     figure;
@@ -91,7 +88,7 @@ function plotMeanRTButtonPressVsEyecomparison(data, color_map, comparison_result
     hold off;
     xticks(1:length(conditions));
     xticklabels(conditions);
-    ylabel('Mean Button Press RT (s)');
+    ylabel('Median Button Press RT (s)');
     title('Button Press RT');
     grid on;
     legend('Orientation', 'horizontal');
@@ -120,7 +117,7 @@ function plotMeanRTButtonPressVsEyecomparison(data, color_map, comparison_result
     hold off;
     xticks(1:length(conditions));
     xticklabels(conditions);
-    ylabel('Mean Eye RT (s)');
+    ylabel('Median Eye RT (s)');
     title('Eye Movement RT');
     grid on;
     
@@ -148,7 +145,7 @@ function plotMeanRTButtonPressVsEyecomparison(data, color_map, comparison_result
     hold off;
     xticks(1:length(conditions));
     xticklabels(conditions);
-    ylabel('Mean Difference RT (s)');
+    ylabel('Median Difference RT (s)');
     title('Difference: Button Press RT - Eye RT');
     grid on;
     

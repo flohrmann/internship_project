@@ -1,90 +1,205 @@
-function plotViolinFixationStats(fixationStats, group_labels, conditions, color_map, comparison_results_folder, safe)
-    % Initialize containers for ADHD and nonADHD data
-    duration_adhd_conditions = [];
-    duration_nonadhd_conditions = [];
-    
-    condition_adhd = {};
-    condition_nonadhd = {};
+function plotViolinFixationStats(fixationStats, group_labels, conditions, condition_labels, color_map, color_map_individual, comparison_results_folder, safe)
+    % Initialize containers for ADHD and non-ADHD groups
+    mean_adhd_conditions = [];
+    mean_nonadhd_conditions = [];
+    sem_adhd_conditions = [];
+    sem_nonadhd_conditions = [];
+    all_means_condition = [];
 
-    % Loop through the struct to gather data for ADHD and non-ADHD groups
-    for i = 1:length(fixationStats)
-        for c = 1:length(conditions)
-            conditionIdx = strcmp({fixationStats(i).conditions.name}, conditions{c});
-            
-            if any(conditionIdx)
-                conditionData = fixationStats(i).conditions(conditionIdx);
-                
-                if strcmp(group_labels{i}, 'ADHD')
-                    % Append the fixation durations for each condition
-                    duration_adhd_conditions = [duration_adhd_conditions; conditionData.fixationDurations(:)];
-                    condition_adhd = [condition_adhd; repmat({conditions{c}}, length(conditionData.fixationDurations), 1)];
-                elseif strcmp(group_labels{i}, 'nonADHD')
-                    % Append the fixation durations for each condition
-                    duration_nonadhd_conditions = [duration_nonadhd_conditions; conditionData.fixationDurations(:)];
-                    condition_nonadhd = [condition_nonadhd; repmat({conditions{c}}, length(conditionData.fixationDurations), 1)];
-                end
-            end
+    % Loop through the struct to gather mean and SEM data for each group
+    for i = 1:size(fixationStats, 2)
+        conditionData = fixationStats(i);
+        all_means_condition = [conditionData.a_mean, conditionData.as_mean, ...
+                               conditionData.b_mean, conditionData.bs_mean];
+        if strcmp(group_labels{i}, 'ADHD')
+            % Append means and SEMs for ADHD group
+            mean_values = [conditionData.a_mean, conditionData.as_mean, ...
+                           conditionData.b_mean, conditionData.bs_mean];
+            sem_values = [conditionData.a_sem, conditionData.as_sem, ...
+                          conditionData.b_sem, conditionData.bs_mean];
+            mean_adhd_conditions = [mean_adhd_conditions; mean_values];
+            sem_adhd_conditions = [sem_adhd_conditions; sem_values];
+        elseif strcmp(group_labels{i}, 'nonADHD')
+            % Append means and SEMs for non-ADHD group
+            mean_values = [conditionData.a_mean, conditionData.as_mean, ...
+                           conditionData.b_mean, conditionData.bs_mean];
+            sem_values = [conditionData.a_sem, conditionData.as_sem, ...
+                          conditionData.b_sem, conditionData.bs_mean];
+            mean_nonadhd_conditions = [mean_nonadhd_conditions; mean_values];
+            sem_nonadhd_conditions = [sem_nonadhd_conditions; sem_values];
         end
     end
 
-    % Convert the condition labels to categorical and extract unique conditions
-    condition_adhd = categorical(condition_adhd);
-    condition_nonadhd = categorical(condition_nonadhd);
-    unique_conditions = categories(condition_adhd); % Assuming both groups have the same conditions
+    % Prepare data for violin plots
+    num_conditions = size(mean_adhd_conditions, 2); % Number of conditions
+    data_for_violin_mean_adhd = cell(1, num_conditions);
+    data_for_violin_mean_nonadhd = cell(1, num_conditions);
 
-    % Prepare data for ADHD and non-ADHD violin plots
-    data_for_violin_duration_adhd = cell(1, length(unique_conditions));
-    data_for_violin_duration_nonadhd = cell(1, length(unique_conditions));
-    facecolors_adhd = zeros(length(unique_conditions), 3);
-    facecolors_nonadhd = zeros(length(unique_conditions), 3);
-
-    for i = 1:length(unique_conditions)
-        % Log-transform the data before storing it in the cell arrays
-        data_for_violin_duration_adhd{i} = log10(duration_adhd_conditions(condition_adhd == unique_conditions{i}));
-        data_for_violin_duration_nonadhd{i} = log10(duration_nonadhd_conditions(condition_nonadhd == unique_conditions{i}));
-        
-        % Set face colors
-        facecolors_adhd(i, :) = color_map(char(unique_conditions{i}));
-        facecolors_nonadhd(i, :) = color_map(char(unique_conditions{i}));
+    for i = 1:num_conditions
+        % Extract mean data for each condition
+        data_for_violin_mean_adhd{i} = mean_adhd_conditions(:, i);
+        data_for_violin_mean_nonadhd{i} = mean_nonadhd_conditions(:, i);
     end
 
-    % Create figure with two subplots for fixation duration
+    %% Create figure with two subplots for fixation duration
     figure;
-
+   
     % Subplot for Fixation Duration - non-ADHD group
-    subplot(1, 2, 1);
-    [h1, L1, MX1, MED1, bw1] = violin(data_for_violin_duration_nonadhd, 'xlabel', unique_conditions, 'facecolor', facecolors_nonadhd, 'edgecolor', 'none', 'facealpha', 0.5, 'mc', 'k', 'medc', 'k--');
-    ylabel('log(Fixation Duration (ms))');
-    xlabel('Condition');
-    title('non-ADHD');
+    ax1 = subplot(1, 2, 2);
+    violin(data_for_violin_mean_nonadhd, 'xlabel', condition_labels, 'facecolor', repmat(color_map('nonADHD'), num_conditions, 1), ...
+           'edgecolor', 'none', 'facealpha', 0.5, 'mc', 'k', 'medc', 'k--');
+    ylabel('Fixation Duration (s)');
+    title('nonADHD');
+    hold on;
 
-    % Capture the y-axis limits
-    ylim_nonadhd_duration = ylim();
+    % Add SEM as error bars for non-ADHD group
+    for i = 1:num_conditions
+        x = repmat(i, size(mean_nonadhd_conditions, 1), 1);
+        hError = errorbar(x, mean_nonadhd_conditions(:, i), sem_nonadhd_conditions(:, i), 'k.', 'CapSize', 0); % Example of creating an error bar
+        set(get(get(hError, 'Annotation'), 'LegendInformation'), 'IconDisplayStyle', 'off');
+    end
 
+    % Add individual markers for non-ADHD group using color_map_individual
+    %% TODO fix individual markers
+    jitterAmount = 0.1; % Adjust for marker spread
+    for participant = 1:size(all_means_condition, 1)
+        for condition = 1:num_conditions
+            x = condition + (rand(1) - 0.5) * jitterAmount; % Jitter x-coordinates
+            scatter(x, all_means_condition(participant, condition), 60, ...
+                'MarkerFaceColor', color_map_individual(participant).color, ... % Use individual color for nonADHD
+                'MarkerEdgeColor', color_map_individual(participant).color, ...
+                'Marker', color_map_individual(participant).marker, ...
+                'HandleVisibility', 'off'); % Exclude individual markers from legend
+        end
+    end
+    hold off;
+
+    
+    
+    
     % Subplot for Fixation Duration - ADHD group
-    subplot(1, 2, 2);
-    [h2, L2, MX2, MED2, bw2] = violin(data_for_violin_duration_adhd, 'xlabel', unique_conditions, 'facecolor', facecolors_adhd, 'edgecolor', 'none', 'facealpha', 0.5, 'mc', 'k', 'medc', 'k--');
-    ylabel('log(Fixation Duration (ms))');
-    xlabel('Condition');
+    ax2 = subplot(1, 2, 1);
+    violin(data_for_violin_mean_adhd, 'xlabel', condition_labels, 'facecolor', repmat(color_map('ADHD'), num_conditions, 1), ...
+           'edgecolor', 'none', 'facealpha', 0.5, 'mc', 'k', 'medc', 'k--');
+    ylabel('Fixation Duration (s)');
     title('ADHD');
+    hold on;
 
-    % Capture the y-axis limits
-    ylim_adhd_duration = ylim();
+    % Add SEM as error bars for ADHD group
+    for i = 1:num_conditions
+        x = repmat(i, size(mean_adhd_conditions, 1), 1);
+        hError = errorbar(x, mean_adhd_conditions(:, i), sem_adhd_conditions(:, i), 'k.', 'CapSize', 0); % Example of creating an error bar
+        set(get(get(hError, 'Annotation'), 'LegendInformation'), 'IconDisplayStyle', 'off');
+    end
 
-    % Determine the global y-axis limits
-    global_ylim_duration = [min(ylim_nonadhd_duration(1), ylim_adhd_duration(1)), max(ylim_nonadhd_duration(2), ylim_adhd_duration(2))];
-
-    % Apply the global y-axis limits to both subplots
-    subplot(1, 2, 1);
-    ylim(global_ylim_duration);
-
-    subplot(1, 2, 2);
-    ylim(global_ylim_duration);
-
-    sgtitle('Comparison of Log-Transformed Fixation Durations per Condition');
-
+    % Add individual markers for ADHD group using color_map_individual
+    for participant = 1:size(mean_adhd_conditions, 1)
+        
+        for condition = 1:num_conditions
+            x = condition + (rand(1) - 0.5) * jitterAmount; % Jitter x-coordinates
+            scatter(x, mean_adhd_conditions(participant, condition), 60, ...
+                'MarkerFaceColor', color_map_individual(participant), ... % Use individual color for ADHD
+                'MarkerEdgeColor', 'k', ...
+                'Marker', 'o', ...
+                'HandleVisibility', 'off'); % Exclude individual markers from legend
+        end
+    end
+    hold off;   
+    
+    linkaxes([ax1, ax2], 'y');    % Link y-axes of the two subplots
+    sgtitle('Comparison of Fixation Durations per Condition');
     if safe == 1
-        set(gcf, 'Units', 'normalized', 'OuterPosition', [0 0 1 1]);
-        saveas(gcf, fullfile(comparison_results_folder, 'violin_log_fixation_duration_condition_group.png'));
+        set(gcf, 'Position', [0 0 1 1]);
+        saveas(gcf, fullfile(comparison_results_folder, '01_fixation_violin_fixation_duration_condition_group.png'));
     end
 end
+
+
+
+% function plotViolinFixationStats(fixationStats, group_labels, conditions, condition_labels, color_map, comparison_results_folder, safe)
+%     % Initialize containers for ADHD and non-ADHD groups
+%     mean_adhd_conditions = [];
+%     mean_nonadhd_conditions = [];
+%     sem_adhd_conditions = [];
+%     sem_nonadhd_conditions = [];
+%     
+%     % Loop through the struct to gather mean and SEM data for each group
+%     for i = 1:size(fixationStats, 2)
+%         conditionData = fixationStats(i);
+%         if strcmp(group_labels{i}, 'ADHD')
+%             % Append means and SEMs for ADHD group
+%             mean_values = [conditionData.a_mean, conditionData.as_mean, ...
+%                            conditionData.b_mean, conditionData.bs_mean];
+%             sem_values = [conditionData.a_sem, conditionData.as_sem, ...
+%                           conditionData.b_sem, conditionData.bs_sem];
+%             mean_adhd_conditions = [mean_adhd_conditions; mean_values];
+%             sem_adhd_conditions = [sem_adhd_conditions; sem_values];
+%         elseif strcmp(group_labels{i}, 'nonADHD')
+%             % Append means and SEMs for non-ADHD group
+%             mean_values = [conditionData.a_mean, conditionData.as_mean, ...
+%                            conditionData.b_mean, conditionData.bs_mean];
+%             sem_values = [conditionData.a_sem, conditionData.as_sem, ...
+%                           conditionData.b_sem, conditionData.bs_sem];
+%             mean_nonadhd_conditions = [mean_nonadhd_conditions; mean_values];
+%             sem_nonadhd_conditions = [sem_nonadhd_conditions; sem_values];
+%         end
+%     end
+% 
+%     % Prepare data for violin plots
+%     num_conditions = size(mean_adhd_conditions, 2); % Number of conditions
+%     data_for_violin_mean_adhd = cell(1, num_conditions);
+%     data_for_violin_mean_nonadhd = cell(1, num_conditions);
+%     facecolors_adhd = zeros(num_conditions, 3);
+%     facecolors_nonadhd = zeros(num_conditions, 3);
+% 
+%     for i = 1:num_conditions
+%         % Extract mean data for each condition
+%         data_for_violin_mean_adhd{i} = mean_adhd_conditions(:, i);
+%         data_for_violin_mean_nonadhd{i} = mean_nonadhd_conditions(:, i);
+%         
+%         % Set face colors
+%         facecolors_adhd(i, :) = color_map(conditions{i});
+%         facecolors_nonadhd(i, :) = color_map(conditions{i});
+%     end
+% 
+%     %% Create figure with two subplots for fixation duration
+%     figure;
+%    
+%     % Subplot for Fixation Duration - non-ADHD group
+%     ax1 = subplot(1, 2, 2);
+%     
+%     violin(data_for_violin_mean_nonadhd, 'xlabel', {'a', 'a simple', 'b', 'b simple'}, 'facecolor', facecolors_nonadhd, ...
+%            'edgecolor', 'none', 'facealpha', 0.5, 'mc', 'k', 'medc', 'k--');
+%     ylabel('Fixation Duration (s)');
+%     %xlabel(condition_labels);
+%     title('nonADHD');
+%     % Add SEM as error bars for non-ADHD group
+%     hold on;
+%     for i = 1:num_conditions
+%         x = repmat(i, size(mean_nonadhd_conditions, 1), 1);
+%         hError = errorbar(x, mean_nonadhd_conditions(:, i), sem_nonadhd_conditions(:, i), 'k.', 'CapSize', 0); % Example of creating an error bar
+%         set(get(get(hError, 'Annotation'), 'LegendInformation'), 'IconDisplayStyle', 'off');
+%     end
+%     hold off;
+% 
+%     % Subplot for Fixation Duration - ADHD group
+%     ax2 = subplot(1, 2, 1);
+%     violin(data_for_violin_mean_adhd, 'xlabel', {'a', 'a simple', 'b', 'b simple'}, 'facecolor', facecolors_adhd, ...
+%            'edgecolor', 'none', 'facealpha', 0.5, 'mc', 'k', 'medc', 'k--');
+%     ylabel('Fixation Duration (s)');
+%     title('ADHD');
+%     hold on;
+%     for i = 1:num_conditions    % Add SEM as error bars for ADHD group
+%         x = repmat(i, size(mean_adhd_conditions, 1), 1);
+%         hError = errorbar(x, mean_adhd_conditions(:, i), sem_adhd_conditions(:, i), 'k.', 'CapSize', 0); % Example of creating an error bar
+%         set(get(get(hError, 'Annotation'), 'LegendInformation'), 'IconDisplayStyle', 'off');
+%     end
+%     hold off;   
+%     
+%     linkaxes([ax1, ax2], 'y');    % Link y-axes of the two subplots
+%     sgtitle('Comparison of Fixation Durations per Condition');
+%     if safe == 1
+%         set(gcf, 'Position', [0 0 1 1]);
+%         saveas(gcf, fullfile(comparison_results_folder, '01_fixation_violin_fixation_duration_condition_group.png'));
+%     end
+% end

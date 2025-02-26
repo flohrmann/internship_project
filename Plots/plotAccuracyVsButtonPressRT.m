@@ -1,72 +1,90 @@
-function plotAccuracyVsButtonPressRT(data, color_map, comparison_results_folder, safe)
-    % Manually set the x-axis labels
-    x_labels = {'a', 'a simple', 'b', 'b simple'};
+function plotAccuracyVsButtonPressRT(data, mistakes, accuracy, rt_median_eye, rt_median_button, ...
+                                    group_labels, ids, unique_conditions, condition_labels, color_map,color_map_individual, comparison_results_folder, safe)
 
-    rt_button_press = [];
-    accuracy_all = [];
-    condition_all = [];
-    group_all = {};
+%% data by group                                
+adhd_eye    = rt_median_eye(strcmp(group_labels, 'ADHD'), :);
+nonadhd_eye = rt_median_eye(strcmp(group_labels, 'nonADHD'), :);
+                               
+adhd_button    = rt_median_button(strcmp(group_labels, 'ADHD'), :);
+nonadhd_button = rt_median_button(strcmp(group_labels, 'nonADHD'), :);
 
-    % Loop through the struct to gather data for RT comparison and accuracy
-    for i = 1:length(data)
-        rt_button_press = [rt_button_press; data(i).rt];
-        accuracy_all = [accuracy_all; data(i).accuracy];
-        condition_all = [condition_all; data(i).Condition];
-        group_all = [group_all; repmat({data(i).group}, length(data(i).Condition), 1)];
-    end
+adhd_mistakes    = mistakes(strcmp(group_labels, 'ADHD'), :);
+nonadhd_mistakes = mistakes(strcmp(group_labels, 'nonADHD'), :);
 
-    % Convert group and condition labels to categorical
-    condition_all = categorical(condition_all);
-    group_all = categorical(group_all);
+adhd_accuracy    = accuracy(strcmp(group_labels, 'ADHD'), :);
+nonadhd_accuracy = accuracy(strcmp(group_labels, 'nonADHD'), :);
 
-    % Calculate mean RT and accuracy per condition and group
-    [unique_conditions, ~, cond_idx] = unique(condition_all);
-    [unique_groups, ~, group_idx] = unique(group_all);
+num_participants = length(group_labels);
+num_conditions = length(unique_conditions);
 
-    mean_rt_button_press = zeros(length(unique_conditions), length(unique_groups));
-    mean_accuracy = zeros(length(unique_conditions), length(unique_groups));
 
-    for i = 1:length(unique_conditions)
-        for j = 1:length(unique_groups)
-            idx = cond_idx == i & group_idx == j;
-            mean_rt_button_press(i, j) = mean(rt_button_press(idx));
-            mean_accuracy(i, j) = mean(accuracy_all(idx));
-        end
-    end
+%% accuracy anova
+% % Define the Within-Subjects Design for 4 conditions
+% conditions = {'a', 'b', 'a_simple', 'b_simple'}; % Match column order in accuracy
+% within = table(conditions', 'VariableNames', {'Condition'});
+% % Create RM-ANOVA Table (Using Separate Columns for Each Condition)
+% tbl_rm = table(group_labels, accuracy(:,1), accuracy(:,2), accuracy(:,3), accuracy(:,4), ...
+%                'VariableNames', {'Group', 'a', 'b', 'a_simple', 'b_simple'});
+% % Convert categorical variables
+% tbl_rm.Group = categorical(tbl_rm.Group);
+% % Fit Repeated-Measures Model for Accuracy
+% rm_accuracy = fitrm(tbl_rm, 'a,b,a_simple,b_simple ~ Group', 'WithinDesign', within);
+% ranova_accuracy = ranova(rm_accuracy);
+% disp('Repeated-Measures ANOVA (Accuracy)');
+% disp(ranova_accuracy);
+% % Run post-hoc comparisons for Condition
+% multcompare(rm_accuracy, 'Condition', 'ComparisonType', 'bonferroni')
 
-    % Create figure
-    figure;
+%% Linear Mixed-Effects Model (LME)
+ids = repelem(1:num_participants, num_conditions, 1)';
+groups = repelem(group_labels, 1, num_conditions);
+cond = repelem(1:num_conditions,num_participants, 1);
+% Create table for analysis
+tbl = table(ids(:), groups(:), cond(:), ...
+                accuracy(:), rt_median_eye(:), rt_median_button(:), ...
+                'VariableNames', {'Participant', 'Group', 'Condition', 'Accuracy', 'RT_eye', 'RT_button'});
 
-    % Plot accuracy vs. button press RT for each group and condition
-    hold on;
-    for j = 1:length(unique_groups)
-        group = char(unique_groups(j));
-        x_data = mean_rt_button_press(:, j);
-        y_data = mean_accuracy(:, j);
-        scatter(x_data, y_data, 100, 'MarkerFaceColor', color_map(group), ...
-            'MarkerEdgeColor', 'k', 'LineWidth', 1.5);
-        
-        % Label each point with the corresponding label from x_labels at the top right with a small offset
-        x_offset = 0.003;  % Adjust this value to control the horizontal distance
-        y_offset = 0.003;  % Adjust this value to control the vertical distance
-        for k = 1:length(x_labels)
-            text(x_data(k) + x_offset, y_data(k) + y_offset, x_labels{k}, ...
-                'VerticalAlignment', 'top', 'HorizontalAlignment', 'left', ...
-                'FontSize', 10, 'Color', color_map(group), 'FontWeight', 'bold');
-        end
-    end
-    hold off;
+% Convert categorical variables
+tbl.Group = categorical(tbl.Group);
+tbl.Condition = categorical(tbl.Condition);
 
-    % Customize the plot
-    xlabel('Button Press RT (s)');
-    ylabel('Accuracy');
-    title('Accuracy vs. Button Press Reaction Time per Condition/Group');
-    legend(unique_groups, 'Location', 'northeastoutside');
-    grid on;
+% Fit LME model: Does RT predict Accuracy?
+lme_eye = fitlme(tbl, 'Accuracy ~ RT_eye * Group * Condition + (1|Participant)');
+disp('Linear Mixed-Effects Model (RT Eye ~ Accuracy)');
+disp(lme_eye);
 
-    % Save the figure if safe is set to 1
-    if safe == 1
-        set(gcf, 'Units', 'normalized', 'OuterPosition', [0 0 1 1]);
-        saveas(gcf, fullfile(comparison_results_folder, 'accuracy_vs_button_press_rt.png'));
-    end
+lme_button = fitlme(tbl, 'Accuracy ~ RT_button * Group * Condition + (1|Participant)');
+disp('Linear Mixed-Effects Model (RT Button ~ Accuracy)');
+disp(lme_button);
+
+
+
+
+
+
+
+%% spearman correlation
+% eye
+% [r_eye, p_eye] = corr(rt_median_eye(:), accuracy(:), 'Type', 'Spearman');
+% fprintf('Spearman correlation (All RT_eye vs Accuracy): r = %.3f, p = %.3f\n', r_eye, p_eye);
+% [r_eye_adhd, p_eye_adhd] = corr(adhd_eye(:), adhd_accuracy(:), 'Type', 'Spearman');
+% fprintf('Spearman correlation (ADHD RT_eye vs Accuracy): r = %.3f, p = %.3f\n', r_eye_adhd, p_eye_adhd);
+% [r_eye_non, p_eye_non] = corr(nonadhd_eye(:), nonadhd_accuracy(:), 'Type', 'Spearman');
+% fprintf('Spearman correlation (nonDHD RT_eye vs Accuracy): r = %.3f, p = %.3f\n', r_eye_non, p_eye_non);
+% 
+% % button 
+% [r_button, p_button] = corr(rt_median_button(:), accuracy(:), 'Type', 'Spearman');
+% fprintf('Spearman correlation (All RT_button vs Accuracy): r = %.3f, p = %.3f\n', r_button, p_button);
+% [r_button_adhd, p_button_adhd] = corr(adhd_button(:), adhd_accuracy(:), 'Type', 'Spearman');
+% fprintf('Spearman correlation (ADHD RT_button vs Accuracy): r = %.3f, p = %.3f\n', r_button_adhd, p_button_adhd);
+% [r_button_non, p_button_non] = corr(nonadhd_button(:), nonadhd_accuracy(:), 'Type', 'Spearman');
+% fprintf('Spearman correlation (nonADHD RT_button vs Accuracy): r = %.3f, p = %.3f\n', r_button_non, p_button_non);
+
+
+
+
+
+       
+                                
+                                
 end

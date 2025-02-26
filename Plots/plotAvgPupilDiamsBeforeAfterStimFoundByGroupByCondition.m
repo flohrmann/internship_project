@@ -1,4 +1,4 @@
-function plotAvgPupilDiamsBeforeAfterStimFoundByGroupByCondition(average, mean_diam_around_stim_adhd, mean_diam_around_stim_nonadhd, conditions, color_map, num_before, num_after, comparison_results_folder)
+function plotAvgPupilDiamsBeforeAfterStimFoundByGroupByCondition(average, y_title, mean_diam_around_stim_adhd, mean_diam_around_stim_nonadhd, conditions, color_map, num_before, num_after, outlier_threshold, comparison_results_folder)
     % Create a tiled layout for the 4 plots and 1 legend tile
     figure;
     %t = tiledlayout(3, 2, 'TileSpacing', 'compact', 'Padding', 'compact'); % 4 tiles for plots, 1 for the legend
@@ -7,15 +7,14 @@ function plotAvgPupilDiamsBeforeAfterStimFoundByGroupByCondition(average, mean_d
     condition_names = {'a', 'a simple', 'b', 'b simple'};
     
     for condIdx = 1:length(conditions)
-        condition = conditions{condIdx};  % Current condition
-
+        condition = conditions{condIdx};  
         % Extract ADHD group data
-        adhd_data_before = mean_diam_around_stim_adhd.(condition).before;  % [n_participants x 30]
-        adhd_data_after = mean_diam_around_stim_adhd.(condition).after;    % [n_participants x 10]
+        adhd_data_before = mean_diam_around_stim_adhd.(condition).before;  
+        adhd_data_after = mean_diam_around_stim_adhd.(condition).after;   
         
         % Extract non-ADHD group data
-        nonadhd_data_before = mean_diam_around_stim_nonadhd.(condition).before;  % [n_participants x 30]
-        nonadhd_data_after = mean_diam_around_stim_nonadhd.(condition).after;    % [n_participants x 10]
+        nonadhd_data_before = mean_diam_around_stim_nonadhd.(condition).before; 
+        nonadhd_data_after = mean_diam_around_stim_nonadhd.(condition).after;    
 
         % Compute the average for each group and condition
         avg_adhd_before = mean(adhd_data_before, 1, 'omitnan');
@@ -65,7 +64,7 @@ function plotAvgPupilDiamsBeforeAfterStimFoundByGroupByCondition(average, mean_d
 
         % Add labels and title for each condition
         xlabel('Time (s)');
-        ylabel('Average Pupil Diameter (mm)');
+        ylabel(y_title);
         title(condition_names(condIdx));
 
         hold off;
@@ -81,5 +80,5 @@ function plotAvgPupilDiamsBeforeAfterStimFoundByGroupByCondition(average, mean_d
     lgd.Location = 'bestoutside';
 
     set(gcf, 'Units', 'normalized', 'OuterPosition', [0 0 1 1])
-    saveas(gcf, fullfile(comparison_results_folder, 'norm_pupil_diameter_comparison_by_condition_group.png'));
+    saveas(gcf, fullfile(comparison_results_folder, strcat('norm_pupil_diameter_comparison_by_condition_group_outlier_threshold_', outlier_threshold, '.png')));
 end

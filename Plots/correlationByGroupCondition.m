@@ -20,7 +20,7 @@ function [R_group_condition, P_group_condition] = correlationByGroupCondition(da
             rt_button = [];
             rt_eye = [];
             accuracy = [];
-            
+            lapse = [];
             % Loop through participants and trials
             for participant = 1:length(data)
                 if strcmp(data(participant).group, group)
@@ -29,6 +29,7 @@ function [R_group_condition, P_group_condition] = correlationByGroupCondition(da
                             % Collect reaction times and accuracy for this group and condition
                             rt_button = [rt_button; data(participant).rt(trial)];
                             rt_eye = [rt_eye; data(participant).rt_eye(trial)];
+                            lapse = [lapse; data(participant).rt(trial) -data(participant).rt_eye(trial)];
                             accuracy = [accuracy; data(participant).accuracy(trial)];
                         end
                     end
@@ -40,9 +41,10 @@ function [R_group_condition, P_group_condition] = correlationByGroupCondition(da
             rt_button = rt_button(valid_idx);
             rt_eye = rt_eye(valid_idx);
             accuracy = accuracy(valid_idx);
+            lapse = lapse(valid_idx);
             
             % Perform correlation analysis for the current group and condition
-            [R, P] = corr([rt_button, rt_eye, accuracy], 'Type', 'Pearson');
+            [R, P] = corr([rt_button, rt_eye, accuracy, lapse], 'Type', 'Pearson');
             
             % Store results for the current group and condition
             R_group_condition.(group){c} = R;

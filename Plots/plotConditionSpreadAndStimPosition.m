@@ -23,7 +23,7 @@ function plotConditionSpreadAndStimPosition(rand_trials, num_rows, num_columns, 
     end
 
     % Plot the data in a 2x2 subplot layout
-    figure;
+    figure(1);
     for i = 1:numConditions
         subplot(2, 2, i);
         imagesc(countMatrices{i});
@@ -39,7 +39,7 @@ function plotConditionSpreadAndStimPosition(rand_trials, num_rows, num_columns, 
     totalCountMatrix = sum(cat(3, countMatrices{:}), 3);
 
     % Plot the summed conditions
-    figure;
+    figure(2);
     imagesc(totalCountMatrix);
     colorbar;
     title('Sum of All Conditions');

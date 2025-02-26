@@ -19,7 +19,7 @@ function searchLatencyStats = analyzeSearchLatency(all_fixations, data, conditio
             
             % Assuming that `rt_eye` in `data` indicates the time of eye movements
             stimulusOnset = data(participant).StimulusOnsetTime(trial);
-            eyeMovementTimes = data(participant).rt_eye{trial};
+            eyeMovementTimes = data(participant).rt_eye(trial);
             
             if ~isempty(eyeMovementTimes) && length(fixations) > 1
                 % Search latency: Time from stimulus onset to the first saccade/fixation shift

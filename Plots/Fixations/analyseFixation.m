@@ -1,4 +1,4 @@
-function fixations = analyseFixation(data, distThreshold, minDuration, screenXpixels, screenYpixels, safe, analysis_folder)
+function fixations = analyseFixation(id, plot_these, data, dist_threshold, min_duration, screenXpixels, screenYpixels, safe, analysis_folder, length_fixation)
 
     % Initialize arrays for storing fixations and target centers
     targetCenters = [];
@@ -13,46 +13,60 @@ function fixations = analyseFixation(data, distThreshold, minDuration, screenXpi
         target = data.TargetPosition(trialIdx, :);
         target_x_center = data.x_centers{trialIdx}(target(2), target(1));
         target_y_center = screenYpixels - data.y_centers{trialIdx}(target(2), target(1));
-        
+        %target_y_center = data.y_centers{trialIdx}(target(2), target(1));
+
         % Store the target center for this trial
         targetCenters = [targetCenters; [target_x_center, target_y_center]];
         
         % Convert gaze and target positions for eyeTrial
-        eyeFixation = detect_fixations_with_target(data.eyeTrial(trialIdx), screenXpixels, screenYpixels, distThreshold, minDuration);
+        eyeFixation = detect_fixations(data.eyeTrial(trialIdx), screenXpixels, screenYpixels, dist_threshold, min_duration);
         
         % Convert gaze and target positions for stimulusTrial
-        stimulusFixation = detect_fixations_with_target(data.stimulusTrial(trialIdx), screenXpixels, screenYpixels, distThreshold, minDuration);
+        stimulusFixation = detect_fixations(data.stimulusTrial(trialIdx), screenXpixels, screenYpixels, dist_threshold, min_duration);
         
+        % timepoint trial/stimulus start
+        trial_start    = double(data.eyeTrial(trialIdx).systemTimeStamp(1,1))/ 1e6;
+        stimulus_start = double(data.stimulusTrial(trialIdx).systemTimeStamp(1,1))/ 1e6;
         % Store the fixations for this trial
-        eyeFixations = [eyeFixations, struct('trial', trialIdx, 'fixations', eyeFixation)];
-        stimulusFixations = [stimulusFixations, struct('trial', trialIdx, 'fixations', stimulusFixation)];
+        eyeFixations = [eyeFixations, struct('trial', trialIdx, 'trialStart', trial_start ,'fixations', eyeFixation)];
+        stimulusFixations = [stimulusFixations, struct('trial', trialIdx, 'stimStart', stimulus_start, 'fixations', stimulusFixation)];
     end
 
     % Store the fixation data along with the target information
-    fixations.targetCenters = targetCenters';
+    fixations.targetCenters = targetCenters'; % (x,y)
     fixations.eyeFixations = eyeFixations;
     fixations.stimulusFixations = stimulusFixations;
-
-    save(fullfile(analysis_folder, 'fixations.mat'), 'fixations');
+    fixations.length = length_fixation;
+    fixations.id = id;
+    save(strcat(analysis_folder, '\fixations.mat'), 'fixations');
+    %save(fullfile(analysis_folder, 'fixations.mat'), 'fixations');
 
     % Display the results if safe is true
     if safe
-        disp('Fixations detected:');
+        %disp('Fixations detected:');
         %display_fixations(fixations.eyeFixations);
-        display_fixations(fixations.stimulusFixations);
+        %display_fixations(fixations.stimulusFixations);
+    end
+    
+    
+    % plot some fixations for checking
+    if length(plot_these) >= 1
+        plotFixations(data, fixations, screenXpixels, screenYpixels, plot_these, analysis_folder, length_fixation, safe);
+        close all
+    else
     end
 end
 
 
 %% 
-function [fixations] = detect_fixations_with_target(trialData, screenXpixels, screenYpixels, distThreshold, minDuration)
+function [fixations] = detect_fixations(trialData, screenXpixels, screenYpixels, distThreshold, minDuration)
     % Detects fixations based on proximity of consecutive gaze points and includes target information.
     % trialData: structure containing trial data (either eyeTrial or stimulusTrial)
     % distThreshold: maximum distance between consecutive points to consider as fixation (in pixels).
     % minDuration: minimum number of consecutive points to qualify as a fixation.
 
     % Preallocate the fixations array
-    fixations = struct('startIdx', {}, 'endIdx', {}, 'center', {}, 'duration', {});
+    fixations = struct('startIdx', {}, 'endIdx', {}, 'center', {}, 'duration', {}, 'fixStart', {}, 'fixEnd', {});
 
     % Convert gaze points to screen coordinates
     xGaze = (trialData.left.gazePoint.onDisplayArea(1, :)) * screenXpixels;
@@ -72,7 +86,10 @@ function [fixations] = detect_fixations_with_target(trialData, screenXpixels, sc
         duration = endIdx - startIdx + 1;
         centerX = mean(xGaze(startIdx:endIdx));
         centerY = mean(yGaze(startIdx:endIdx));
-        fixations(end+1) = struct('startIdx', startIdx, 'endIdx', endIdx, 'center', [centerX, centerY], 'duration', duration);
+        fix_start = double(trialData.systemTimeStamp(1,startIdx))/ 1e6;
+        fix_end = double(trialData.systemTimeStamp(1,endIdx))/ 1e6;
+        %fixations(end+1) = struct('startIdx', startIdx, 'endIdx', endIdx, 'center', [centerY,centerX], 'duration', duration, 'fixStart', fix_start, 'fixEnd', fix_end);
+        fixations(end+1) = struct('startIdx', startIdx, 'endIdx', endIdx, 'center', [centerX, centerY], 'duration', duration, 'fixStart', fix_start, 'fixEnd', fix_end);
     end
 end
 
@@ -91,12 +108,7 @@ function display_fixations(fixations)
 end
 
 
-
-
-
-
-
-
+%%
 function [fixationGroups] = split_fixations(isFixation, minDuration)
     % This helper function groups consecutive indices of fixations
     fixationIdx = find(isFixation);

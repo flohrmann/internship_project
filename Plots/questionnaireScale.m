@@ -20,8 +20,8 @@ function results_table = questionnaireScale(data, folder)
     a_symptom_counts = a_scores >= thresholds(1:6);
     
     % Mean answers 
-    mean_symptoms = sum(scores, 2);
-    a_mean_symptoms = sum(a_scores, 2);
+    mean_symptoms = sum(scores, 2)/19;
+    a_mean_symptoms = sum(a_scores, 2)/6;
 
     % Sum the number of symptoms per participant
     sum_symptom_counts = sum(symptom_counts, 2);
