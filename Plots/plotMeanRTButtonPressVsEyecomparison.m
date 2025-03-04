@@ -1,4 +1,4 @@
-function plotMeanRTButtonPressVsEyecomparison(data, color_map, conditions, comparison_results_folder, safe)
+function plotMeanRTButtonPressVsEyecomparison(data, color_map, conditions,condition_labels,  comparison_results_folder, safe)
     % Initialize empty arrays to hold the overall mean RTs and SEMs per condition for each group
     avg_rt_adhd = [];
     avg_rt_eye_adhd = [];
@@ -87,7 +87,7 @@ function plotMeanRTButtonPressVsEyecomparison(data, color_map, conditions, compa
         'DisplayName', 'nonADHD', 'LineWidth', 2, 'MarkerSize', 8);
     hold off;
     xticks(1:length(conditions));
-    xticklabels(conditions);
+    xticklabels(condition_labels);
     ylabel('Median Button Press RT (s)');
     title('Button Press RT');
     grid on;
@@ -102,7 +102,7 @@ function plotMeanRTButtonPressVsEyecomparison(data, color_map, conditions, compa
         'DisplayName', 'nonADHD', 'LineWidth', 2, 'MarkerSize', 8);
     hold off;
     xticks(1:length(conditions));
-    xticklabels(conditions);
+    xticklabels(condition_labels);
     ylabel('Normalized Button Press RT (s)');
     title('Normalized Button Press RT');
     grid on;
@@ -116,7 +116,7 @@ function plotMeanRTButtonPressVsEyecomparison(data, color_map, conditions, compa
         'DisplayName', 'nonADHD', 'LineWidth', 2, 'MarkerSize', 8);
     hold off;
     xticks(1:length(conditions));
-    xticklabels(conditions);
+    xticklabels(condition_labels);
     ylabel('Median Eye RT (s)');
     title('Eye Movement RT');
     grid on;
@@ -130,7 +130,7 @@ function plotMeanRTButtonPressVsEyecomparison(data, color_map, conditions, compa
         'DisplayName', 'nonADHD', 'LineWidth', 2, 'MarkerSize', 8);
     hold off;
     xticks(1:length(conditions));
-    xticklabels(conditions);
+    xticklabels(condition_labels);
     ylabel('Normalized Eye RT (s)');
     title('Normalized Eye Movement RT');
     grid on;
@@ -144,7 +144,7 @@ function plotMeanRTButtonPressVsEyecomparison(data, color_map, conditions, compa
         'DisplayName', 'nonADHD', 'LineWidth', 2, 'MarkerSize', 8);
     hold off;
     xticks(1:length(conditions));
-    xticklabels(conditions);
+    xticklabels(condition_labels);
     ylabel('Median Difference RT (s)');
     title('Difference: Button Press RT - Eye RT');
     grid on;
@@ -158,7 +158,7 @@ function plotMeanRTButtonPressVsEyecomparison(data, color_map, conditions, compa
         'DisplayName', 'nonADHD', 'LineWidth', 2, 'MarkerSize', 8);
     hold off;
     xticks(1:length(conditions));
-    xticklabels(conditions);
+    xticklabels(condition_labels);
     ylabel('Normalized Difference RT (s)');
     title('Normalized Difference: Button Press RT - Eye RT');
     grid on;

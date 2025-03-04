@@ -31,9 +31,9 @@ sem_adhd = std(adhd_medians, 0, 1, 'omitnan')./ sqrt(size(adhd_medians, 1));
 median_nonAdhdMedians = median(nonadhd_medians, 1, 'omitnan');
 sem_nonadhd = std(nonadhd_medians, 0, 1, 'omitnan')./ sqrt(size(nonadhd_medians, 1));
 
-plotADHDnonADHDVariance('Average Fixation Duration',... % sgtitle
-                        adhd_medians, median_adhdMedians, sem_adhd, 'ADHD', 'northeast', ...       % adhd data
-                        nonadhd_medians, median_nonAdhdMedians, sem_nonadhd, 'nonADHD', 'northeast',...  % nonadhd data
+plotADHDnonADHDandDiff('Average Fixation Duration',... % sgtitle
+                        adhd_medians, median_adhdMedians, sem_adhd, 'ADHD', 'northwest', ...       % adhd data
+                        nonadhd_medians, median_nonAdhdMedians, sem_nonadhd, 'nonADHD', 'northwest',...  % nonadhd data
                         ids, labels, 'Median Fixation Duration (s)', ... % x, y axis labels
                         group_labels, conditions, color_map, participant_map, ...
                         fullfile(comparison_results_folder, '01_fixation_duration_condition_group_diff.png'));

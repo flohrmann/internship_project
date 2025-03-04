@@ -27,14 +27,8 @@ function cutData = cutEyeTrackingData(folder_name, trial_results, eye_tracking_d
         [~, blankIdx] = min(abs(timestamps - blankStartTime));
         [~, stimulusIdx] = min(abs(timestamps - StimulusOnsetTime));
         [~, endIdx] = min(abs(timestamps - trialEndTime));
-
-        %% plot the two different timepoints (just a line with both of their point on it 
-%         figure(2); clf;
-%         plot(trial_results.fixStartTime*1000, 'r*'); hold on;
-%         plot(trial_results.StimulusOnsetTime*1000, 'b.');
-
         
-         %% plot test
+        %% plot test
         FixationStart_times = trial_results.fixStartTime; % seconds
         ButtonPress_times = trial_results.trialEndTime;
         StimulusStart_time  = trial_results.StimulusOnsetTime; % seconds
@@ -51,55 +45,18 @@ function cutData = cutEyeTrackingData(folder_name, trial_results, eye_tracking_d
                 [~, StimulusOnset_Index_InEyeTrackerTimeStamps(t)] = min(abs(eye_tracker_times_inSeconds -StimulusStart_time(t)));
                 [~, ButtonPressend_Index_MatlabTimeStamp(t)] = min(abs(eye_tracker_times_inSeconds - ButtonPress_times(t)));
         end
-        
-        
-%         figure(10); clf; plot(eye_tracker_times_inSeconds, 'r.'); hold;
-%         plot(Fixation_Index_InEyeTrackerTimeStamps, eye_tracker_times_inSeconds(Fixation_Index_InEyeTrackerTimeStamps), 'b*');
-%         plot(StimulusOnset_Index_InEyeTrackerTimeStamps, eye_tracker_times_inSeconds(StimulusOnset_Index_InEyeTrackerTimeStamps), 'g>');
-%         plot(ButtonPressend_Index_MatlabTimeStamp, eye_tracker_times_inSeconds(ButtonPressend_Index_MatlabTimeStamp), 'ks');
-%         
-        % Assuming the rest of your code is the same up until the plotting part
-
-% %%  Clear figure and set it up
-% figure(10); clf;
-% hold on;
-% 
-% % Overlay Fixation Start points
-% plot(Fixation_Index_InEyeTrackerTimeStamps, eye_tracker_times_inSeconds(Fixation_Index_InEyeTrackerTimeStamps), ...
-%     'b*', 'MarkerSize', 8, 'DisplayName', 'Fixation Start');
-% 
-% % Overlay Stimulus Onset points
-% plot(StimulusOnset_Index_InEyeTrackerTimeStamps, eye_tracker_times_inSeconds(StimulusOnset_Index_InEyeTrackerTimeStamps), ...
-%     'g>', 'MarkerSize', 8, 'DisplayName', 'Stimulus Start');
-% 
-% % Overlay Button Press End points
-% plot(ButtonPressend_Index_MatlabTimeStamp, eye_tracker_times_inSeconds(ButtonPressend_Index_MatlabTimeStamp), ...
-%     'ks', 'MarkerSize', 8, 'DisplayName', 'Button Press End');
-% 
-% % Add labels and title
-% xlabel('Trial Index');
-% ylabel('Time (seconds)');
-% title('Trial Time Points per Trial: Fixation, Stimulus, Button Press');
-% 
-% % Add legend to identify each timepoint type
-% legend();
-% 
-% % Enhance plot with grid
-% grid on;
-% hold off;
-
-
-%         
+       
         %% cut the data         
         % complete trial
         cutData(trial).startIdxWithInstructionScreen = trialStartIdx;
         cutData(trial).completeTrial = extractEyeTrackingData(eye_tracking_data, trialStartIdx, endIdx);
-        % trial after user presses start trial button
+        % trial after user presses start trial button: fixation, blank screen and stimulation screen
         cutData(trial).startIdx = startIdx;
         cutData(trial).eyeTrial = extractEyeTrackingData(eye_tracking_data, startIdx, endIdx);
-        %disp(size(cutData(trial).eyeTrial.systemTimeStamp, 2));
+        
         if size(cutData(trial).eyeTrial.systemTimeStamp, 2) < 25
-            disp('damn') %(blankIdx - trialStartIdx) +
+            disp('less than 25 datapoints in this trial');
+            %disp(size(cutData(trial).eyeTrial.systemTimeStamp, 2));
         else
         end
         cutData(trial).blankIdx = blankIdx; % blank screen index
@@ -142,7 +99,8 @@ function cutData = cutEyeTrackingData(folder_name, trial_results, eye_tracking_d
     cutData = struct2table(cutData);
     
     % Save the table to a .mat file
-    results_file = [folder_name, '\cut_trials_' , datestr(now, 'yyyymmdd_HHMM'), '.mat'];
+    %results_file = [folder_name, '\cut_trials_' , datestr(now, 'yyyymmdd_HHMM'), '.mat'];
+    results_file = [folder_name, '\cut_trials.mat'];
     save(results_file, 'cutData');
     disp('Eye tracking data cut into smaller structs per trial and saved as a table.');
 end

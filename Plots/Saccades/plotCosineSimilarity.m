@@ -130,23 +130,23 @@ end
 
 
 
-%% whack quiver plot for actual + optimal path in one
-cosSim_all = dot(s_end_vector, target_vector, 2) ./ (vecnorm(s_end_vector, 2, 2) .* vecnorm(target_vector, 2, 2));
-figure;        hold on;        grid on;
-for a = 1:num_trials
-    if ~isnan(cosSim_all(a))
-        % Plot start, end, and target points
-        scatter([x_s_start(a), x_s_end(a), x_target(a)], [y_s_start(a), y_s_end(a), y_target(a)], 100, 'filled');
-        % Plot vectors
-        quiver(x_s_start(a), y_s_start(a), x_s_end_centered(a), y_s_end_centered(a), 0, 'r', 'LineWidth', 1.5); % Actual path
-        quiver(x_s_start(a), y_s_start(a), x_target_centered(a), y_target_centered(a), 0, 'g', 'LineWidth', 1.5); % Optimal path
-        % Label cosine similarity
-        text(x_s_end(a), y_s_end(a), sprintf('%.2f', cosSim_all(a)), 'Color', 'b', 'FontSize', 10);
-    end
-end
-xlabel('screen x axis pixels');  ylabel('screen y axis pixels');
-title(strcat('ID ' , num2str(trial_metrics.id), ': Saccade Paths and Cosine Similarity to Optimal Paths'));
-legend('Points', 'Actual Path', 'Optimal Path', 'Location', 'best');
+%%  quiver plot for actual + optimal path in one
+% cosSim_all = dot(s_end_vector, target_vector, 2) ./ (vecnorm(s_end_vector, 2, 2) .* vecnorm(target_vector, 2, 2));
+% figure;        hold on;        grid on;
+% for a = 1:num_trials
+%     if ~isnan(cosSim_all(a))
+%         % Plot start, end, and target points
+%         scatter([x_s_start(a), x_s_end(a), x_target(a)], [y_s_start(a), y_s_end(a), y_target(a)], 100, 'filled');
+%         % Plot vectors
+%         quiver(x_s_start(a), y_s_start(a), x_s_end_centered(a), y_s_end_centered(a), 0, 'r', 'LineWidth', 1.5); % Actual path
+%         quiver(x_s_start(a), y_s_start(a), x_target_centered(a), y_target_centered(a), 0, 'g', 'LineWidth', 1.5); % Optimal path
+%         % Label cosine similarity
+%         text(x_s_end(a), y_s_end(a), sprintf('%.2f', cosSim_all(a)), 'Color', 'b', 'FontSize', 10);
+%     end
+% end
+% xlabel('screen x axis pixels');  ylabel('screen y axis pixels');
+% title(strcat('ID ' , num2str(trial_metrics.id), ': Saccade Paths and Cosine Similarity to Optimal Paths'));
+% legend('Points', 'Actual Path', 'Optimal Path', 'Location', 'best');
 
 
 %% quiver two plots one optimal one actual

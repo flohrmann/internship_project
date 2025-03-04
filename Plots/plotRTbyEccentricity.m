@@ -4,6 +4,7 @@ function plotRTbyEccentricity(trial_results, eye_rt, screenXpixels, screenYpixel
     centerCol = round(n_columns / 2);
     
     % Define inner positions as a 3x3 block around the center
+    
     innerPositions = [
         centerRow-1, centerCol-1;
         centerRow-1, centerCol;

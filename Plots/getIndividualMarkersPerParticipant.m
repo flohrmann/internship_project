@@ -9,17 +9,17 @@ function participant_map = getIndividualMarkersPerParticipant(group_labels, ids,
     numParticipants = length(group_labels);
 
     % Generate a rainbow gradient colormap with space between groups
-    rainbow_colors = jet(numParticipants + 12); % Add extra colors for spacing
+    rainbow_colors = jet(numParticipants + 14); % Add extra colors for spacing
     numNonADHD = sum(strcmp(group_labels, 'nonADHD'));
     numADHD = sum(strcmp(group_labels, 'ADHD'));
     
     
     % Assign nonADHD and ADHD colors with a gap in between
-    adhd_colors = rainbow_colors(4:numADHD+4, :);                 % blue to green
-    nonadhd_colors = rainbow_colors(numParticipants-numNonADHD+11:end, :);   % yellow to red, skip some in between for spacing between groups
+    adhd_colors = rainbow_colors(10:numADHD+10, :);                 % blue to green
+    nonadhd_colors = rainbow_colors(numParticipants-numNonADHD+14:end, :);   % yellow to red, skip some in between for spacing between groups
 
     % Define unique markers for participants
-    markers = {'o', 's', 'd', '^', 'v', '<', '>', 'p', 'h', '*'};
+    markers = {'o', 's', '^','d', 'v', 'p', '<', 'h','>', '*'};
     numMarkers = length(markers);
 
     % Initialize the map

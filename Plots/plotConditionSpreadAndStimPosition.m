@@ -1,4 +1,4 @@
-function plotConditionSpreadAndStimPosition(rand_trials, num_rows, num_columns, analysis_folder)
+function plotConditionSpreadAndStimPosition(rand_trials, num_rows, num_columns, analysis_folder, condition_labels)
     targetPositions = table2array(rand_trials(:, {'TargetPosition'}));%, 'TargetPosition'}));
 
     conditions = categorical(rand_trials.Condition);
@@ -28,9 +28,9 @@ function plotConditionSpreadAndStimPosition(rand_trials, num_rows, num_columns, 
         subplot(2, 2, i);
         imagesc(countMatrices{i});
         colorbar;
-        title(['Condition: ', char(uniqueConditions(i))]);
-        xlabel('Y Position');
-        ylabel('X Position');
+        title(['Condition: ', condition_labels{i}]);
+        xlabel('X Position');
+        ylabel('Y Position');
         axis equal tight;
         saveas(gcf,strcat(analysis_folder, '\condition_spread.png'));
 

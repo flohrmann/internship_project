@@ -41,7 +41,7 @@ function plotBarNumFixations(fixationStats, group_labels, ids,  conditions, cond
     avg_nonadhd = median(avg_nonadhd_conditions, 1);
     sem_nonadhd = std(avg_nonadhd_conditions, [], 1) ./ sqrt(size(avg_nonadhd_conditions, 1));
 
-    plotADHDnonADHDVariance('Number of Fixations per Trial',... % sgtitle
+    plotADHDnonADHDandDiff('Number of Fixations per Trial',... % sgtitle
                             avg_adhd_conditions, avg_adhd, sem_adhd, 'ADHD', 'northeast', ...  % adhd data
                             avg_nonadhd_conditions, avg_nonadhd, sem_nonadhd, 'nonADHD', 'northeast', ...  % nonadhd data
                             ids,condition_labels, 'Median Fixations per Trial', ...% x, y axis labels

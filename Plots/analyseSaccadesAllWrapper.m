@@ -1,4 +1,4 @@
-function all_saccades = analyseSaccadesAllWrapper(data, all_fixations, plot_these, screenXpixels, screenYpixels, safe, folders, subfolder_fixation, comparison_results_folder, fixation_duration)
+function all_saccades = analyseSaccadesAllWrapper(data, all_fixations, plot_these, screenXpixels, screenYpixels, safe, path_to_folders, folders, subfolder_fixation, comparison_results_folder, fixation_duration)
 
 fd_label = strcat(num2str(fixation_duration), 'ms');
 all_saccades = struct();
@@ -41,7 +41,7 @@ end
 
 % plot saccades
 for participant = 1:size(data, 2)
-    analysis_folder = strcat(folders{participant}, subfolder_fixation, '\');
+    analysis_folder = strcat(path_to_folders, folders{participant}, subfolder_fixation, '\');
     participant_data = data(participant).stimulusTrial;
     participant_fixations = all_fixations(participant).fixations.stimulusFixations;
     plotFixationSaccades(data(participant), all_saccades(participant), all_fixations(participant), screenXpixels, screenYpixels, plot_these, analysis_folder, safe);

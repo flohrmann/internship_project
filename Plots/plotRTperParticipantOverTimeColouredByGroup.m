@@ -14,7 +14,7 @@ for i = 1:length(data)
     end
     
     % Plot reaction times for this participant
-    plot(1:length(data(i).rt), data(i).rt, 'Color', plot_color, 'DisplayName', ['Participant ' num2str(i)]);
+    plot(1:length(data(i).rt), data(i).rt, 'Color', plot_color, 'DisplayName', ['ID ' num2str(data(i).id)]);
 end
 
 title('Reaction Times Over Trials');
@@ -22,7 +22,7 @@ xlabel('Trial Number');
 ylabel('Reaction Time');
 
 % Update legend to show ADHD and non-ADHD groups
-legend('Location', 'northeastoutside');
+legend('Location', 'northeast');
 hold off;
 
 if safe == 1

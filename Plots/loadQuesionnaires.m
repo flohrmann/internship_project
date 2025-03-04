@@ -1,4 +1,4 @@
-function data = loadQuesionnaires(folders, group_labels)
+function [data, quest_table] = loadQuesionnaires(path, folders, group_labels, ids)
 % loads questionaire results from paths provided
 % sepperates them by group_labels (ADHD, nonADHD)
 % return struct with two tables: ADHD and nonADHD
@@ -13,16 +13,16 @@ num_questions = 18;
 column_names = [{'id'}, arrayfun(@(x) sprintf('Question%d', x), 1:num_questions, 'UniformOutput', false)];
 
 % Define the response mapping
-response_mapping = containers.Map({'Never', 'Rarely', 'Sometimes', 'Often', 'Very Often'}, [1, 2, 3, 4, 5]);
+response_mapping = containers.Map({'Never', 'Rarely', 'Sometimes', 'Often', 'Very Often'}, [0, 1, 2, 3, 4]);
 
 % Load the data from each folder
 for i = 1:length(folders)
-    folder = folders{i};
+    folder = strcat(path, folders{i});
     label = group_labels{i};
     
     % Extract the ID from the folder name (the number after the last backslash)
     %[~, folder_name] = fileparts(folder);
-    id = i;%sscanf(folder_name, '%d_%*s'); % Extract the leading number (ID)
+    id = ids(i);%sscanf(folder_name, '%d_%*s'); % Extract the leading number (ID)
     
     % Find the CSV file that matches the pattern 'questionnaire*.csv' in the folder
     file = dir(fullfile(folder, 'questionnaire*.csv'));
@@ -50,4 +50,10 @@ for i = 1:length(folders)
     else
         warning('No questionnaire file found in folder: %s', folder);
     end
+       
 end
+adhd_data = data.ADHD;
+non_adhd_data = data.nonADHD;
+quest_table = [adhd_data; non_adhd_data];
+fprintf('Loaded %d ADHD entries and %d nonADHD entries.\n', height(adhd_data), height(non_adhd_data));
+

@@ -18,6 +18,144 @@ num_participants = length(group_labels);
 num_conditions = length(unique_conditions);
 
 
+%% anova
+[p,tbl,stats] = anova1(rt_median_button(:), mistakes(:));
+disp(tbl)
+
+%% eye
+ymax = max(accuracy(:)); 
+ymin = min(accuracy(:));
+xmax = max(rt_median_eye(:)); 
+xmin = min(rt_median_eye(:)); 
+sharedYLimits = [ymin, ymax];
+sharedXLimits = [xmin, xmax];
+
+figure;
+sgtitle('Gaze-RT vs Accuracy by Condition [Participant Medians and Regression Line per Condition]');
+
+% ADHD Subplot
+[r_1, p_1] = corr(adhd_eye(:), adhd_accuracy(:), 'Type', 'Spearman');
+
+subplot(1, 2, 1); hold on;
+legendEntries_ADHD = cell(1, num_conditions);
+for c = 1:num_conditions
+    % Extract RT and Accuracy values for ADHD group
+    rt_data = adhd_eye(:, c); 
+    acc_data = adhd_accuracy(:, c); 
+    % Scatter plot for ADHD group
+    scatterHandles_ADHD(c) = scatter(rt_data, acc_data, 50, color_map(unique_conditions{c}), 'filled', 'DisplayName', condition_labels{c});
+    % Store legend entry
+    legendEntries_ADHD{c} = sprintf('%s', condition_labels{c});
+    % Fit regression line
+    coeffs = polyfit(rt_data, acc_data, 1);
+    x_fit = linspace(min(rt_data), max(rt_data), 100);
+    y_fit = polyval(coeffs, x_fit);
+    plot(x_fit, y_fit, 'Color', color_map(unique_conditions{c}), 'LineWidth', 1.5);
+end
+xlabel('Reaction Time (s)');ylabel('Accuracy (%)');
+%title(sprintf('ADHD - Spearman Correlation: r = %.2f, p = %.3f\n', r_1, p_1));
+title('ADHD');
+legend(scatterHandles_ADHD, legendEntries_ADHD, 'Location', 'southwest', 'Interpreter', 'none');
+ylim(sharedYLimits);xlim(sharedXLimits);
+hold off;
+
+% Non-ADHD Subplot
+[r_2, p_2] = corr(nonadhd_eye(:), nonadhd_accuracy(:), 'Type', 'Spearman');
+fprintf('nonadhd Spearman Correlation: r = %.2f, p = %.3f\n', r_2, p_2)
+subplot(1, 2, 2); hold on;
+legendEntries_NonADHD = cell(1, num_conditions);
+
+for c = 1:num_conditions
+    % Extract RT and Accuracy values for Non-ADHD group
+    rt_data = nonadhd_eye(:, c); 
+    acc_data = nonadhd_accuracy(:, c); 
+    % Scatter plot for Non-ADHD group
+    scatterHandles_nonADHD(c) = scatter(rt_data, acc_data, 50, color_map(unique_conditions{c}), 'filled', 'DisplayName', condition_labels{c});
+    % Store legend entry
+    legendEntries_NonADHD{c} = sprintf('%s', condition_labels{c}); 
+    % Fit regression line
+    coeffs = polyfit(rt_data, acc_data, 1);
+    x_fit = linspace(min(rt_data), max(rt_data), 100);
+    y_fit = polyval(coeffs, x_fit);
+    plot(x_fit, y_fit, 'Color', color_map(unique_conditions{c}), 'LineWidth', 1.5);
+end
+xlabel('Reaction Time (s)');ylabel('Accuracy (%)');
+%title(sprintf('nonADHD - Spearman Correlation: r = %.2f, p = %.3f\n', r_2, p_2));
+title('nonADHD');
+legend(scatterHandles_nonADHD, legendEntries_NonADHD, 'Location', 'southwest', 'Interpreter', 'none');
+ylim(sharedYLimits);xlim(sharedXLimits);
+hold off;
+
+set(gcf, 'Position', [50, 50, 1200, 600]); 
+saveas(gcf, strcat(comparison_results_folder, "\11_accuracy_rt_eye.png"));
+
+
+%% button press
+xmax = max(adhd_button(:)); 
+xmin = min(nonadhd_button(:)); 
+sharedYLimits = [ymin, ymax];
+sharedXLimits = [xmin, xmax];
+
+figure;
+sgtitle('Button-Press-RT vs Accuracy by Condition [Participant Medians and Regression Line per Condition]');
+
+% ADHD Subplot
+[r_3, p_3] = corr(adhd_button(:), adhd_accuracy(:), 'Type', 'Spearman');
+
+subplot(1, 2, 1); hold on;
+legendEntries_ADHD = cell(1, num_conditions);
+for c = 1:num_conditions
+    % Extract RT and Accuracy values for ADHD group
+    rt_data = adhd_button(:, c); 
+    acc_data = adhd_accuracy(:, c); 
+    % Scatter plot for ADHD group
+    scatterHandles_ADHD(c) = scatter(rt_data, acc_data, 50, color_map(unique_conditions{c}), 'filled', 'DisplayName', condition_labels{c});
+    % Store legend entry
+    legendEntries_ADHD{c} = sprintf('%s', condition_labels{c});
+    % Fit regression line
+    coeffs = polyfit(rt_data, acc_data, 1);
+    x_fit = linspace(min(rt_data), max(rt_data), 100);
+    y_fit = polyval(coeffs, x_fit);
+    plot(x_fit, y_fit, 'Color', color_map(unique_conditions{c}), 'LineWidth', 1.5);
+end
+xlabel('Reaction Time (s)');ylabel('Accuracy (%)');
+%title(sprintf('ADHD - Spearman Correlation: r = %.2f, p = %.3f\n', r_3, p_3));
+title('ADHD');
+legend(scatterHandles_ADHD, legendEntries_ADHD, 'Location', 'best', 'Interpreter', 'none');
+ylim(sharedYLimits);xlim(sharedXLimits);
+hold off;
+
+% Non-ADHD Subplot
+[r_spearman, p_spearman] = corr(nonadhd_button(:), nonadhd_accuracy(:), 'Type', 'Spearman');
+fprintf('nonadhd Spearman Correlation: r = %.2f, p = %.3f\n', r_spearman, p_spearman)
+subplot(1, 2, 2); hold on;
+legendEntries_NonADHD = cell(1, num_conditions);
+
+for c = 1:num_conditions
+    % Extract RT and Accuracy values for Non-ADHD group
+    rt_data = nonadhd_button(:, c); 
+    acc_data = nonadhd_accuracy(:, c); 
+    % Scatter plot for Non-ADHD group
+    scatterHandles_nonADHD(c) = scatter(rt_data, acc_data, 50, color_map(unique_conditions{c}), 'filled', 'DisplayName', condition_labels{c});
+    % Store legend entry
+    legendEntries_NonADHD{c} = sprintf('%s', condition_labels{c}); 
+    % Fit regression line
+    coeffs = polyfit(rt_data, acc_data, 1);
+    x_fit = linspace(min(rt_data), max(rt_data), 100);
+    y_fit = polyval(coeffs, x_fit);
+    plot(x_fit, y_fit, 'Color', color_map(unique_conditions{c}), 'LineWidth', 1.5);
+end
+xlabel('Reaction Time (s)');ylabel('Accuracy (%)');
+%title(sprintf('nonADHD - Spearman Correlation: r = %.2f, p = %.3f\n', r_spearman, p_spearman));
+title('nonADHD');
+legend(scatterHandles_nonADHD, legendEntries_NonADHD, 'Location', 'best', 'Interpreter', 'none');
+ylim(sharedYLimits);xlim(sharedXLimits);
+hold off;
+
+set(gcf, 'Position', [50, 50, 1200, 600]); 
+saveas(gcf, strcat(comparison_results_folder, "\11_accuracy_rt_buttonpress.png"));
+
+
 %% accuracy anova
 % % Define the Within-Subjects Design for 4 conditions
 % conditions = {'a', 'b', 'a_simple', 'b_simple'}; % Match column order in accuracy
@@ -56,33 +194,6 @@ disp(lme_eye);
 lme_button = fitlme(tbl, 'Accuracy ~ RT_button * Group * Condition + (1|Participant)');
 disp('Linear Mixed-Effects Model (RT Button ~ Accuracy)');
 disp(lme_button);
-
-
-
-
-
-
-
-%% spearman correlation
-% eye
-% [r_eye, p_eye] = corr(rt_median_eye(:), accuracy(:), 'Type', 'Spearman');
-% fprintf('Spearman correlation (All RT_eye vs Accuracy): r = %.3f, p = %.3f\n', r_eye, p_eye);
-% [r_eye_adhd, p_eye_adhd] = corr(adhd_eye(:), adhd_accuracy(:), 'Type', 'Spearman');
-% fprintf('Spearman correlation (ADHD RT_eye vs Accuracy): r = %.3f, p = %.3f\n', r_eye_adhd, p_eye_adhd);
-% [r_eye_non, p_eye_non] = corr(nonadhd_eye(:), nonadhd_accuracy(:), 'Type', 'Spearman');
-% fprintf('Spearman correlation (nonDHD RT_eye vs Accuracy): r = %.3f, p = %.3f\n', r_eye_non, p_eye_non);
-% 
-% % button 
-% [r_button, p_button] = corr(rt_median_button(:), accuracy(:), 'Type', 'Spearman');
-% fprintf('Spearman correlation (All RT_button vs Accuracy): r = %.3f, p = %.3f\n', r_button, p_button);
-% [r_button_adhd, p_button_adhd] = corr(adhd_button(:), adhd_accuracy(:), 'Type', 'Spearman');
-% fprintf('Spearman correlation (ADHD RT_button vs Accuracy): r = %.3f, p = %.3f\n', r_button_adhd, p_button_adhd);
-% [r_button_non, p_button_non] = corr(nonadhd_button(:), nonadhd_accuracy(:), 'Type', 'Spearman');
-% fprintf('Spearman correlation (nonADHD RT_button vs Accuracy): r = %.3f, p = %.3f\n', r_button_non, p_button_non);
-
-
-
-
 
        
                                 

@@ -20,15 +20,17 @@ function results_table = questionnaireScale(data, folder)
     a_symptom_counts = a_scores >= thresholds(1:6);
     
     % Mean answers 
-    mean_symptoms = sum(scores, 2)/19;
-    a_mean_symptoms = sum(a_scores, 2)/6;
+    sum_symtoms = sum(scores, 2);
+    mean_symptoms = sum_symtoms/19;
+    a_sum_scores = sum(a_scores, 2);
+    a_mean_symptoms = a_sum_scores/6;
 
     % Sum the number of symptoms per participant
     sum_symptom_counts = sum(symptom_counts, 2);
     sum_a_symptom_counts = sum(a_symptom_counts, 2);
 
-    results_table = table(ids, sum_symptom_counts, mean_symptoms, sum_a_symptom_counts, a_mean_symptoms, ...
-                    'VariableNames', {'id', 'TotalSymptomsCount', 'MeanSymptoms', 'PartASymptomsCount', 'PartAMeanSymptoms'});
+    results_table = table(ids, sum_symtoms, sum_symptom_counts, mean_symptoms, a_sum_scores, sum_a_symptom_counts, a_mean_symptoms, ...
+                    'VariableNames', {'id', 'TotalSumSymptoms', 'TotalSymptomsCount', 'MeanSymptoms', 'PartASumSymptoms', 'PartASymptomsCount', 'PartAMeanSymptoms'});
     disp(results_table); 
     
     % Save the results as a .mat file in the specified folder

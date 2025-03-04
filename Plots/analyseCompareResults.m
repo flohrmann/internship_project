@@ -1,9 +1,15 @@
-%% load all data & define variables
+%% infos:
+% subject gaming was accidentally safed as false instead of in hours
+% 
+%
+%% define variables/paths
+
 % save path
 analysis_subfolder = '\analysis_new';
-subfolder_fixation = '\analysis_fixation_100ms'; fixation_duration = 100;
+fixation_duration = 50; % 50,100,200 
+subfolder_fixation = strcat('\analysis_fixation_', num2str(fixation_duration),'ms');
 
-comparison_results_folder = 'C:\Users\flohrmann\Documents\Analysis_2025\';
+comparison_results_folder = 'C:\Users\flohrmann\Documents\Analysis_2025_abgabe\';
 %comparison_results_folder = strcat(comparison_results_folder, num2str(fixation_duration), 'ms\');
 try
     mkdir(comparison_results_folder);
@@ -12,6 +18,43 @@ end
 
 % save plots yes/no 1/0
 safe = 1;
+
+path_to_folders = 'C:\Users\flohrmann\Documents\Results\';
+
+%% load all data
+valid_participant_folders = {
+    %'1_20240714_140048'; % alex
+    '2_20240726_191755'; % mara
+    '3_20240805_105213'; % tilo
+    '4_20240811_131601'; % anu
+    '5_20240813_114700'; % kieran
+    '6_20240821_191408'; % sura
+    '7_20240821_194651'; % hamit
+    '7_20240823_162058'; % jannik
+    '9_20240829_101613'; % farn
+    '10_20240929_151434'; % julia
+    '11_20241006_153704'; % felix
+    '12_20241006_150321'; % florian
+    '13_20241025_195047'; % leandra
+    '14_20241028_084922'; % finn
+    '15_20241114_200512'; % david
+    '16_20241128_113348'; % bennet
+    '17_20250126_202511'; % kerstin
+    '18_20250222_153229'; % stacey
+    '19_20250224_120844'; % maria
+    '20_20250224_171837'; % lea
+    '21_20250224_174504'; % giove
+    };
+
+%%%%%%%%%%%%%%%%%%%
+
+conditions = {'a', 'b', 'a_simple', 'b_simple'};
+condition_labels = {'a', 'b', 'a simple',  'b simple'};
+groups = {'ADHD', 'nonADHD'};
+
+% experiment screen size
+screenXpixels = 3240;
+screenYpixels = 2160;
 
 % colour scheme
 color_map = containers.Map({'a',  'b', 'a_simple', 'b_simple', 'ADHD', 'nonADHD'}, {
@@ -22,66 +65,39 @@ color_map = containers.Map({'a',  'b', 'a_simple', 'b_simple', 'ADHD', 'nonADHD'
     [0.5, 0.7, 0.5]  % orange ish
     [0.7, 0.2, 0.2]  % green ish
     });
-
-ids = [1, 2, 3, 4, 5, 6, 7, 8, 9 , 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21];
-folders = {
-    'C:\Users\flohrmann\Documents\Results\1_20240714_140048'; % alex
-    'C:\Users\flohrmann\Documents\Results\2_20240726_191755'; % mara
-    'C:\Users\flohrmann\Documents\Results\3_20240805_105213'; % tilo
-    'C:\Users\flohrmann\Documents\Results\4_20240811_131601'; % anu
-    'C:\Users\flohrmann\Documents\Results\5_20240813_114700'; % kieran
-    'C:\Users\flohrmann\Documents\Results\6_20240821_191408'; % sura
-    'C:\Users\flohrmann\Documents\Results\7_20240821_194651'; % hamit
-    'C:\Users\flohrmann\Documents\Results\7_20240823_162058'; % jannik
-    'C:\Users\flohrmann\Documents\Results\9_20240829_101613'; % farn
-    'C:\Users\flohrmann\Documents\Results\10_20240929_151434'; % julia
-    'C:\Users\flohrmann\Documents\Results\11_20241006_153704'; % felix
-    'C:\Users\flohrmann\Documents\Results\12_20241006_150321'; % florian
-    'C:\Users\flohrmann\Documents\Results\13_20241025_195047'; % leandra
-    'C:\Users\flohrmann\Documents\Results\14_20241028_084922'; % finn
-    'C:\Users\flohrmann\Documents\Results\15_20241114_200512'; % david
-    'C:\Users\flohrmann\Documents\Results\16_20241128_113348'; % bennet
-    'C:\Users\flohrmann\Documents\Results\17_20250126_202511'; % kerstin
-    'C:\Users\flohrmann\Documents\Results\18_20250222_153229'; % stacey
-    'C:\Users\flohrmann\Documents\Results\19_20250224_120844'; % maria
-    'C:\Users\flohrmann\Documents\Results\20_20250224_171837'; % lea
-    'C:\Users\flohrmann\Documents\Results\21_20250224_174504'; % giove
-    };
-
-% Define the classification of the folders (ADHD or non-ADHD)
-group_labels = {'nonADHD'; 'ADHD'   ; 'ADHD'   ; 'ADHD'   ; 'ADHD'   ; 
-                'ADHD'   ; 'nonADHD'; 'nonADHD'; 'ADHD'   ; 'nonADHD'; 
-                'ADHD'   ; 'nonADHD'; 'nonADHD'; 'ADHD'   ; 'ADHD'   ; 
-                'nonADHD'; 'nonADHD'; 'nonADHD'; 'nonADHD'; 'ADHD'   ;
-                'nonADHD'};
-
-% individual symbol and colour per participant
-color_map_individual = getIndividualMarkersPerParticipant(group_labels, ids, comparison_results_folder);
-
-conditions = {'a', 'b', 'a_simple', 'b_simple'};
-condition_labels = {'a', 'b', 'a simple',  'b simple'};
-groups = {'ADHD', 'nonADHD'};
-
-% experiment screen size
-screenXpixels = 3240;
-screenYpixels = 2160;
+color_map_other = containers.Map({'1',  '2', '3', '4', '5', '6'}, {
+    [0.878, 0.349, 0.682]  % pink
+    [0.259, 0.651, 0.533]  % green turquis
+    [0.506, 0.212, 0.6]    % purple
+    [0.259, 0.427, 0.651]  % blueish
+    [0.506, 0.112, 0.5]    % 
+    [0.559, 0.327, 0.55]  % 
+    });
 
 data_struct = struct();
-% Loop through each folder and load the data
-for i = 1:length(folders)
-    folder = folders{i};
-    %folder = strcat(folders{i}, '\results');
-    group = group_labels{i};
+for i = 1:length(valid_participant_folders) % Loop through each folder and load the data
+    folder = strcat(path_to_folders, valid_participant_folders{i});
     data_file   = dir(fullfile(folder, '\results\trial_results*.mat')); % original data
     eyetracking_file = dir(fullfile(folder, analysis_subfolder, '\cut_trials*.mat'));
     load(strcat(folder, analysis_subfolder, '\eye_rt.mat')); % calculated eye rt from analyseResults.m
     %pupil_file = dir(strcat(folder, analysis_subfolder, '\pupil_20before_31after_finding_stim.mat'));
     %pupil_diam_norm_file = dir(strcat(folder, analysis_subfolder, '\pupil_processed_found_stim_StartOfTrial.mat'));
     
+    participant_file = fullfile(folder, 'info.csv'); % participant infos
+    info_data = readtable(participant_file);
+    group = "";
+    if strcmp(info_data.SubjectADHD, 'yes')
+        group = 'ADHD';        
+    elseif strcmp(info_data.SubjectADHD, 'no')
+        group = 'nonADHD'; 
+    end
+    
     if ~isempty(data_file)
         load(fullfile(data_file.folder, data_file.name), 'trial_results');
-        data_struct(i).id                = i;
+        data_struct(i).id                = info_data.SubjectID;
         data_struct(i).group             = group;
+        data_struct(i).age               = info_data.Subject_Age;
+        data_struct(i).gender            = info_data.SubjectGender;
         data_struct(i).Condition         = trial_results.Condition;
         data_struct(i).rt                = trial_results.rt;
         data_struct(i).accuracy          = trial_results.correct;
@@ -91,10 +107,10 @@ for i = 1:length(folders)
         %load(fullfile(eye_rt_file.folder, eye_rt_file.name), 'eye_rt');
         data_struct(i).rt_right          = eye_rt.RightEyeRT;
         data_struct(i).rt_left           = eye_rt.LeftEyeRT;
-        % eyetracking data cut into trials
-        try
+        
+        try% eyetracking data cut into trials
             load(fullfile(eyetracking_file.folder, eyetracking_file.name), 'cutData');
-        catch
+        catch % take the first you can find in case theres serveral
             load(fullfile(eyetracking_file(1).folder, eyetracking_file(1).name), 'cutData');
         end
         
@@ -109,47 +125,55 @@ for i = 1:length(folders)
         %         load(fullfile(pupil_diam_norm_file.folder, pupil_diam_norm_file.name), 'condition_diam_avg');
         %         data_struct(i).pupilDiamNorm      = condition_diam_avg;
         
-        try
-            load(strcat(folder, subfolder_fixation, '\diam_t0_ntse.mat'));
-            load(strcat(folder, subfolder_fixation, '\diam_t0_ntss.mat'));
-            load(strcat(folder, subfolder_fixation, '\diam_t0_tse.mat'));
-            load(strcat(folder, subfolder_fixation, '\diam_t0_tss.mat'));
-            load(strcat(folder, subfolder_fixation, '\diam_t0_tss_first.mat'));
-        catch
-            disp('no data for id:', i)
-        end
-        load(strcat(folder, subfolder_fixation, '\trial_metrics.mat')); % TODO change path
+        % the following results depend on their fixation duration
+        load(strcat(folder, subfolder_fixation, '\diam_t0_ntse.mat'));
+        load(strcat(folder, subfolder_fixation, '\diam_t0_ntss.mat'));
+        load(strcat(folder, subfolder_fixation, '\diam_t0_tse.mat'));
+        load(strcat(folder, subfolder_fixation, '\diam_t0_tss.mat'));
+        load(strcat(folder, subfolder_fixation, '\diam_t0_tss_first.mat'));
         data_struct(i).ntse         = diam_t0_ntse;
         data_struct(i).ntss         = diam_t0_ntss;
         data_struct(i).tse          = diam_t0_tse;
         data_struct(i).tss          = diam_t0_tss;
-        data_struct(i).ntse_first   = diam_t0_tss_first;
+        data_struct(i).tss_first   = diam_t0_tss_first;
+        
+        load(strcat(folder, subfolder_fixation, '\trial_metrics.mat'));
         data_struct(i).trial_metrics= trial_metrics;
         
-        load(fullfile(folder, '\analysis_fixation_100ms\first_sacc.mat'));
+        load(strcat(folder, subfolder_fixation, '\first_sacc.mat'));
         data_struct(i).first_sacc = first_sacc;
     else
-        warning(['Data file not found in folder: ', folder]);
+        warning(['Data file not found in: ', folder]);
     end
 end
 
+group_labels = arrayfun(@(x) x.group, data_struct, 'UniformOutput', false);
+group_labels = group_labels';
+ids = arrayfun(@(x) x.id, data_struct);
+
+% individual symbol and colour per participant
+color_map_individual = getIndividualMarkersPerParticipant(group_labels, ids, comparison_results_folder);
 
 % get the faster of the two eye RTs; ignore 0s where target was not looked at
 data_struct = processEyeRTs(data_struct);
+
 % normalized RT per participan, take mean or median for rt/noramlisation
+% median
 average = 'median'; % 'mean' or 'median'
-data_struct_norm_median = normalizeMeanRTsBySimpleConditions(data_struct, average, conditions, comparison_results_folder);
+data_median = normalizeMeanRTsBySimpleConditions(data_struct, average, conditions, comparison_results_folder);
 
-% set data to normalized data
-data = data_struct_norm_median;
+%mean
+average = 'mean'; % 'mean' or 'median'
+data_mean = normalizeMeanRTsBySimpleConditions(data_struct, average, conditions, comparison_results_folder);
 
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%% PLOTS/ANALYSIS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  PLOTS/ANALYSIS %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% get group labels and ids per participant into lists for easier plotting
+getGroupStats(data_struct, group_labels);
+
+
 %% REACTION TIME AND ACCURACY
 %% Compare RT_ButtonPress and RT_Eye across the four conditions ("a", "a simple", "b", "b simple").
 %% Hyp: Easier conditions ("a simple", "b simple") might have faster RTs than harder conditions ("a", "b").
@@ -158,138 +182,73 @@ data = data_struct_norm_median;
 
 %% Reaction Time
 % 3x3 subplots: rt button press vs rt eyes vs diff; means of groups per condition
-plotMeanRTButtonPressVsEyecomparison(data, color_map, conditions, comparison_results_folder, safe)
+%plotMeanRTButtonPressVsEyecomparison(data_median, color_map, conditions, condition_labels, comparison_results_folder, safe);
+
+% rt over time per participant
+plotRTperParticipantOverTimeColouredByGroup(data_median, color_map, safe, comparison_results_folder)
 
 %% RT variability
-measure = 'Standard Deviation';  % Use "Standard Deviation" or "Mean Squared Successive Difference" (or "Ex-Gaussian Analysis")
-[rt_median_eye,rt_median_button]  = getRTvariability(data, group_labels, ids, conditions, condition_labels, measure, color_map, color_map_individual, comparison_results_folder);
+% values used here dont differ between data_median and data_mean so either can be used
+measure = 'Standard Deviation';  % Use "Standard Deviation", "Coefficient of Variation", "Variance" or "Mean Squared Successive Difference" (or "Ex-Gaussian Analysis")
+[rt_median_eye,rt_median_button, rt_mean_eye, rt_mean_button]  = getRTvariability(data_median, group_labels, ids, conditions, condition_labels, measure, color_map, color_map_individual, comparison_results_folder);
 %rt_variability_2 = getAndPlotRTV_ParticipantLines(data, conditions,condition_labels, 'std', groups, color_map, comparison_results_folder);
 
 %% Confusion/ RTa - RTb or RTa/RTb for both button press/eye RT
 % Mean confusion of participants for each condition plus p values in names
-data = plotConfusionPerGroup(data, average, color_map, comparison_results_folder, safe);
+data_mean = plotConfusionPerGroup('Mean', data_mean, group_labels, ids, conditions, color_map, color_map_other,color_map_individual, comparison_results_folder, safe);
+data_median = plotConfusionPerGroup('Median', data_median, group_labels, ids, conditions, color_map, color_map_other,color_map_individual, comparison_results_folder, safe);
 
 %% Accuracy
 % H: Accuracy might be lower in harder conditions for ADHD participants compared to non-ADHD participants
-% Difference in correct trials
-[mistakes, accuracy] = plotMeanAccuracyPerGroupCondition(data, group_labels, ids, conditions, condition_labels, color_map,color_map_individual, comparison_results_folder, safe);
+checkAccuracyDistributionByCondition(data_median, conditions);
 
-                        %plotBarAccuracyGroupCondition(data, color_map, comparison_results_folder, safe)
+% Difference in correct trials; calcs median didnt change name
+[mistakes, accuracy] = plotMeanAccuracyPerGroupCondition(data_median, group_labels, ids, conditions, condition_labels, color_map,color_map_individual, comparison_results_folder, safe);
+
 % accuracy vs rt button press per condition and group
-% anova and lme
-plotAccuracyVsButtonPressRT(data, mistakes, accuracy, rt_median_eye, rt_median_button, group_labels, ids, conditions, condition_labels, color_map,color_map_individual, comparison_results_folder, safe)
+plotAccuracyVsButtonPressRT(data_median, mistakes, accuracy, rt_median_eye, rt_median_button, group_labels, ids, conditions, condition_labels, color_map,color_map_individual, comparison_results_folder, safe)
 
-% plot points per participant and connect with line
-% wrong trials: simple vs nonsimple conditions per group
-% TODO FIX
-%plotAccuracyVsRTandErrorRates(data, color_map)
+%% Correlations: speed accuracy tradeoff
+% info: corrs higher in simple conditions since target was almost never fixated!!
 
+% RTeye, RTbuttonpress and accuracy for all
+%[R, P] = correlationRTbuttonRTeyeAccuracy(data_median, comparison_results_folder);
 
+% rt_button, rt_eye, accuracy per group
+%[R_group, P_group] = correlationByGroup(data_median, groups, comparison_results_folder);
 
-            %% correlation analysis: RTeye, RTbuttonpress and accuracy
-            %[R, P] = correlationRTbuttonRTeyeAccuracy(data, comparison_results_folder);
+% rtbutton, rteye, acc, lapse
+%[R_group_condition, P_group_condition] = correlationByGroupCondition(accuracy,rt_median_eye,rt_median_button, group_labels, groups, conditions, comparison_results_folder);
+[R_group_condition, P_group_condition] = correlationByGroupCondition(data_median,  groups, conditions, comparison_results_folder);
 
+%% --- parallel advantage -2022 zhaoping paper plots ---
+% Mean reaction times of participants for each condition
+plotBarRTmeanParticipantsCondition(data_median, color_map, comparison_results_folder, color_map_individual, ids);
+%same but per group
+plotBarRTmeanParticipantsConditionPerGroup(data_median, color_map, comparison_results_folder, color_map_individual);
 
-%% condition-Specific Correlation Analysis
-%[R_condition, P_condition] = correlationByCondition(data, conditions, comparison_results_folder);
-% ADHD vs. non-ADHD Group Correlation Analysis
-%[R_group, P_group] = correlationByGroup(data, groups, comparison_results_folder);
-
-% correlation has nans in b_simple since theres only 1 incorrect trial for
-% all participants/trials
-checkAccuracyDistributionByCondition(data, conditions);
-
-
-            %% BOTH TODO look up some values
-            % [R_group_condition, P_group_condition] = correlationByGroupCondition(data, groups, conditions, comparison_results_folder);
-            % % TODO add Rtbutton-rteye (lapse?)
-            % plotGroupConditionCorrelations(R_group_condition, groups, conditions)
-            % compareGroupCorrelations(R_group_condition, groups, data, conditions)
-
-
-%% BAR and LINE plot: mean RT and error bars (~variability) per group and condition
-%plotBarSEMMeanRTConditonGroup(groups, conditions, data, color_map, safe, comparison_results_folder)
-
-% rt over time per participant
-%% TODO change to subplots per condition
-plotRTperParticipantOverTimeColouredByGroup(data, color_map, safe, comparison_results_folder)
-
-% NOT NEEDED normalized RT across groups
-%plotNormalizedRTCcomparison(data, color_map, comparison_results_folder, safe);
-
-
-
-            %% --- parallel advantage -2022 zhaoping paper plots ---
-            % Mean reaction times of participants for each condition
-            plotBarRTmeanParticipantsCondition(data, color_map, comparison_results_folder);
-            %same but per group
-            plotBarRTmeanParticipantsConditionPerGroup(data, color_map, comparison_results_folder);
-
-            % TODO RT for central vs. peripheral targets (per condition) TODO
-            % " target that is more or less than its average distance (14 degrees) from the
-            % display center is termed “peripheral” or “central,” respectively." -zp22
-
-
-            %  TODO Learning effects 
-            % "Each observer had several practice trials right before the 400 testing trials.
-            % The saliency effect, manifested as a shorter RT for the parallel than the perpendicular target,
-            % was significant for the peripheral but not the central targets in the first 200 testing trials,
-            % and became significant for the central targets in the second 200 testing
-            % trials."-zp22
-            % Central vs. Peripheral Classification:
-            %     The function calculates the Euclidean distance from the target to the center of the screen for each trial.
-            %     Based on a threshold (half of the screen diagonal), targets are classified as "central" or "peripheral."
-            % RT Collection by Block:
-            %     The function divides trials into blocks of 100.
-            %     It groups reaction times into "central" and "peripheral" categories for each block.
-            % Plotting:
-            %     For each participant, mean reaction times for central and peripheral targets are plotted across blocks.
-            %     This should reveal any learning effect by showing changes in RT over time for each category.
+% TODO RT for central vs. peripheral targets (per condition) 
+% " target that is more or less than its average distance (14 degrees) from the
+% display center is termed “peripheral” or “central,” respectively." -zp22
+% Central vs. Peripheral Classification:
+%     The function calculates the Euclidean distance from the target to the center of the screen for each trial.
+%     Based on a threshold (half of the screen diagonal), targets are classified as "central" or "peripheral."
+%     For each participant, mean reaction times for central and peripheral targets are plotted across blocks.
 %             distance_threshold = 14; % degrees
 %             viewing_distance = 30; % cm
 %             screen_width_cm = 28.2; %13.5 zoll
 %             screen_height_cm = 18.8; % cm
-%             %plotlearningEffects(data, screenXpixels, screenYpixels, comparison_results_folder, color_map, viewing_distance, screen_width_cm);
-%             plotlearningEffects(data, screen_width_cm, screen_height_cm, screenXpixels, screenYpixels, color_map, comparison_results_folder, distance_threshold)
-% 
-
 
 %% Interaction Between Group, Condition (Difficulty), and RT:
 % H: ADHD participants might have a weaker correlation between RT_Eye and RT_ButtonPress
 %    possibly indicating a delay in motor response after visual detection.
-rt_button_press_conditions = cell(length(groups), length(conditions));
-rt_eye_conditions = cell(length(groups), length(conditions));
-accuracy_conditions = cell(length(groups), length(conditions));
-
-for i = 1:length(data)
-    group_idx = find(strcmp(groups, data(i).group));
-    if isempty(group_idx)
-        warning('Group label "%s" not found in the predefined groups list.', data(i).group);
-        continue;
-    end
-    for t = 1:length(data(i).Condition)
-        condition = data(i).Condition{t};
-        condition_idx = find(strcmp(conditions, condition));
-        if isempty(condition_idx)
-            warning('Condition label "%s" not found in the predefined conditions list.', condition);
-            continue;
-        end
-        rt_button_press_conditions{group_idx, condition_idx} = [rt_button_press_conditions{group_idx, condition_idx}; data(i).rt(t)];
-        rt_eye_conditions{group_idx, condition_idx} = [rt_eye_conditions{group_idx, condition_idx}; data(i).rt_eye(t)];
-        accuracy_conditions{group_idx, condition_idx} = [accuracy_conditions{group_idx, condition_idx}; data(i).accuracy(t)];
-    end
-end
-
-% Visualize Reaction Times Across Conditions and Groups
-% todo change condition names
-% First Figure: Each group and condition in separate subplots
-plotRTScatterGroupCondition(groups, conditions, rt_eye_conditions, rt_button_press_conditions, color_map, safe, comparison_results_folder);
-
-plotRTscatterConditionAcrossGroups(groups, conditions, rt_eye_conditions, rt_button_press_conditions, color_map, safe, comparison_results_folder)
+plotInteractionRTeyebuttonConditions(groups, conditions, data_median, color_map, safe, comparison_results_folder)
 
 
 
-%% --- EYE-TRACKING DATA ---
+%% EYETRACKING DATA
+
+%% Load fixations/saccades or calculate if nothing to load
 dist_threshold = 50; % max distance between consecutive points (in pixels) for a fixations cluster
 plot_these = [2, 119]; % just plot two for checking
 comp_results_fix = strcat(comparison_results_folder, subfolder_fixation, '\');
@@ -297,65 +256,65 @@ try
     mkdir(comp_results_fix);
 catch % folders already exists
 end
+
 % -01 load/detect fixations -
-all_fixations = analyseFixationAllWrapper(data, plot_these, dist_threshold, screenXpixels, screenYpixels, safe, folders, subfolder_fixation,comp_results_fix,  fixation_duration);
-   
+all_fixations = analyseFixationAllWrapper(data_median, plot_these, dist_threshold, screenXpixels, screenYpixels, safe, path_to_folders ,valid_participant_folders, subfolder_fixation,comp_results_fix, fixation_duration);
+
 % -02 load/reverse engineer "saccades" from fixation clusters -
-all_saccades = analyseSaccadesAllWrapper(data, all_fixations, plot_these, screenXpixels, screenYpixels, safe, folders, subfolder_fixation, comp_results_fix, fixation_duration);
+all_saccades = analyseSaccadesAllWrapper(data_median, all_fixations, plot_these, screenXpixels, screenYpixels, safe, path_to_folders, valid_participant_folders, subfolder_fixation, comp_results_fix, fixation_duration);
 
 % -03 get num saccades, distance, angle, diff, cosine from trial start to target center/saccades,... -
 tolerance = 200; % num pixels away to count as target found
-trial_metrics = calcGazeDistanceDirection(data, all_fixations, all_saccades, tolerance, screenXpixels, screenYpixels);
-% todo start at target high for some- mistake maybe??
+trial_metrics = calcGazeDistanceDirection(data_median, all_fixations, all_saccades, tolerance, screenXpixels, screenYpixels);
 
-
-
-
-
-
-
-
-                %% --- hamits ideas TODO ---
-                % Step 1: Epoch Data Around Saccades
-                % For each trial, we will create time-locked segments around each saccade:
-                % Baseline (before saccade): Take pupil data for 250ms before the start of the saccade.
-                % Saccade Start: The moment when the saccade begins.
-                % Post-saccade: Record pupil data for 2000ms after the saccade.
-
-                % get data
-                min_length = 32;  % Datapoints; 0.016ms sampling rate -> 0.5/0.016=31.3
-                num_before = 20;  % Number of datapoints before target found
-                num_after = 31;   % Number of datapoints after target found
-                sr = 1/60;        % Sampling rate of eyetracker
-                % [result_table, tnf, tts] = findTargetAndExtractDataSaccadeStart(trial_metrics, data, comparison_results_folder, num_before, num_after, min_length);
-
-                % baseline_window = 0.250;
-                % post_saccade_window = 0.500;
-                % gaze_shift_threshold = 200;
-                % [epoch_data, confirmatory_epoch_data] = analyzePupilAndSaccades(data, participant_saccades, screenXpixels, screenYpixels, baseline_window, post_saccade_window, gaze_shift_threshold);
-
+                    
 %% --- 01_fixation: Fixation Duration and Distribution ---
 % get fixation durations, counts per trial ,  mean per condition
-fixation_stats = getFixationDuration(all_fixations, data,conditions, comp_results_fix);
+fixation_stats = getFixationDuration(all_fixations, data_median,conditions, comp_results_fix);
 
 % Fixation Duration: Compare the average duration of fixations between ADHD
 % and non-ADHD participants. ADHD individuals often have shorter fixation durations,
 % indicating less stable attention on specific areas of interest.
 plotGroupFixationDurations(fixation_stats, ids, group_labels, condition_labels, conditions, color_map_individual, color_map, comp_results_fix, fixation_duration, safe);
 
-% Fixation Number: Analyze the number (distribution?) of fixations.
+% Fixation Number: Analyze the number of fixations.
 % ADHD participants might have a more scattered fixation pattern, with less
 % focus on task-relevant areas compared to non-ADHD participants
-%plotViolinNumFixations(fixation_stats, group_labels, conditions, color_map, comparison_results_folder, safe)
 plotBarNumFixations(fixation_stats, group_labels, ids, conditions,condition_labels, color_map,color_map_individual, comp_results_fix, safe)
 % -> GEGENTEIL: less fixation in condition a for adhd
 % target found faster- more salient- more bottom up?
+
+
+%% --- 01_saccade: Saccade Metrics ---
+% Saccade Amplitude and Velocity: ADHD participants may exhibit larger saccade
+% amplitudes and higher velocities, reflecting more erratic or less controlled eye movements.
+saccadeStats = analyzeSaccadeAmplitudeAndVelocity(all_saccades, data_median, conditions);
+plotSaccadeDifferences(saccadeStats,data_median, group_labels, ids, conditions,condition_labels, color_map, color_map_individual, comp_results_fix, safe);
+% -> looks basically the same, just as zhaoping said it would be
+% TODO check if consistent with raw path data: distance per second
+
+
+% Saccade Frequency: Higher saccade frequency might indicate more frequent
+% shifts in attention, which is often characteristic of ADHD.
+% -> is basically plotBarNumFixations since between each 2 fixations i assume a saccade
+%plotSaccadeCount(saccadeStats, group_labels, conditions, color_map, ids, color_map_individual, comp_results_fix, safe);
+% -> less saccades in a/b in adhd: matches the ARTs
+
+
+% Time to First Fixation on Target: Assess the time taken for the first
+% fixation on the target. Delays in this metric could suggest differences
+% in how quickly participants orient their attention to relevant stimuli.
+% in easy conditions bottom up attention in harder condition maybe no
+% as big influence of BU since its less salient?
+plotAverageStartFirstSaccadeGroup(data_median, ids, conditions, condition_labels, group_labels, color_map, color_map_individual, comp_results_fix, safe);
+% -> adhd slighly faster everywhere but b
 
 % Arrive Abandon Return Trials
 % 1. If a target fixation is followed by a non-target fixation -> AARTs
 % 2. If the target fixation is the last fixation -> no abandon
 % 3. combo of the two
-participant_data = plotAbandonReturnTrials(data_struct, all_fixations, conditions, condition_labels, group_labels, color_map, comp_results_fix, safe);
+is_abandon = 201; % 1 pixel more than counts as target found
+participant_data = plotAbandonReturnTrials(is_abandon, data_struct, all_fixations, conditions, condition_labels, group_labels, color_map, comp_results_fix, safe);
 % -> no real difference in those 3 categories
 % -> slightly less target fixation abandonments in condition a for adhd
 % this matches with less fixations from above
@@ -363,50 +322,71 @@ participant_data = plotAbandonReturnTrials(data_struct, all_fixations, condition
 % RThand - RTeye for AARTs
 plotAARtrialsRThandeye(participant_data, data_struct, ids, conditions, condition_labels, group_labels, color_map, color_map_individual, comp_results_fix, safe);
 
-                    % todo vlads thing with eccentricity
-                    %     h = 25; % Monitor height in cm
-                    %     d = 30; % Distance between monitor and participant in cm
-                    %     r = 768; % Vertical resolution of the monitor 34.3 cm
-                    %     size_in_px = 100; % The stimulus size in pixels
-                    %     % Calculate the number of degrees that correspond to a single pixel. This will
-                    %     % generally be a very small value, something like 0.03.
-                    %     deg_per_px = degrees(atan2(.5*h, d)) / (.5*r);
+% todo vlads thing with eccentricity
+%     h = 25; % Monitor height in cm
+%     d = 30; % Distance between monitor and participant in cm
+%     r = 768; % Vertical resolution of the monitor 34.3 cm
+%     size_in_px = 100; % The stimulus size in pixels
+%     % Calculate the number of degrees that correspond to a single pixel. This will
+%     % generally be a very small value, something like 0.03.
+%     deg_per_px = degrees(atan2(.5*h, d)) / (.5*r);
 
-%% --- 01_saccade: Saccade Metrics ---
-% Saccade Amplitude and Velocity: ADHD participants may exhibit larger saccade
-% amplitudes and higher velocities, reflecting more erratic or less controlled eye movements.
-saccadeStats = analyzeSaccadeAmplitudeAndVelocity(all_saccades, data, conditions);
-plotSaccadeDifferences(saccadeStats,data, group_labels, ids, conditions,condition_labels, color_map, color_map_individual, comp_results_fix, safe);
-% -> looks basically the same, just as zhaoping said it would be
-% TODO check if consistent with raw path data: distance per second 
-
-
-            % Saccade Frequency: Higher saccade frequency might indicate more frequent
-            % shifts in attention, which is often characteristic of ADHD.
-            % -> is basically plotBarNumFixations since between each 2 fixations i assume a saccade
-            %plotSaccadeCount(saccadeStats, group_labels, conditions, color_map, ids, color_map_individual, comp_results_fix, safe); 
-            % -> less saccades in a/b in adhd: matches the ARTs
-
-     
-% Time to First Fixation on Target: Assess the time taken for the first
-% fixation on the target. Delays in this metric could suggest differences
-% in how quickly participants orient their attention to relevant stimuli.
-% in easy conditions bottom up attention in harder condition maybe no
-% as big influence of BU since its less salient?
-plotAverageStartFirstSaccadeGroup(data, ids, conditions, condition_labels, group_labels, color_map, color_map_individual, comp_results_fix, safe);
-% -> adhd slighly faster everywhere but b
 
 
 %% --- Search Efficiency/Strategy/.... ---
 % Path Efficiency: Measure the efficiency of the visual search path.
 % Non-ADHD participants might display more direct paths towards the target,
 % whereas ADHD participants could show more erratic paths with unnecessary movements.
-plotCosineSimilarityGroup(data, group_labels, ids, all_saccades, all_fixations, ...
-                          conditions, condition_labels, color_map, color_map_individual, comp_results_fix);
-% -> distance of gaze per trial in saccade amplitude/ distance per trial plot 
+plotCosineSimilarityGroup(data_median, group_labels, ids, all_saccades, all_fixations, ...
+    conditions, condition_labels, color_map, color_map_individual, comp_results_fix);
+% -> distance of gaze per trial in saccade amplitude/ distance per trial plot
 
 
+%% --- QUESTIONAIRE RESULTS --- 
+% get results
+[quest_struct, quest_table] = loadQuesionnaires(path_to_folders, valid_participant_folders, group_labels, ids);% load questionnaire results
+% get stats table
+groupQuestionnaire(quest_table, group_labels)
+% usual plots
+plotQuestionnaires(ids, quest_struct, quest_table, group_labels, color_map, color_map_other, color_map_individual,comparison_results_folder, safe)
 
+
+%% INFLUENCE OF (IN)ATTENTION
+%% combine questionnaire results with RT and accuracy
+% Convert your data structure to a table for easier manipulation
+data_table = struct2table(data_median);
+
+% Merge questionnaire data with RT/accuracy/saccade data based on ID
+merged_data = innerjoin(data_table, quest_table, 'Keys', 'id');
+merged_data = innerjoin(merged_data, quest_scores, 'Keys', 'id');
+%merged_data = innerjoin(merged_data, struct2table(rt_variability), 'Keys', 'id');
+%merged_data = innerjoin(merged_data, struct2table(trial_metrics), 'Keys', 'id');
+
+merged_data
+
+            % Perform correlation analysis for the current group and condition
+            [R, P] = corr([rt_button, rt_eye, accuracy, lapse], 'Type', 'Pearson');
+            
+            % Store results for the current group and condition
+            R_group_condition.(group){c} = R;
+            P_group_condition.(group){c} = P;
+            
+            % Display results
+            disp(['Group: ', group, ', Condition: ', condition]);
+            disp('Correlation Matrix (R) rtbutton, rteye, acc, lapse:');
+            disp(R);
+            disp('P-values Matrix (P):');
+            disp(P);
+            disp('------------------------------------------');
+
+    
+    
+    
+    
+    
+    
+    
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
 
 %% pupil diam lets go
 num_before = 20;        % Number of datapoints before target found
@@ -418,71 +398,79 @@ avg_result_table = [];
 
 which_diam_before = 'tss_diam_before';
 which_diam_after = 'tss_diam_after';
+
+
+
+which_diam = 'tss';
+
+
 s_start = 'ts_start';
-    
+
 %     which_diam_before = 'ntss_diam_before';
 %     which_diam_after = 'ntss_diam_after';
 %     s_start = 'nts_start';
-%     
-    
-for p=1:17
-    trial_metrics = data_struct(p).trial_metrics;     
+%
+
+for p=1:20
+    trial_metrics = data_struct(p).trial_metrics;
     %cut_data = data_struct(p).tss;   % only needed for conditions
     id = data_struct(p).id;
     %  --- 4.1 plot saccades TOWARDS target aligned by START of saccade [raw, 0-aligned, cleaned] ---
-%     diam_t0_tss = getPupilDiamsBasedOnt0(cut_data, current_data, 'tss_diam_before','tss_diam_after', 'ts_start', comparison_results_folder, comp_results_fix, ...
-%                         safe, conditions, condition_labels, time_vector, x_label_text, color_map, ...
-%                         'aligned_diams', strcat('ID ', num2str(id), ': Pupil Response Around Target Saccade Starts [zero-aligned]'), ...
-%                         't0_s', strcat('diam_t0_tss_zero_aligned_subj',num2str(id)), id);
-
+    %     diam_t0_tss = getPupilDiamsBasedOnt0(cut_data, current_data, 'tss_diam_before','tss_diam_after', 'ts_start', comparison_results_folder, comp_results_fix, ...
+    %                         safe, conditions, condition_labels, time_vector, x_label_text, color_map, ...
+    %                         'aligned_diams', strcat('ID ', num2str(id), ': Pupil Response Around Target Saccade Starts [zero-aligned]'), ...
+    %                         't0_s', strcat('diam_t0_tss_zero_aligned_subj',num2str(id)), id);
+    
     result_table = [];result_table_first= [];
     num_trials = height(trial_metrics.(which_diam_before));
+    curr_conditions = data_struct(p).Condition;
     for ts = 1:num_trials
-        current_condition = cut_data.Condition(ts);
+        current_condition = curr_conditions(ts);
         num_saccades = height(trial_metrics.(which_diam_before){ts});
         for s = 1:num_saccades
-            
-            %diam_combined =  
+            current_saccades = diam_t0_tss(ismember(diam_t0_tss.TrialNumber, trial), :);
+
+            %diam_combined =
             saccade_idx = trial_metrics.(s_start){ts}(s,:);
             result_table       = [result_table; {ts, current_condition, diam_combined, saccade_idx}];
             
         end
     end
     diam_t0 = cell2table(result_table, 'VariableNames', {'TrialNumber', 'Condition', 'DataPointsBefore', 'DataPointsAfter', 'DiamCombined', 'SaccadeTrialIndex'});
-
+    
     % condition avg
     for i = 1:4
-        PLOTDATA = diam_t0; 
-        current_condition = conditions{i}; 
+        PLOTDATA = diam_t0;
+        current_condition = conditions{i};
         condition_trials = PLOTDATA(strcmp(PLOTDATA.Condition, current_condition), :);
         
         % Convert cell array to matrix, but first remove NaN rows
         valid_rows = ~cellfun(@(x) all(isnan(x)), condition_trials.DataPointsBefore); % Find valid rows
         before_matrix = cell2mat(condition_trials.DataPointsBefore(valid_rows)); % Convert only valid rows
         diam_before = nanmedian(before_matrix, 1); % Compute column-wise median ignoring NaNs
-
-        valid_rows = ~cellfun(@(x) all(isnan(x)), condition_trials.DataPointsAfter); 
+        
+        valid_rows = ~cellfun(@(x) all(isnan(x)), condition_trials.DataPointsAfter);
         after_matrix = cell2mat(condition_trials.DataPointsAfter(valid_rows));
-        diam_after = nanmedian(after_matrix, 1);       
+        diam_after = nanmedian(after_matrix, 1);
         
         diam_combined = [diam_before, diam_after];
-             %saccade_idx = trial_metrics.(s_start){ts}(s,:);
+        %saccade_idx = trial_metrics.(s_start){ts}(s,:);
         avg_result_table = [avg_result_table; {id, current_condition, diam_before, diam_after, diam_combined, 1}]; % 1 bc avg
-            
+        
     end
 end
 diam_t0 = cell2table(avg_result_table, 'VariableNames', {'TrialNumber', 'Condition', 'DataPointsBefore', 'DataPointsAfter', 'DiamCombined', 'SaccadeTrialIndex'});
 for ts = 1:size(diam_t0, 1)
-        if ~isnan(diam_t0.SaccadeTrialIndex(ts))
-            try current_diam = diam_t0.DiamCombined{ts,:};
-            catch, current_diam = diam_t0.DiamCombined(ts,:);
-            end
-            try diam_t0.aligned_diams(ts,:) = current_diam - current_diam(1);  % Aligning each trial to start at zero
-            catch, diam_t0.aligned_diams(ts,:) = NaN(1,51);
-            end
-        else
-            diam_t0.aligned_diams(ts,:) = NaN(1,51);
+    if ~isnan(diam_t0.SaccadeTrialIndex(ts))
+        try current_diam = diam_t0.DiamCombined{ts,:};
+        catch, current_diam = diam_t0.DiamCombined(ts,:);
         end
+        try diam_t0.aligned_diams(ts,:) = current_diam - current_diam(1);  % Aligning each trial to start at zero
+        catch, diam_t0.aligned_diams(ts,:) = NaN(1,51);
+        end
+    else
+        diam_t0.aligned_diams(ts,:) = NaN(1,51);
+    end
 end
 
 adhd_ids= find(strcmp(group_labels, 'ADHD'));
@@ -492,7 +480,7 @@ is_NonADHD = ~is_ADHD; % The rest are Non-ADHD
 
 diam_t0_ADHD = diam_t0(is_ADHD, :);     % ADHD table
 diam_t0_nonADHD = diam_t0(is_NonADHD, :); % Non-ADHD table
- 
+
 %         plotDiamsPerConditionAndAverage(diam_t0_ADHD, 'aligned_diams', conditions, condition_labels, ...
 %                                         time_vector, x_label_text, color_map, 'ADHD: Avg Pupil Diam After Start of Saccade to Target', ...
 %                                         't0_s', comparison_results_folder, comparison_results_folder, 't0_s', id);
@@ -514,13 +502,13 @@ else
     safe_name = strcat('mean_nonADHD_ts_t0_diam',s_start,'.png');
 end
 
-num_rows = 3; num_col = 2; %figure; 
+num_rows = 3; num_col = 2; %figure;
 all_y_values = [];t = tiledlayout(num_rows, num_col, 'TileSpacing', 'Compact', 'Padding', 'Compact');
 % Add shared title and axis labels
 title(t,bigtitle); xlabel(t,x_label_text); ylabel(t,'Change in Pupil Diameter (mm)')
 for i = 1:4
     ax = nexttile;     hold on;
-    condition = conditions{i}; 
+    condition = conditions{i};
     title(strcat('Averages of Participants: ', condition_labels{i}));
     condition_trials = PLOTDATA(strcmp(PLOTDATA.Condition, condition), :);
     for j = 1:height(condition_trials)
@@ -528,7 +516,7 @@ for i = 1:4
             y_data = condition_trials.(data_type)(j,:);
             plot(time_vector, y_data, 'Color', color_map(condition));
             all_y_values = [all_y_values; [max(y_data), min(y_data)]];  % Collect y-values for unified axis
-        catch 
+        catch
         end
     end
     xline(0, '--', xlinelabel,  'Color', [0.3 0.3 0.3], 'LabelOrientation', 'horizontal', 'HandleVisibility', 'off');
@@ -544,25 +532,25 @@ end
 ax_avg = nexttile([1, 2]);  % Span across 2 columns
 hold on; title('Condition Average');
 for i = 1:4
-    condition = conditions{i}; 
+    condition = conditions{i};
     condition_trials = PLOTDATA(strcmp(PLOTDATA.Condition, condition), :);
     plotConditionDataWithShading(condition_trials.(data_type), time_vector, color_map(condition), condition);
 end
 xline(0, '--', xlinelabel, 'LabelHorizontalAlignment', 'right', 'LabelOrientation', 'horizontal', 'Color', [0.3 0.3 0.3], 'HandleVisibility', 'off');
-lgd = legend(condition_labels); 
+lgd = legend(condition_labels);
 set(lgd, 'Orientation', 'horizontal', 'Location', 'southoutside', 'Box', 'off');
 xlim(ax_avg, [min(time_vector), max(time_vector)]);
-hold off;                           
- saveas(gcf, fullfile(comparison_results_folder , safe_name));
-                                     
-        
+hold off;
+saveas(gcf, fullfile(comparison_results_folder , safe_name));
+
+
 %         plotDiamsPerConditionAndAverage(diam_t0_NonADHD, 'aligned_diams', conditions, condition_labels, ...
 %                                         time_vector, x_label_text, color_map, 'nonADHD: Avg Pupil Diam After Start of Saccade to Target', ...
 %                                         't0_s', comparison_results_folder, comparison_results_folder, 't0_s', id);
 %         saveas(gcf, fullfile(comparison_results_folder, strcat('nonADHD_nts_t0_diam',s_start,'.png')));
-%                                     
+%
 %%  --- 4.5 plot FIRST START target saccade of trial ---
-result_table = [];  
+result_table = [];
 for trial=1:num_trials
     current_condition = cut_data.Condition(trial);
     current_saccades = diam_t0_tss(ismember(diam_t0_tss.TrialNumber, trial), :);
@@ -573,11 +561,6 @@ for trial=1:num_trials
     end
 end
 diam_t0_tss_first = cell2table(result_table, 'VariableNames', {'TrialNumber', 'Condition', 'SaccadeTrialIndex', 'DiamCombined'});
-
-
-
-
-
 
 
 
@@ -598,22 +581,22 @@ diam_t0_tss_first.cleanedData = filloutliers(diam_t0_tss_first.aligned_diams,'ne
 save(fullfile(analysis_folder, strcat('\diam_t0_tss_first.mat')), 'diam_t0_tss_first');
 if do_plots == 1
     plotCompareTwoStepsDiam(diam_t0_tss_first, 'aligned_diams', 'ZeroAligned', ...
-                            diam_t0_tss_first, 'cleanedData',   '80Percentile', ...
-                            strcat('ID ', num2str(id), ': Pupil Response Around First Target Saccade Start'), ...
-                            color_map, conditions, condition_labels, time_vector, x_label_text, 't0_s',analysis_folder, compare_folder, 'tss_first',id);
+        diam_t0_tss_first, 'cleanedData',   '80Percentile', ...
+        strcat('ID ', num2str(id), ': Pupil Response Around First Target Saccade Start'), ...
+        color_map, conditions, condition_labels, time_vector, x_label_text, 't0_s',analysis_folder, compare_folder, 'tss_first',id);
     plotDiamsPerConditionAndAverage(diam_t0_tss_first, 'aligned_diams', conditions,  condition_labels, time_vector, x_label_text, color_map, ...
-            strcat('ID ', num2str(id), ': Pupil Response Around First Target Saccade Start [ZeroAligned]'), 't0_s',...
-            analysis_folder, compare_folder, 'tss_first',id);
+        strcat('ID ', num2str(id), ': Pupil Response Around First Target Saccade Start [ZeroAligned]'), 't0_s',...
+        analysis_folder, compare_folder, 'tss_first',id);
 else
-end                                    
-        
+end
+
 
 %% averages for both groups
 safe_name_group = strcat('ts_t0_diam',s_start,'_groups_mean.png');
 
-num_rows = 1; 
-num_col = 2; 
-figure; 
+num_rows = 1;
+num_col = 2;
+figure;
 t = tiledlayout(num_rows, num_col, 'TileSpacing', 'Compact', 'Padding', 'Compact');
 
 % Common X-axis label
@@ -628,7 +611,7 @@ title(bigtitle_ADHD);
 xlabel(x_label_text); ylabel(y_label_text);
 
 for i = 1:4
-    condition = conditions{i}; 
+    condition = conditions{i};
     condition_trials = PLOTDATA(strcmp(PLOTDATA.Condition, condition), :);
     plotConditionDataWithShading(condition_trials.(data_type), time_vector, color_map(condition), condition);
 end
@@ -644,7 +627,7 @@ title(bigtitle_NonADHD);
 xlabel(x_label_text); ylabel(y_label_text);
 
 for i = 1:4
-    condition = conditions{i}; 
+    condition = conditions{i};
     condition_trials = PLOTDATA(strcmp(PLOTDATA.Condition, condition), :);
     plotConditionDataWithShading(condition_trials.(data_type), time_vector, color_map(condition), condition);
 end
@@ -657,8 +640,6 @@ title(t, 'Comparison of Pupil Diameter Changes: ADHD vs nonADHD');
 set(gcf, 'Position', [50, 50, 1400, 700]); % Resize the figure window (x, y, width, height)
 saveas(gcf, fullfile(comparison_results_folder , safe_name_group));
 
-                    
-          
 
 
 
@@ -680,64 +661,57 @@ saveas(gcf, fullfile(comparison_results_folder , safe_name_group));
 
 
 
-    %% Fill outliers
-    diam_t0_tss.cleanedData = filloutliers(diam_t0_tss.aligned_diams,'nearest', 'percentiles',[10 90]); 
-    if do_plots == 1
-        plotCompareTwoStepsDiam(diam_t0_tss, 'aligned_diams', 'ZeroAligned',  ...
-                                diam_t0_tss, 'cleanedData',   '80Percentile', ...
-                                strcat('ID ', num2str(id), ': Pupil Response Around Target Saccade Starts'), ...
-                                color_map, conditions, condition_labels, time_vector, x_label_text, 't0_s',analysis_folder, compare_folder, 'tss',id);
-        plotHistNaNsBufferedDiamSacc(diam_t0_tss, analysis_folder, 'Target Saccade NaN Counts before/after t0start', 'diam_t0_tss_nan_counts_histogram');
+
+
+%% Fill outliers
+diam_t0_tss.cleanedData = filloutliers(diam_t0_tss.aligned_diams,'nearest', 'percentiles',[10 90]);
+if do_plots == 1
+    plotCompareTwoStepsDiam(diam_t0_tss, 'aligned_diams', 'ZeroAligned',  ...
+        diam_t0_tss, 'cleanedData',   '80Percentile', ...
+        strcat('ID ', num2str(id), ': Pupil Response Around Target Saccade Starts'), ...
+        color_map, conditions, condition_labels, time_vector, x_label_text, 't0_s',analysis_folder, compare_folder, 'tss',id);
+    plotHistNaNsBufferedDiamSacc(diam_t0_tss, analysis_folder, 'Target Saccade NaN Counts before/after t0start', 'diam_t0_tss_nan_counts_histogram');
 else
-    end
+end
 
 %save(fullfile(analysis_folder, strcat('\diam_t0_tss.mat')), 'diam_t0_tss');
 
-        % Reverse engineer Saccades from Fixations and take as t0:
-        % 1. [Start of Saccade that Reached Target]
-        % 2. [End of Saccade that Reached Target]
-        % 3. [Start of Saccade that didnt Reach Target]
-        % 4. [End of Saccade that didnt Reach Target]
-        % 5. [FIRST Start Target Saccade of trial]
-        % 6. [FIRST End of Target Saccade of trial]
-        % 7. [LAST Start of Target Saccades per trial] (uneccessary bc fixation as marker for fixation ensures the saccade was goal oriented)
-        analyseChangePupilDilation(id, cut_data, trial_metrics, conditions, condition_labels, analysis_folder, compare_folder, do_plots, time_vector, x_label_text, color_map);
-        close all; % close plots
-        
-        
-        
-        
+% Reverse engineer Saccades from Fixations and take as t0:
+% 1. [Start of Saccade that Reached Target]
+% 2. [End of Saccade that Reached Target]
+% 3. [Start of Saccade that didnt Reach Target]
+% 4. [End of Saccade that didnt Reach Target]
+% 5. [FIRST Start Target Saccade of trial]
+% 6. [FIRST End of Target Saccade of trial]
+% 7. [LAST Start of Target Saccades per trial] (uneccessary bc fixation as marker for fixation ensures the saccade was goal oriented)
+analyseChangePupilDilation(id, cut_data, trial_metrics, conditions, condition_labels, analysis_folder, compare_folder, do_plots, time_vector, x_label_text, color_map);
+close all; % close plots
 
-    %% --- Normalized and Max Pupil Diameter  ---
-    % get pupil diam of all participants by group
 
-    % --- plot nRT versus maxPupilDiam after target reaches stim ---
-    % Set threshold for outlier detection
-    % 2 plots: per group and per participant
-    outlier_threshold = 4; % remove outliers from rt/rtv, already done for pupil dilation in analyseResults
-    [avg_adhd, avg_nonadhd] = extractPupilData(data, outlier_threshold, 'ADHD');
-    plotPupilRTRelationships(avg_adhd, avg_nonadhd, conditions, color_map, comparison_results_folder);
 
-    % --- pupil diameter over time per group with stdabweichung ---
-    % get data into format needed for plot
-    outlier_threshold = 4;
-    [avg_adhd, avg_nonadhd] = extractPupilData(data, outlier_threshold, 'ADHD');
-    before = size(data(1).pupilDiamNorm.a.beforeMean,2);
-    after = size(data(1).pupilDiamNorm.a.afterMean,2);
-    [avg_adhd_struct, avg_nonadhd_struct] = changeFormatPupilRT(avg_adhd, avg_nonadhd, before, after);
-    plotAvgPupilDiamsBeforeAfterStimFoundByGroupByCondition('Mean', 'Mean Change in Pupil Diameter (z-score)', ...
-        avg_adhd_struct, avg_nonadhd_struct, conditions, color_map, before, after, outlier_threshold, comparison_results_folder);
-    avg_both = [avg_adhd; avg_nonadhd];
 
-                %% MS participants
-                outlier_threshold = 3;
-                [avg_ms, avg_nonms] = extractPupilData(data, outlier_threshold, 'MS');
-                avg_both = [avg_ms; avg_nonms];
-                before = size(data(1).pupilDiamNorm.a.beforeMean,2);
-                after = size(data(1).pupilDiamNorm.a.afterMean,2);
-                [avg_ms_struct, avg_nonms_struct] = changeFormatPupilRT(avg_ms, avg_nonms, before, after);
-                plotAvgPupilDiamsBeforeAfterStimFoundByGroupByCondition('Mean', 'Mean Change in Pupil Diameter (z-score)', avg_ms_struct, avg_nonms_struct, conditions, color_map, before, after, comparison_results_folder);
-%%
+
+%% --- Normalized and Max Pupil Diameter  ---
+% get pupil diam of all participants by group
+
+% --- plot nRT versus maxPupilDiam after target reaches stim ---
+% Set threshold for outlier detection
+% 2 plots: per group and per participant
+outlier_threshold = 4; % remove outliers from rt/rtv, already done for pupil dilation in analyseResults
+[avg_adhd, avg_nonadhd] = extractPupilData(data_median, outlier_threshold, 'ADHD');
+plotPupilRTRelationships(avg_adhd, avg_nonadhd, conditions, color_map, comparison_results_folder);
+
+% --- pupil diameter over time per group with stdabweichung ---
+% get data into format needed for plot
+outlier_threshold = 4;
+[avg_adhd, avg_nonadhd] = extractPupilData(data_median, outlier_threshold, 'ADHD');
+before = size(data_median(1).pupilDiamNorm.a.beforeMean,2);
+after = size(data_median(1).pupilDiamNorm.a.afterMean,2);
+[avg_adhd_struct, avg_nonadhd_struct] = changeFormatPupilRT(avg_adhd, avg_nonadhd, before, after);
+plotAvgPupilDiamsBeforeAfterStimFoundByGroupByCondition('Mean', 'Mean Change in Pupil Diameter (z-score)', ...
+    avg_adhd_struct, avg_nonadhd_struct, conditions, color_map, before, after, outlier_threshold, comparison_results_folder);
+avg_both = [avg_adhd; avg_nonadhd];
+
 % --- max pupil diam after stim found per group ---
 plotPupilMaxStimFound(avg_adhd, avg_nonadhd, conditions, color_map, comparison_results_folder);
 % --- max min and mean pupil diam during stimulus presentation ---
@@ -759,60 +733,15 @@ plotPupilMagnitudesTwoGroups(avg_adhd, avg_nonadhd, conditions, color_map, compa
 %nanmean(searchLatencyStats(1).conditions(1).searchLatencies)
 % TODO something is wrong here
 
-%% --- Attention Shifts and Disengagement ---
-% Task Engagement Over Time: Evaluate how task engagement changes over time.
-% ADHD participants might show a decline in performance or more frequent disengagement from the task as it progresses.
-
-% Revisits: Track how often participants revisit previously searched areas.
-% Frequent revisits might indicate memory deficits or difficulties in sustaining attention.
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% QUESTIONAIRE RESULTS
-% Define the response mapping
-response_mapping = containers.Map({'Never', 'Rarely', 'Sometimes', 'Often', 'Very Often'}, [1, 2, 3, 4, 5]);
-% Create a generic set of column names including the ID column
-num_questions = 18;
-column_names = [{'id'}, arrayfun(@(x) sprintf('Question%d', x), 1:num_questions, 'UniformOutput', false)];
-question_data = loadQuesionnaires(folders, group_labels);% load questionnaire results
-adhd_data = question_data.ADHD;
-non_adhd_data = question_data.nonADHD;
-quest_table = [adhd_data; non_adhd_data];
-% Convert responses to numeric for easier analysis and plotting
-adhd_numeric = adhd_data{:, 2:end};  % Skip the ID column
-non_adhd_numeric = non_adhd_data{:, 2:end};  % Skip the ID column
-fprintf('Loaded %d ADHD entries and %d nonADHD entries.\n', height(adhd_data), height(non_adhd_data));
-
-% get questionnaire results/mean answers
-quest_scores = questionnaireScale(quest_table, comparison_results_folder);
-
-% Pie Chart for overall response proportions for (non)ADHD group
-plotQPieChart(adhd_numeric, 'ADHD', color_map, 'all', safe, comparison_results_folder);
-plotQPieChart(non_adhd_numeric, 'nonADHD', color_map, 'all', safe, comparison_results_folder);
-
-% Pie Chart for first 6 responses: proportions for (non)ADHD group
-plotQPieChart(adhd_numeric(:,1:6), 'ADHD', color_map, '6', safe, comparison_results_folder);
-plotQPieChart(non_adhd_numeric(:,1:6), 'nonADHD', color_map, '6', safe, comparison_results_folder);
-
-% Answers per question with a unique color for each participant
-plotQParticipantAnswers(quest_table, color_map, safe, comparison_results_folder);
-
-% Means of answers per question per group
-plotQMeanAndStd(adhd_numeric, non_adhd_numeric, color_map, safe, comparison_results_folder)
 
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% INFLUENCE OF (IN)ATTENTION
-%% combine questionnaire results with RT and accuracy
-% Convert your data structure to a table for easier manipulation
-data_table = struct2table(data);
 
-% Merge questionnaire data with RT/accuracy/saccade data based on ID
-merged_data = innerjoin(data_table, quest_table, 'Keys', 'id');
-merged_data = innerjoin(merged_data, quest_scores, 'Keys', 'id');
-%merged_data = innerjoin(merged_data, struct2table(rt_variability), 'Keys', 'id');
-merged_data = innerjoin(merged_data, struct2table(trial_metrics), 'Keys', 'id');
+
+
+
+
+
 
 
 %% define attentional levels based on ASRS guidelines
@@ -831,10 +760,10 @@ adhd_indices = strcmp(merged_data.group, 'ADHD');
 nonadhd_indices = strcmp(merged_data.group, 'nonADHD');
 
 
-                %% correlation analyis (unpassend zum vergleich der gruppen, wenn dann innerhalb der gruppen)
-                % ttest between AHD/nonADHD groups AND
-                % ttestResultsADHD = cleanADHDnonADHDattRT(merged_data, conditions);
-                % ttestResults = cleanAttRTcorrTtest(merged_data, conditions);
+%% correlation analyis (unpassend zum vergleich der gruppen, wenn dann innerhalb der gruppen)
+% ttest between AHD/nonADHD groups AND
+% ttestResultsADHD = cleanADHDnonADHDattRT(merged_data, conditions);
+% ttestResults = cleanAttRTcorrTtest(merged_data, conditions);
 
 
 %% --- lieber ttest ---
@@ -929,13 +858,13 @@ end
 
 
 function [y_upper,y_lower] = plotConditionDataWithShading(data, x_values, color, condition)
-    % Plot median ± SEM with shading for each condition
-    avg = mean(data, 1, 'omitnan');
-    std_error = std(data, 0, 1, 'omitnan') / sqrt(size(data, 1));
-    nan_mask = ~isnan(avg) & ~isnan(std_error);
-    x_shaded = x_values(nan_mask);
-    y_upper = avg(nan_mask) + std_error(nan_mask);
-    y_lower = avg(nan_mask) - std_error(nan_mask);
-    fill([x_shaded, fliplr(x_shaded)], [y_upper, fliplr(y_lower)], color, 'FaceAlpha', 0.2, 'EdgeColor', 'none', 'HandleVisibility', 'off');
-    plot(x_values, avg, 'Color', color, 'LineWidth', 2, 'DisplayName', condition);
+% Plot median ± SEM with shading for each condition
+avg = mean(data, 1, 'omitnan');
+std_error = std(data, 0, 1, 'omitnan') / sqrt(size(data, 1));
+nan_mask = ~isnan(avg) & ~isnan(std_error);
+x_shaded = x_values(nan_mask);
+y_upper = avg(nan_mask) + std_error(nan_mask);
+y_lower = avg(nan_mask) - std_error(nan_mask);
+fill([x_shaded, fliplr(x_shaded)], [y_upper, fliplr(y_lower)], color, 'FaceAlpha', 0.2, 'EdgeColor', 'none', 'HandleVisibility', 'off');
+plot(x_values, avg, 'Color', color, 'LineWidth', 2, 'DisplayName', condition);
 end

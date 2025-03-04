@@ -1,4 +1,4 @@
-function plotSaccadeMetricsViolin(trial_metrics, cutData, conditions, color_map)
+function plotSaccadeMetricsViolin(trial_metrics, cutData, conditions, color_map, condition_labels, safe_name)
 figure;
 t = tiledlayout(2, 2, 'TileSpacing', 'Compact');
 
@@ -143,4 +143,7 @@ for i = 1:length(vp)
 end
 title('Diff: Optimal and First Saccade Angle');
 ylabel('Angle Difference (degrees)');set(gca, 'YScale', 'log');
+
+
+print(gcf, safe_name, '-dsvg');
 end

@@ -1,16 +1,47 @@
-function plotBarRTmeanParticipantsCondition(data, color_map, comparison_results_folder)
+function plotBarRTmeanParticipantsCondition(data, color_map, comparison_results_folder, color_map_individual, ids)
+
+ADHD_indices = strcmp({data.group}, 'ADHD');
+nonADHD_indices = strcmp({data.group}, 'nonADHD');
+
+%eye
+prettyPlots(1, data(nonADHD_indices), color_map, fullfile(comparison_results_folder, 'RT_condition_coloured_participants_nonADHD_eye.png'),'nonADHD: Gaze Reaction Time',  color_map_individual, ids(nonADHD_indices));
+prettyPlots(1, data(ADHD_indices), color_map, fullfile(comparison_results_folder, 'RT_condition_coloured_participants_ADHD_eye.png'), 'ADHD: Gaze Reaction Time',  color_map_individual, ids(ADHD_indices));
+%button
+prettyPlots(0, data(nonADHD_indices), color_map, fullfile(comparison_results_folder, 'RT_condition_coloured_participants_nonADHD_button.png'),'nonADHD: Button Press Reaction Time',  color_map_individual, ids(nonADHD_indices));
+prettyPlots(0, data(ADHD_indices), color_map, fullfile(comparison_results_folder, 'RT_condition_coloured_participants_ADHD_button.png'), 'ADHD: Button Press Reaction Time',  color_map_individual, ids(ADHD_indices));
 
 
-nRTa_all = arrayfun(@(x) x.nRTa, data);
-nRTa_simple_all = arrayfun(@(x) x.nRTasimple, data);
-nRTb_all = arrayfun(@(x) x.nRTb, data);
-nRTb_simple_all = arrayfun(@(x) x.nRTbsimple, data);
+
+end
+% Extract data for each condition and group using logical indexing
+
+
+
+
+
+
+
+
+
+function prettyPlots(eye, data, color_map, safe_here, this_title, color_map_individual,id)
+
+if eye == 0
+    nRTa_all = arrayfun(@(x) x.nRTa, data);
+    nRTa_simple_all = arrayfun(@(x) x.nRTasimple, data);
+    nRTb_all = arrayfun(@(x) x.nRTb, data);
+    nRTb_simple_all = arrayfun(@(x) x.nRTbsimple, data);
+else
+    nRTa_all = arrayfun(@(x) x.nRTa_eye, data);
+    nRTa_simple_all = arrayfun(@(x) x.nRTasimple_eye, data);
+    nRTb_all = arrayfun(@(x) x.nRTb_eye, data);
+    nRTb_simple_all = arrayfun(@(x) x.nRTbsimple_eye, data);
+end
 
 % Calculate the mean and SEM for each condition
-mean_rt_a = mean(nRTa_all, 'omitnan');
-mean_rt_a_simple = mean(nRTa_simple_all, 'omitnan');
+mean_rt_a = median(nRTa_all, 'omitnan');
+mean_rt_a_simple = median(nRTa_simple_all, 'omitnan');
 mean_rt_b = mean(nRTb_all, 'omitnan');
-mean_rt_b_simple = mean(nRTb_simple_all, 'omitnan');
+mean_rt_b_simple = median(nRTb_simple_all, 'omitnan');
 
 sem_rt_a = std(nRTa_all, 'omitnan') / sqrt(length(nRTa_all));
 sem_rt_a_simple = std(nRTa_simple_all, 'omitnan') / sqrt(length(nRTa_simple_all));
@@ -58,11 +89,15 @@ for i = 1:length(conditions)
 end
 
 % Assign unique colors to each participant and plot individual lines
-num_participants = size(individual_data, 2);
-cmap = lines(num_participants);  % Generate unique colors for participants
+num_participants = size(data, 2);
 for i = 1:num_participants
-    plot(1:4, individual_data(:, i), '-o', 'MarkerSize', 5, ...
-        'MarkerFaceColor', cmap(i, :), 'Color', cmap(i, :), 'LineWidth', 1);
+    
+    info = color_map_individual(id(i));
+    plot(1:4, individual_data(:, i), 'MarkerEdgeColor', info.color, ...
+            'MarkerFaceColor', info.color, 'Marker', info.marker,...
+            'Color', info.color, ...
+            'DisplayName', sprintf('ID%d', id(i)), ...
+            'MarkerSize', 5, 'LineWidth', 1);
 end
 
 % Add significance stars with horizontal lines close to the x-axis
@@ -87,12 +122,15 @@ end
 
 % Configure the plot
 set(gca, 'XTick', 1:4, 'XTickLabel', condition_labels);
-xlabel('Condition');
-ylabel('Reaction Time (RT)');
-title('Reaction Time by Condition');
-legend('Location', 'northeastoutside');
+%xlabel('Condition');
+ylabel('Reaction Time (s)');
+title(this_title);
+
+legend('boxoff'); 
+legend('Location', 'northeast');
 grid off;
 hold off;
 
-set(gcf, 'Units', 'normalized', 'OuterPosition', [0 0 1 1]);
-saveas(gcf, fullfile(comparison_results_folder, 'RT_condition_coloured_participants.png'));
+set(gcf, 'Position', [50, 50, 700, 500]); % Resize the figure window (x, y, width, height)
+saveas(gcf, safe_here);
+end
