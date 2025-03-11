@@ -227,30 +227,29 @@ try
     
     
     %% average per adhd/nonadhd (not shown: multiple abandonments)
-    means_adhd = zeros(num_conditions, 3); % [conditions x strategies]
-    means_nonadhd = zeros(num_conditions, 3);
-    for i = 1:numel(adhd_summary_struct)% ADHD group
-        for c = 1:num_conditions % Extract data for this participant & condition
-            means_adhd(c, 1) = means_adhd(c, 1) + adhd_summary_struct(i).counts(c, 1); % Strategy 1
-            means_adhd(c, 2) = means_adhd(c, 2) + adhd_summary_struct(i).counts(c, 2); % Strategy 2
-            means_adhd(c, 3) = means_adhd(c, 3) + adhd_summary_struct(i).counts(c, 3); % Strategy 3
+    nonadhd_counts = zeros(num_conditions, 3, numel(nonadhd_summary_struct)); % [conditions x strategies x participants]
+    adhd_counts = zeros(num_conditions, 3, numel(adhd_summary_struct));
+
+    for i = 1:numel(adhd_summary_struct) % ADHD group
+        for c = 1:num_conditions % data for this participant & condition
+            adhd_counts(c, :, i) = adhd_summary_struct(i).counts(c, :);
         end
     end
-    means_adhd = means_adhd / numel(adhd_summary_struct);
-    for i = 1:numel(nonadhd_summary_struct)% Non-ADHD group
-        for c = 1:num_conditions
-            means_nonadhd(c, 1) = means_nonadhd(c, 1) + nonadhd_summary_struct(i).counts(c, 1); % Strategy 1
-            means_nonadhd(c, 2) = means_nonadhd(c, 2) + nonadhd_summary_struct(i).counts(c, 2); % Strategy 2
-            means_nonadhd(c, 3) = means_nonadhd(c, 3) + nonadhd_summary_struct(i).counts(c, 3); % Strategy 3
+    avg_adhd = median(adhd_counts, 3);
+
+    for i = 1:numel(nonadhd_summary_struct) % ADHD group
+        for c = 1:num_conditions % data for this participant & condition
+            nonadhd_counts(c, :, i) = nonadhd_summary_struct(i).counts(c, :);
         end
     end
-    means_nonadhd = means_nonadhd / numel(nonadhd_summary_struct);
-    
+    avg_nonadhd = median(nonadhd_counts, 3);
+
+ 
     % Combine averages for plotting and add spacing
     spacer = nan(1, 3); % Create a spacer row
     group_averages = [];
     for c = 1:num_conditions
-        group_averages = [group_averages; means_adhd(c, :); means_nonadhd(c, :); spacer];
+        group_averages = [group_averages; avg_adhd(c, :); avg_nonadhd(c, :); spacer];
     end
     group_averages(end,:) = []; % remove last spacer to safe space in plot
     

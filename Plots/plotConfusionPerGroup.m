@@ -92,7 +92,7 @@ disp([average, ' confusion'])
                         ids,...     % all participant ids
                         {"EyeDiff","PressDiff","EyeRatio","PressRatio"}, "Diff/Ratio (s)", ...% x, y axis labels "Diff: RTa - RTb (s) | Ratio: RTa/RTb (s)"
                         group_labels, {'1', '2', '3', '4'}, color_map_other, participant_map, ...
-                        fullfile(comparison_results_folder, ['12_confusion_allinone_', average, '.png']), [50, 50, 1600, 700]);
+                        fullfile(comparison_results_folder, ['12_confusion_allinone_', average, '.png']), [100, 100, 1100, 500]);
     
     plotADHDnonADHDDiffTwoValues([average, ' confusion for Gaze and Button-Press RT'],... % sgtitle
                         [ratio_adhd_eye,     ratio_adhd_press],...
@@ -106,7 +106,7 @@ disp([average, ' confusion'])
                         ids,...     % all participant ids
                         {"Gaze","Button Press"}, "Ratio RTa/RTb (s)", ...% x, y axis labels "Diff: RTa - RTb (s) | Ratio: RTa/RTb (s)"
                         group_labels, {'1',  '3'}, color_map_other, participant_map, ...
-                        fullfile(comparison_results_folder, ['12_confusion_allinone_ratio', average, '.png']), [50, 50, 1000, 600]);
+                        fullfile(comparison_results_folder, ['12_confusion_allinone_ratio', average, '.png']), [100, 100, 1000, 450]);
                     
                     
     %% Create 2x2 figure

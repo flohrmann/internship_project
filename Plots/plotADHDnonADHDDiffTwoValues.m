@@ -27,6 +27,7 @@ plotDifferenceAndTheirError(data_1, group_1_sems, data_2, group_2_sems, conditio
 set(gcf, 'Position', dimensions); % Resize the figure window (x, y, width, height)
 saveas(gcf, safe_name);
 
+
 end
 
 
@@ -89,24 +90,23 @@ function plotDifferenceAndTheirError(adhd_medians, adhd_sem, nonadhd_medians, no
         adhd_data = adhd_medians(:, c); % ADHD group medians for condition c
         nonadhd_data = nonadhd_medians(:, c); % nonADHD group medians for condition c
         
-        % Perform a T-test (or permutation test if needed)
-        [~, p] = ttest2(adhd_data, nonadhd_data);
-        p_values(c) = p; % Store p-value
+        % Perform a ranksum (or permutation test if needed)
+        [p, h, stats] = ranksum(adhd_data, nonadhd_data);
         
         % Plot variance metric
         bar(c, difference(c), 'FaceColor', color_map(conditions{c}), 'EdgeColor', 'none', ...
             'FaceAlpha', 0.3, 'DisplayName', sprintf('%s Variance', conditions{c}));
         
         errorbar(c, difference(c), difference_sem(c), '.', 'LineWidth', 1.5, 'CapSize', 10, 'Color', [0.3 0.3 0.3], 'HandleVisibility', 'off');
-        legendEntries{c} = sprintf('p=%.2f', p);
+        legendEntries{c} = sprintf('p=%.2f',p);
     end
     title('ADHD vs. nonADHD');
     xticks(1:numConditions); xticklabels(labels);
     ylabel(strcat('Difference in',{' '}, y_label))
     
-    lgd = legend(legendEntries, 'Location', 'southoutside');
+    lgd = legend(legendEntries, 'Location', 'southoutside', 'Orientation', 'vertical', 'NumColumns', 2);
     legend('boxoff'); %lgd.ItemTextAlignment = 'left'; 
-    title(lgd, 'ADHD/nonADHD Averages t-test');
+    title(lgd, 'Wilcoxon Rank-Sum Test');
     hold off;
 end
 

@@ -1,4 +1,4 @@
-function [lookedAtFixation] = checkFixation(trial_results, eye_tracking_data, screenXpixels, screenYpixels, fixationThreshold)
+function [lookedAtFixation] = checkFixation(trial_results, eye_tracking_data, screenXpixels, screenYpixels, fixationThreshold, analysis_folder)
     % Initialize the output array
     lookedAtFixation = false(size(trial_results, 1), 2); % Columns for right and left eyes
 
@@ -41,6 +41,15 @@ function [lookedAtFixation] = checkFixation(trial_results, eye_tracking_data, sc
         end
     end
 
+
+    fixation_summary = any(lookedAtFixation, 2);
+    fixationSummary = table();
+    fixationSummary.fix_count = sum(fixation_summary(:,1));
+    fixationSummary.fix_perc  = fixationSummary.fix_count / size(lookedAtFixation,1) * 100;
+    fixationSummary.fix_l     = {double(lookedAtFixation(:, 2))};
+    fixationSummary.fix_r     = {double(lookedAtFixation(:, 1))};
+    fixationSummary.fix_any   = {double(fixation_summary(:))};
+    save(fullfile(analysis_folder, 'fixationSummary.mat'), 'fixationSummary');
     % Display the results
 %     for trial = 1:size(trial_results, 1)
 %         fprintf('Trial %d: Right Eye - %s, Left Eye - %s\n', trial, ...

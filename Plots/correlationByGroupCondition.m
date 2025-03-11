@@ -44,12 +44,13 @@ for g = 1:length(groups)
                 b1 = current_data.rt(condition_trials);
                 e1 = current_data.rt_eye(condition_trials);
                 
-                valid_idx = ~isnan(a1) & ~isnan(b1) & ~isnan(e1);
+                %valid_idx = ~isnan(a1) & ~isnan(b1) & ~isnan(e1);
+                %avg_rt_button = [avg_rt_button; nanmedian(b1(valid_idx))];
 
-                avg_rt_button = [avg_rt_button; nanmedian(b1(valid_idx))];
-                avg_rt_eye = [avg_rt_eye; nanmedian(e1(valid_idx))];
-                avg_lapse = [avg_lapse; nanmedian(b1(valid_idx)) - nanmedian(e1(valid_idx))];
-                avg_accuracy = [avg_accuracy; nanmedian(a1(valid_idx))];
+                avg_rt_button = [avg_rt_button; nanmedian(b1)]; %(valid_idx))];
+                avg_rt_eye = [avg_rt_eye; nanmedian(e1)]; %(valid_idx))];
+                avg_lapse = [avg_lapse; nanmedian(b1) - nanmedian(e1)];
+                avg_accuracy = [avg_accuracy; nanmedian(a1)]; %(valid_idx))];
             end
         end
         
@@ -61,9 +62,11 @@ for g = 1:length(groups)
          lapse = lapse(valid_idx);
          
         % Perform correlation analysis for the current group and condition
-        [R, P] = corr([rt_button, rt_eye, accuracy, lapse], 'Type', 'Pearson');
+        %[R, P] = corr([rt_button, rt_eye, accuracy, lapse], 'Type', 'Pearson');
         [R, P] = corr([avg_rt_button, avg_rt_eye, avg_accuracy, avg_lapse], 'Type', 'Pearson');
-     
+        
+        [R, P] = corr([avg_rt_button, avg_accuracy], 'Type', 'Pearson');
+
         % Store results for the current group and condition
         R_group_condition.(group){c} = R;
         P_group_condition.(group){c} = P;

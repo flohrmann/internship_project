@@ -16,7 +16,7 @@ catch % if file cant be loaded, compute for everyone
     save(strcat(comparison_results_folder, 'all_fixations_', fd_label, '.mat'), 'all_fixations'); % save for all participants
 end
 
-if size(all_fixations, 2) == size(folders, 1) % if this contains data for all participants do nothing
+if size(all_fixations, 2) == size(folders, 2) % if this contains data for all participants do nothing
 else % if file doesnt contain everyone, compute for everyone
     for participant=1:size(data,2)
         %analysis_folder = strcat(folders{participant}, '\analysis\'); % save per participant
@@ -25,5 +25,5 @@ else % if file doesnt contain everyone, compute for everyone
         all_fixations(participant).id        = data(participant).id;
         all_fixations(participant).fixations = fixations;
     end
-    save(strcat(comparison_results_folder, 'all_fixations_', fd_label', '.mat'), 'all_fixations'); % save for all participants
+    save(strcat(comparison_results_folder, 'all_fixations_', fd_label, '.mat'), 'all_fixations'); % save for all participants
 end

@@ -1,14 +1,16 @@
-function plotBarRTmeanParticipantsCondition(data, color_map, comparison_results_folder, color_map_individual, ids)
+function plotBarRTmeanParticipantsCondition(data, color_map, comparison_results_folder, color_map_individual, ids, conditions, condition_labels)
 
 ADHD_indices = strcmp({data.group}, 'ADHD');
 nonADHD_indices = strcmp({data.group}, 'nonADHD');
 
 %eye
-prettyPlots(1, data(nonADHD_indices), color_map, fullfile(comparison_results_folder, 'RT_condition_coloured_participants_nonADHD_eye.png'),'nonADHD: Gaze Reaction Time',  color_map_individual, ids(nonADHD_indices));
-prettyPlots(1, data(ADHD_indices), color_map, fullfile(comparison_results_folder, 'RT_condition_coloured_participants_ADHD_eye.png'), 'ADHD: Gaze Reaction Time',  color_map_individual, ids(ADHD_indices));
+my_ylim = [0, 1.5];
+prettyPlots(my_ylim, 1, data(nonADHD_indices), color_map, fullfile(comparison_results_folder, 'RT_condition_coloured_participants_nonADHD_eye.png'),'nonADHD: Gaze Reaction Time',  color_map_individual, ids(nonADHD_indices), conditions, condition_labels);
+prettyPlots(my_ylim, 1, data(ADHD_indices), color_map, fullfile(comparison_results_folder, 'RT_condition_coloured_participants_ADHD_eye.png'), 'ADHD: Gaze Reaction Time',  color_map_individual, ids(ADHD_indices), conditions, condition_labels);
 %button
-prettyPlots(0, data(nonADHD_indices), color_map, fullfile(comparison_results_folder, 'RT_condition_coloured_participants_nonADHD_button.png'),'nonADHD: Button Press Reaction Time',  color_map_individual, ids(nonADHD_indices));
-prettyPlots(0, data(ADHD_indices), color_map, fullfile(comparison_results_folder, 'RT_condition_coloured_participants_ADHD_button.png'), 'ADHD: Button Press Reaction Time',  color_map_individual, ids(ADHD_indices));
+my_ylim = [0, 15];
+prettyPlots(my_ylim, 0, data(nonADHD_indices), color_map, fullfile(comparison_results_folder, 'RT_condition_coloured_participants_nonADHD_button.png'),'nonADHD: Button Press Reaction Time',  color_map_individual, ids(nonADHD_indices), conditions, condition_labels);
+prettyPlots(my_ylim, 0, data(ADHD_indices), color_map, fullfile(comparison_results_folder, 'RT_condition_coloured_participants_ADHD_button.png'), 'ADHD: Button Press Reaction Time',  color_map_individual, ids(ADHD_indices), conditions, condition_labels);
 
 
 
@@ -23,7 +25,7 @@ end
 
 
 
-function prettyPlots(eye, data, color_map, safe_here, this_title, color_map_individual,id)
+function prettyPlots(my_ylim, eye, data, color_map, safe_here, this_title, color_map_individual,id, conditions, condition_labels)
 
 if eye == 0
     nRTa_all = arrayfun(@(x) x.nRTa, data);
@@ -48,12 +50,11 @@ sem_rt_a_simple = std(nRTa_simple_all, 'omitnan') / sqrt(length(nRTa_simple_all)
 sem_rt_b = std(nRTb_all, 'omitnan') / sqrt(length(nRTb_all));
 sem_rt_b_simple = std(nRTb_simple_all, 'omitnan') / sqrt(length(nRTb_simple_all));
 
-% Set up condition names and labels
-conditions = {'a', 'a_simple', 'b', 'b_simple'};
-condition_labels = {'a', 'a simple', 'b', 'b simple'};
-mean_values = [mean_rt_a, mean_rt_a_simple, mean_rt_b, mean_rt_b_simple];
-sem_values = [sem_rt_a, sem_rt_a_simple, sem_rt_b, sem_rt_b_simple];
-individual_data = [nRTa_all; nRTa_simple_all; nRTb_all; nRTb_simple_all];  % Rows represent conditions
+conditions = {'a', 'b','a_simple',  'b_simple'};
+condition_labels = {'a', 'b','a simple',  'b simple'};
+mean_values = [mean_rt_a, mean_rt_b, mean_rt_a_simple,  mean_rt_b_simple];
+sem_values = [sem_rt_a, sem_rt_b,sem_rt_a_simple,  sem_rt_b_simple];
+individual_data = [nRTa_all; nRTb_all;nRTa_simple_all;  nRTb_simple_all];  % Rows represent conditions
 
 % Pairwise t-tests for significance
 num_conditions = 4;
@@ -125,7 +126,7 @@ set(gca, 'XTick', 1:4, 'XTickLabel', condition_labels);
 %xlabel('Condition');
 ylabel('Reaction Time (s)');
 title(this_title);
-
+ylim(my_ylim);
 legend('boxoff'); 
 legend('Location', 'northeast');
 grid off;

@@ -27,7 +27,7 @@ avg_nonadhd = table([], [], [], [], [], ...
     'rt_a', 'rtv_a', 'rt_as', 'rtv_as', 'rt_b', 'rtv_b', 'rt_bs', 'rtv_bs', ...
     'rt_eye_a', 'rtv_eye_a', 'rt_eye_as', 'rtv_eye_as', 'rt_eye_b', 'rtv_eye_b', 'rt_eye_bs', 'rtv_eye_bs'});
 
-% Define a helper function to remove outliers
+% helper function to remove outliers
 remove_outliers = @(x) replace_outliers_with_nan(x, outlier_threshold);
 
 for i = 1:length(data)

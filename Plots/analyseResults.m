@@ -1,72 +1,17 @@
 %% Load all the varibles and get all the paths
-%function analyseResults(results, num_rows, num_columns)
-%function analyseResults(n_rows, n_columns, folder, rand_trials, trial_results, samp)
+function analyseResults(color_map, color_map_trans, conditions, condition_labels, ...
+                        n_rows, n_columns, screenXpixels, screenYpixels, sr, safe, do_plots, fullscreen, ...
+                        results_path, subfolders, ids, comparison_folder, analysis_subfolder)
 % gets results from experiment including data from eyetracker
 % calls all the analysis/plotting functions
+
 % analysis_folder = strcat(folder_name, '\analysis');
 % mkdir(analysis_folder);
 
-color_map = containers.Map({'a', 'a_simple', 'b', 'b_simple'}, {
-    [0.9, 0.5, 0]  % orange
-    [1.0, 0  , 0]  % red
-    [0  , 0.5, 0]  % green
-    [0  , 0  , 1]  % blue
-    });
-% slightly transparent colours
-alpha = 0.2;
-color_map_trans = containers.Map({'a', 'a_simple', 'b', 'b_simple'}, {
-    [0.9 0.5 0 alpha]  % orange
-    [1.0 0   0 alpha]  % red
-    [0   0.5 0 alpha]  % green
-    [0   0   1 alpha]  % blue
-    });
 
-conditions = {'a', 'a_simple', 'b', 'b_simple'};
-condition_labels = {'a', 'a simple', 'b', 'b simple'};
-
-% for testing hardcoded
-n_rows = 9;
-n_columns = 12;
-screenXpixels = 3240;
-screenYpixels = 2160;
-sr = 1/60;              % Sampling rate of eyetracker
-safe = 1; % safe plots
-fullscreen = 1; % make plots fullscreen
-do_plots = 3;
-% Define folders and IDs for each participant
-subfolders = { ...
-    '1_20240714_140048', ... % alex
-    '2_20240726_191755', ... % mara
-    '3_20240805_105213', ... % tilo
-    '4_20240811_131601', ... % anu
-    '5_20240813_114700', ... % kieran
-    '6_20240821_191408', ... % sura
-    '7_20240821_194651', ... % hamit
-    '7_20240823_162058', ... % jannik
-    '9_20240829_101613', ... % farn
-    '10_20240929_151434' ... % julia
-    '11_20241006_153704' ... % felix
-    '12_20241006_150321' ... % florian
-    '13_20241025_195047' ... % leandra
-    '14_20241028_084922' ... % finn
-    '15_20241114_200512' ... % david
-    '16_20241128_113348' ... % bennet
-    '17_20250126_202511' ... % kerstin
-    '18_20250222_153229' ... % stacey
-    '19_20250224_120844' ... % maria
-    '20_20250224_171837' ... % lea
-    '21_20250224_174504' ... % giove
-    };
-
-ids = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21];
-compare_folder = 'C:\Users\flohrmann\Documents\Analysis_2025_final'; % safe some plots here for easier comparison
-analysis_subfolder = '\analysis_final';
-
-%%
-
-for subject = 15: length(subfolders)
+for subject = 1: length(subfolders)
     name = subfolders{subject};
-    folder = strcat('C:\Users\flohrmann\Documents\Results\', name);
+    folder = strcat(results_path, name);
     analysis_folder = strcat(folder, analysis_subfolder);
     id = ids(subject);
     disp(['Processing folder: ', folder, ' with ID: ', num2str(id)]);
@@ -119,15 +64,8 @@ for subject = 15: length(subfolders)
     
     % did they look at fixation?
     fixationThreshold = 200; % threshold for how close the gaze needs to be to the fixation cross
-    lookedAtFixation = checkFixation(trial_results, samp, screenXpixels, screenYpixels, fixationThreshold);
-    fixation_summary = any(lookedAtFixation, 2);
-    fixationSummary = table();
-    fixationSummary.fix_count = sum(fixation_summary(:,1));
-    fixationSummary.fix_perc  = fixationSummary.fix_count / size(lookedAtFixation,1) * 100;
-    fixationSummary.fix_l     = {double(lookedAtFixation(:, 2))};
-    fixationSummary.fix_r     = {double(lookedAtFixation(:, 1))};
-    fixationSummary.fix_any   = {double(fixation_summary(:))};
-    save(fullfile(analysis_folder, 'fixationSummary.mat'), 'fixationSummary');
+    lookedAtFixation = checkFixation(trial_results, samp, screenXpixels, screenYpixels, fixationThreshold,analysis_folder);
+
     
     % rt trial with looking at fixation vs without
     plotRTwithAndWithoutFixation(id, trial_results, eye_rt, lookedAtFixation, analysis_folder, condition_labels);
@@ -143,24 +81,24 @@ for subject = 15: length(subfolders)
     
     for fd_idx=1:(size(fixation_durations,2))
         fd_label = strcat(num2str(fixation_durations(fd_idx)), 'ms');
-        analysis_folder = strcat(folder, '\analysis_fixation_', fd_label);
-        compare_folder = strcat('C:\Users\flohrmann\Documents\Analysis_2025\PupilDiam_fix_', fd_label); % safe some plots here for easier comparison
+        analysis_subfolder = strcat(folder, '\analysis_fixation_', fd_label);
+        compare_folder = strcat(comparison_folder,'\PupilDiam_fix_', fd_label); % safe some plots here for easier comparison
         
-        sampling_rate = sr *1000; % in seconds
+        sampling_rate = sr *1000; % convert sr into seconds
         min_duration = round(fixation_durations(fd_idx)/sampling_rate); % min num of consecutive datapoints to count as a fixation
         
         try
-            mkdir(analysis_folder);
+            mkdir(analysis_subfolder);
             mkdir(compare_folder);
         catch % folders already exists thats fine
         end
         
         % - 1. Detect fixations -
         dist_threshold = 50; % max distance between consecutive points (in pixels) to count as fixation cluster
-        fixations = analyseFixation(id, plot_these, cut_data, dist_threshold, min_duration, screenXpixels, screenYpixels, safe, analysis_folder, fd_label);
+        fixations = analyseFixation(id, plot_these, cut_data, dist_threshold, min_duration, screenXpixels, screenYpixels, safe, analysis_subfolder, fd_label);
         
         % - 2. Reverse engineer "saccades" from fixation clusters -
-        saccades = reverseEngineerSaccades(cut_data, fixations, screenXpixels, screenYpixels, plot_these, analysis_folder, safe);
+        saccades = reverseEngineerSaccades(cut_data, fixations, screenXpixels, screenYpixels, plot_these, analysis_subfolder, safe);
         
         % - 3. Get num saccades, distance, angle, cosine from trial start to target center/saccades,... -
         % fill in baselines with not enough data with NaNs
@@ -174,7 +112,7 @@ for subject = 15: length(subfolders)
         min_length = 10;        % number of valid datapoints needed for data about 1/5
         tolerance = 200;        % num pixels away to count as target found
         trial_metrics = calcGazeALLSaccadesDistanceDirection(cut_data, fixations, saccades, tolerance, num_before, num_after, baseline_length, screenXpixels, screenYpixels, min_length);
-        save(fullfile(analysis_folder, strcat('\trial_metrics.mat')), 'trial_metrics');
+        save(fullfile(analysis_subfolder, strcat('\trial_metrics.mat')), 'trial_metrics');
                 
         %  - 4. Look at changes in pupil dilation -      
         % Reverse engineer Saccades from Fixations and take as t0:
@@ -187,7 +125,7 @@ for subject = 15: length(subfolders)
         % 7. [LAST Start of Target Saccades per trial] (uneccessary bc fixation as marker for fixation ensures the saccade was goal oriented)
         time_vector = (-num_before:num_after - 1) * sr; % Time in seconds
         x_label_text = 'Time from t0 (s)';
-        analyseChangePupilDilation(id, cut_data, trial_metrics, conditions, condition_labels, analysis_folder, compare_folder, do_plots, time_vector, x_label_text, color_map);
+        analyseChangePupilDilation(id, cut_data, trial_metrics, conditions, condition_labels, analysis_subfolder, compare_folder, do_plots, time_vector, x_label_text, color_map);
         close all; % close plots
         
         % search efficiency
@@ -205,7 +143,7 @@ for subject = 15: length(subfolders)
          
         % --- first sacacde ---
         % - reaction time/ start of first sacacde -
-        first_sacc = plotAverageStartFirstSaccade(id, trial_metrics, trial_results, conditions, condition_labels, color_map, compare_folder, analysis_folder);
+        first_sacc = plotAverageStartFirstSaccade(id, trial_metrics, trial_results, conditions, condition_labels, color_map, compare_folder, analysis_subfolder);
         
         % difference of first saccade angle & distance compared to optimal one
         % pretty but useless plot
@@ -213,7 +151,7 @@ for subject = 15: length(subfolders)
         
         % cosine similarity
         plotCosineSimilarity(trial_results, trial_metrics, saccades, fixations, screenXpixels, screenYpixels, ...
-            conditions, condition_labels, color_map, safe, analysis_folder)
+            conditions, condition_labels, color_map, safe, analysis_subfolder)
         close all
     end
 end

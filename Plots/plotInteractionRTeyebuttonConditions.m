@@ -15,7 +15,6 @@ for i = 1:length(data)
         condition = data(i).Condition{t};
         condition_idx = find(strcmp(conditions, condition));
         if isempty(condition_idx)
-            warning('Condition label "%s" not found in the predefined conditions list.', condition);
             continue;
         end
         rt_button_press_conditions{group_idx, condition_idx} = [rt_button_press_conditions{group_idx, condition_idx}; data(i).rt(t)];
@@ -25,7 +24,6 @@ for i = 1:length(data)
 end
 
 % Visualize Reaction Times Across Conditions and Groups
-% todo change condition names
 % First Figure: Each group and condition in separate subplots
 plotRTScatterGroupCondition(groups, conditions, rt_eye_conditions, rt_button_press_conditions, color_map, safe, comparison_results_folder);
 plotRTscatterConditionAcrossGroups(groups, conditions, rt_eye_conditions, rt_button_press_conditions, color_map, safe, comparison_results_folder)

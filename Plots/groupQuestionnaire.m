@@ -1,4 +1,4 @@
-function groupQuestionnaire(quest_table, group_labels)
+function quest_table = groupQuestionnaire(quest_table, group_labels)
     % group_diagnostic_analysis - Analyzes diagnostic criteria fulfillment and group statistics
     % Performs statistical tests and returns results in a table.
     %

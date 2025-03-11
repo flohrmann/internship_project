@@ -36,7 +36,7 @@ else % if file doesnt contain everyone, compute for everyone
         all_saccades(participant).id = data(participant).id;
         all_saccades(participant).saccades = saccades;
     end
-    save(fullfile(comparison_results_folder, 'all_saccades_', fd_label, 'mat'), 'all_saccades');% save the saccades data
+    save(strcat(comparison_results_folder, 'all_saccades_', fd_label, 'mat'), 'all_saccades');% save the saccades data
 end
 
 % plot saccades

@@ -38,6 +38,10 @@ function fixations = analyseFixation(id, plot_these, data, dist_threshold, min_d
     fixations.stimulusFixations = stimulusFixations;
     fixations.length = length_fixation;
     fixations.id = id;
+    try
+        mkdir(analysis_folder);
+    catch % folders already exists
+    end
     save(strcat(analysis_folder, '\fixations.mat'), 'fixations');
     %save(fullfile(analysis_folder, 'fixations.mat'), 'fixations');
 

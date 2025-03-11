@@ -103,7 +103,7 @@ nonAdhd_sem    = std(nonadhd_condition_avgs, 1, 'omitnan')./ sqrt(size(nonadhd_c
 plotHEREADHDnonADHDVariance('Mistakes Per Condition',...
     adhd_condition_avgs, adhd_median, adhd_sem, 'ADHD', 'northeast', ...
     nonadhd_condition_avgs, nonAdhd_median, nonAdhd_sem, 'nonADHD', 'east', ...
-    ids, {"a", "b, a simple, b simple"}, 'Number of Wrong Trials', group_labels, unique_conditions, color_map, color_map_individual, ...
+    ids, {"a", "other"}, 'Number of Wrong Trials', group_labels, unique_conditions, color_map, color_map_individual, ...
     fullfile(comp_results_fix, '11_mistakes_allinone_median_avsrest.png'));
 
 % accuracy
@@ -117,7 +117,7 @@ nonAdhd_sem    = std(nonadhd_condition_avgs, 1, 'omitnan')./ sqrt(size(nonadhd_c
 plotHEREADHDnonADHDVariance('Accuracy Per Condition',...
     adhd_condition_avgs, adhd_median, adhd_sem, 'ADHD', 'southeast', ...
     nonadhd_condition_avgs, nonAdhd_median, nonAdhd_sem, 'nonADHD', 'east', ...
-    ids, {"a", "b, a simple, b simple"}, '% of correct trials', group_labels, unique_conditions, color_map, color_map_individual, ...
+    ids, {"a", "other"}, '% of correct trials', group_labels, unique_conditions, color_map, color_map_individual, ...
     fullfile(comp_results_fix, '11_accuracy_allinone_median_avsrest.png'));
 
 
@@ -206,7 +206,7 @@ plotHEREStandardTwoGroupsEachData(data_2, group_2_medians, group_2_sems, label_2
 subplot(1, 3, 3); 
 plotHEREVarianceDifference(data_1, group_1_sems, data_2, group_2_sems, conditions, x_labels, color_map, label_2);
   
-set(gcf, 'Position', [50, 50, 1400, 700]); % Resize the figure window (x, y, width, height)
+set(gcf, 'Position', [100, 100, 1000, 500]); % Resize the figure window (x, y, width, height)
 saveas(gcf, safe_name);
 
 % end 
@@ -265,7 +265,7 @@ function plotHEREVarianceDifference(adhd_medians, adhd_sem, nonadhd_medians, non
 
     % Perform statistical tests and store p-values
     numConditions = length(conditions)/2;
-    p_values = nan(1, numConditions); % Store p-values for annotation
+    %p_values = nan(1, numConditions); % Store p-values for annotation
     legendEntries = cell(1, numConditions); % Store legend labels
     
     hold on;
@@ -275,9 +275,20 @@ function plotHEREVarianceDifference(adhd_medians, adhd_sem, nonadhd_medians, non
         nonadhd_data = nonadhd_medians(:, c); % nonADHD group medians for condition c
         
         % Perform a T-test (or permutation test if needed)
-        [~, p] = ttest2(adhd_data, nonadhd_data);
-        p_values(c) = p; % Store p-value
-        
+        %[~, p] = ttest2(adhd_data, nonadhd_data);
+        %p_values(c) = p; % Store p-value
+        [p, h, stats] = ranksum(adhd_data, nonadhd_data);
+        if h     
+            % permutation test
+            p_perm = permutationTestWelch(c_adhd_data, c_nonadhd_data);
+            [~, p_tt] = ttest2(c_adhd_data, c_nonadhd_data);
+            fprintf('Wilcoxon Rank-Sum Test Results:\n');
+            fprintf('p-value: %.4f\n', p);
+            fprintf(['h0 rejected (groups means diff at 5perc sign):', log2str(h),'\n']);
+            fprintf('permutated p %.2f\n', p_perm);
+            fprintf('ttest p %.2f\n', p_tt);
+        else
+        end
         % Plot variance metric
         bar(c, difference(c), 'FaceColor', color_map(conditions{c}), 'EdgeColor', 'none', ...
             'FaceAlpha', 0.3, 'DisplayName', sprintf('%s Variance', conditions{c}));
@@ -292,6 +303,6 @@ function plotHEREVarianceDifference(adhd_medians, adhd_sem, nonadhd_medians, non
 
     lgd = legend(legendEntries, 'Location', 'southoutside');
     legend('boxoff'); %lgd.ItemTextAlignment = 'left'; 
-    title(lgd, 'ADHD/nonADHD Medians t-test'); 
+    title(lgd, 'Wilcoxon Rank-Sum Test'); 
     hold off;
 end

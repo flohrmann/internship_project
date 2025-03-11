@@ -15,7 +15,7 @@ function plotCompareTwoStepsDiam(data1, data_type_1, subtitle1, ...
     subplot(num_rows, num_col, 1); 
     hold on; 
     title(strcat('Individual Trials (', subtitle1, ')'));
-    for i = 1:4
+    for i = 1:size(conditions, 2)
         condition = conditions{i};
         condition_trials = data1(strcmp(data1.Condition, condition), :);
         for j = 1:height(condition_trials)
@@ -33,7 +33,7 @@ function plotCompareTwoStepsDiam(data1, data_type_1, subtitle1, ...
     subplot(num_rows, num_col, 2); 
     hold on; 
     title(strcat('Condition Average (', subtitle1, ')'));
-    for i = 1:4
+    for i = 1:size(conditions, 2)
         condition = conditions{i};
         condition_trials = data1(strcmp(data1.Condition, condition), :);
         plotConditionDataWithShading(condition_trials.(data_type_1), time_vector, color_map(condition), condition);
@@ -47,7 +47,7 @@ function plotCompareTwoStepsDiam(data1, data_type_1, subtitle1, ...
     subplot(num_rows, num_col, 3); 
     hold on; 
     title(strcat('Individual Trials (', subtitle2, ')'));
-    for i = 1:4
+    for i = 1:size(conditions, 2)
         condition = conditions{i};
         condition_trials = data2(strcmp(data2.Condition, condition), :);
         for j = 1:height(condition_trials)
@@ -65,7 +65,7 @@ function plotCompareTwoStepsDiam(data1, data_type_1, subtitle1, ...
     subplot(num_rows, num_col, 4); 
     hold on; 
     title(strcat('Condition Average (', subtitle2, ')'));
-    for i = 1:4
+    for i = 1:size(conditions, 2)
         condition = conditions{i};
         condition_trials = data2(strcmp(data2.Condition, condition), :);
         plotConditionDataWithShading(condition_trials.(data_type_2), time_vector, color_map(condition), condition);
@@ -77,7 +77,7 @@ function plotCompareTwoStepsDiam(data1, data_type_1, subtitle1, ...
 
     %% Apply unified y-limits and x-limits
     y_limits = [min(all_y_values, [], 'all'), max(all_y_values, [], 'all')];
-    for i = 1:4
+    for i = 1:size(conditions, 2)
         subplot(num_rows, num_col, i);
         ylim(y_limits);  % Set uniform y-axis
         xlim([min(time_vector), max(time_vector)]);  % Tight x-axis limits
@@ -89,7 +89,11 @@ function plotCompareTwoStepsDiam(data1, data_type_1, subtitle1, ...
 
     %% Save the figure
     saveas(gcf, fullfile(analysis_folder, strcat('diam_t0_', t0, '.png')));
-    print(gcf, fullfile(compare_folder, strcat('diam_t0_', t0, '_id', num2str(id), '.svg')), '-dsvg');
+    try % id
+        print(gcf, fullfile(compare_folder, strcat('diam_t0_', t0, '_id', num2str(id), '.svg')), '-dsvg');
+    catch % group
+        print(gcf, fullfile(compare_folder, strcat('diam_t0_', t0, id, '.svg')), '-dsvg');
+    end
 end
 
 

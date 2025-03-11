@@ -19,8 +19,8 @@ num_conditions = length(unique_conditions);
 
 
 %% anova
-[p,tbl,stats] = anova1(rt_median_button(:), mistakes(:));
-disp(tbl)
+%[p,tbl,stats] = anova1(rt_median_button(:), mistakes(:));
+%disp(tbl)
 
 %% eye
 ymax = max(accuracy(:)); 
@@ -35,6 +35,7 @@ sgtitle('Gaze-RT vs Accuracy by Condition [Participant Medians and Regression Li
 
 % ADHD Subplot
 [r_1, p_1] = corr(adhd_eye(:), adhd_accuracy(:), 'Type', 'Spearman');
+fprintf('adhd Spearman Correlation eye x acc: r = %.2f, p = %.3f\n', r_1, p_1)
 
 subplot(1, 2, 1); hold on;
 legendEntries_ADHD = cell(1, num_conditions);
@@ -61,7 +62,7 @@ hold off;
 
 % Non-ADHD Subplot
 [r_2, p_2] = corr(nonadhd_eye(:), nonadhd_accuracy(:), 'Type', 'Spearman');
-fprintf('nonadhd Spearman Correlation: r = %.2f, p = %.3f\n', r_2, p_2)
+fprintf('nonadhd Spearman Correlation eye x acc: r = %.2f, p = %.3f\n', r_2, p_2)
 subplot(1, 2, 2); hold on;
 legendEntries_NonADHD = cell(1, num_conditions);
 
@@ -101,6 +102,7 @@ sgtitle('Button-Press-RT vs Accuracy by Condition [Participant Medians and Regre
 
 % ADHD Subplot
 [r_3, p_3] = corr(adhd_button(:), adhd_accuracy(:), 'Type', 'Spearman');
+fprintf('adhd Spearman Correlation button x acc: r = %.2f, p = %.3f\n', r_3, p_3)
 
 subplot(1, 2, 1); hold on;
 legendEntries_ADHD = cell(1, num_conditions);
@@ -127,7 +129,7 @@ hold off;
 
 % Non-ADHD Subplot
 [r_spearman, p_spearman] = corr(nonadhd_button(:), nonadhd_accuracy(:), 'Type', 'Spearman');
-fprintf('nonadhd Spearman Correlation: r = %.2f, p = %.3f\n', r_spearman, p_spearman)
+fprintf('nonadhd Spearman Correlation button x acc: r = %.2f, p = %.3f\n', r_spearman, p_spearman)
 subplot(1, 2, 2); hold on;
 legendEntries_NonADHD = cell(1, num_conditions);
 
