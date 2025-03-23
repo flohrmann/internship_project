@@ -100,15 +100,23 @@ average = 'median'; % 'mean' or 'median'
 data_median = normalizeMeanRTsBySimpleConditions(data_struct, average, conditions, comparison_results_folder);
 
 %mean
-average = 'mean'; % 'mean' or 'median'
-data_mean = normalizeMeanRTsBySimpleConditions(data_struct, average, conditions, comparison_results_folder);
+%average = 'mean'; % 'mean' or 'median'
+%data_mean = normalizeMeanRTsBySimpleConditions(data_struct, average, conditions, comparison_results_folder);
 
+
+% TODO "wrong" nontarget bar on target
+%[data_all_median, data_correct_median] = wrongTargetBarWhichAndRatio(data_struct);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%  PLOTS/ANALYSIS %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% central vs peripheral
+plotRTbyEccentricity(data_median, screenXpixels, screenYpixels, comparison_results_folder, conditions)
+
 % get group labels and ids per participant into lists for easier plotting
 getGroupStats(data_struct, group_labels);
+
+
 
 
 %% ---- REACTION TIME AND ACCURACY ----
