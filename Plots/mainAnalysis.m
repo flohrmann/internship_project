@@ -68,18 +68,17 @@ subfolders = { ...
     };
 
 ids = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21];
-comparison_results_folder = 'C:\Users\idm\Desktop\Semester4\Internship\analysis_group_2025_03\'; % safe some plots here for easier comparison
+comparison_results_folder = 'C:\Users\idm\Desktop\Semester4\Internship\analysis_id2-18_ranksum\'; % safe group plots here for easier comparison
 analysis_subfolder = '\analysis'; %'\analysis_final';
-
 
 %% individual results - needs to run first
 % takes long to plot each individual trials gaze path
- fixation_threshold = 200; % threshold for how close the gaze needs to be to the fixation cross/target to count as it being fixated
- fix_cluster_threshold = 50; % max distance between consecutive points (in pixels) to count as fixation cluster
- analyseResults(color_map, color_map_trans, conditions, condition_labels, ...
-                n_rows, n_columns, screenXpixels, screenYpixels, sr, safe, do_plots, fullscreen, ...
-                results_path, subfolders, ids, comparison_results_folder, analysis_subfolder,...
-                fixation_threshold, fix_cluster_threshold)
+% fixation_threshold = 200; % threshold for how close the gaze needs to be to the fixation cross/target to count as it being fixated
+% fix_cluster_threshold = 50; % max distance between consecutive points (in pixels) to count as fixation cluster
+% analyseResults(color_map, color_map_trans, conditions, condition_labels, ...
+%                n_rows, n_columns, screenXpixels, screenYpixels, sr, safe, do_plots, fullscreen, ...
+%                results_path, subfolders, ids, comparison_results_folder, analysis_subfolder,...
+%                fixation_threshold, fix_cluster_threshold)
 
 %% group results
 % save path
@@ -93,7 +92,7 @@ end
 
 analyseCompareResults(color_map, color_map_other, conditions, condition_labels, groups, ...
                       screenXpixels, screenYpixels, sr, safe, ...
-                      results_path, subfolders(2:end), ids(2:end), analysis_subfolder, comparison_results_folder, ...
+                      results_path, subfolders(2:18), ids(2:18), analysis_subfolder, comparison_results_folder, ... %
                       subfolder_fixation, fixation_duration);
 
 

@@ -54,10 +54,12 @@ function getGroupStats(data_struct, group_labels)
     %% 
     
     %  Gender 
-    fprintf('\nGender Distribution:\n');
-    gender_table = table(adhd_unique_genders', adhd_gender_counts,nonadhd_gender_counts, 'VariableNames', {'Gender', 'ADHD', 'nonADHD'});
-    disp(gender_table);
-
+    try
+        fprintf('\nGender Distribution:\n');
+        gender_table = table(adhd_unique_genders', adhd_gender_counts,nonadhd_gender_counts, 'VariableNames', {'Gender', 'ADHD', 'nonADHD'});
+        disp(gender_table);
+    catch 
+    end
 %     %  Gaming 
 %     fprintf('\nGaming Preferences for ADHD Group:\n');
 %     gaming_table = table(adhd_unique_gaming', adhd_gaming_counts, nonadhd_gaming_counts, 'VariableNames', {'Gaming', 'ADHD', 'nonADHD'});

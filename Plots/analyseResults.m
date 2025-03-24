@@ -7,7 +7,7 @@ function analyseResults(color_map, color_map_trans, conditions, condition_labels
 % calls all the analysis/plotting functions
 
 
-for subject = 20: length(subfolders)
+for subject = 21: length(subfolders)
     name = subfolders{subject};
     folder = strcat(results_path, name);
     analysis_folder = strcat(folder, analysis_subfolder);

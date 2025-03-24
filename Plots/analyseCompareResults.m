@@ -96,12 +96,9 @@ data_struct = processEyeRTs(data_struct);
 
 % normalized RT per participan, take mean or median for rt/normalisation
 % median
-average = 'median'; % 'mean' or 'median'
-data_median = normalizeMeanRTsBySimpleConditions(data_struct, average, conditions, comparison_results_folder);
-
+data_median = normalizeMeanRTsBySimpleConditions(data_struct, 'median', conditions, comparison_results_folder);
 %mean
-%average = 'mean'; % 'mean' or 'median'
-%data_mean = normalizeMeanRTsBySimpleConditions(data_struct, average, conditions, comparison_results_folder);
+data_mean = normalizeMeanRTsBySimpleConditions(data_struct, 'mean', conditions, comparison_results_folder);
 
 
 % TODO "wrong" nontarget bar on target
