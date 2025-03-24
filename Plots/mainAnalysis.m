@@ -42,7 +42,7 @@ do_plots = 1;
 fullscreen = 1; % make plots fullscreen
 
 % folders and IDs for each participant
-results_path = 'C:\Users\idm\Desktop\Semester4\Internship\Results\';
+results_path = 'C:\Users\idm\Desktop\Semester4\Internship\Results_2025_03\';
 subfolders = { ...
     '1_20240714_140048', ... % only 160 trials
     '2_20240726_191755', ... 
@@ -68,21 +68,24 @@ subfolders = { ...
     };
 
 ids = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21];
-comparison_results_folder = 'C:\Users\idm\Desktop\Semester4\Internship\Analysis_2025_abgabe_final\'; % safe some plots here for easier comparison
-analysis_subfolder = '\analysis_final';
+comparison_results_folder = 'C:\Users\idm\Desktop\Semester4\Internship\analysis_group_2025_03\'; % safe some plots here for easier comparison
+analysis_subfolder = '\analysis'; %'\analysis_final';
 
 
 %% individual results - needs to run first
 % takes long to plot each individual trials gaze path
-% analyseResults(color_map, color_map_trans, conditions, condition_labels, ...
-%                n_rows, n_columns, screenXpixels, screenYpixels, sr, safe, do_plots, fullscreen, ...
-%                results_path, subfolders, ids, comparison_results_folder, analysis_subfolder)
+ fixation_threshold = 200; % threshold for how close the gaze needs to be to the fixation cross/target to count as it being fixated
+ fix_cluster_threshold = 50; % max distance between consecutive points (in pixels) to count as fixation cluster
+ analyseResults(color_map, color_map_trans, conditions, condition_labels, ...
+                n_rows, n_columns, screenXpixels, screenYpixels, sr, safe, do_plots, fullscreen, ...
+                results_path, subfolders, ids, comparison_results_folder, analysis_subfolder,...
+                fixation_threshold, fix_cluster_threshold)
 
 %% group results
 % save path
-analysis_subfolder = '\analysis_new'; % subfolders in participants where fixation independet results were saved earlier
-fixation_duration = 50; % 50,100,200 
-subfolder_fixation = strcat('analysis_fixation_', num2str(fixation_duration),'ms');
+%analysis_subfolder = '\analysis'; % subfolders in participants where fixation independet results were saved earlier
+fixation_duration = 100; % 50,100,200 
+subfolder_fixation = strcat('\analysis_fixation_', num2str(fixation_duration),'ms');
 try
     mkdir(comparison_results_folder);
 catch % folders already exists

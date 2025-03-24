@@ -1,4 +1,4 @@
-function plotRTOverTimeColouredByCondition(data, color_map, comparison_results_folder, condition_labels)
+function plotRTOverTimeColouredByCondition(data, color_map, comparison_results_folder, condition_labels, conditions)
     % Initialize figure with two subplots
     figure;
 
@@ -10,21 +10,16 @@ function plotRTOverTimeColouredByCondition(data, color_map, comparison_results_f
     for i = 1:size(data, 1)
         % Get the color directly from color_map based on Condition
         condition = char(data.Condition{i});
-        plot_color = color_map(condition);
-
         % Plot each point with a single marker, hiding it from the legend
-        plot(i, data.rt(i), 'o', 'Color', plot_color, 'MarkerSize', 6, 'HandleVisibility', 'off');
+        plot(i, data.rt(i), 'o', 'Color', color_map(condition), 'MarkerSize', 6, 'HandleVisibility', 'off');
     end
 
     % Add legend entries for each unique condition without showing individual points
-    condition_keys = keys(color_map);
-    for j = 1:length(condition_keys)
+    for j = 1:length(conditions)
         % Get the color from the color map for the legend entry
-        condition = condition_keys{j};
-        legend_color = color_map(condition);
-
+        condition = conditions{j};
         % Create a dummy plot for each unique condition for the legend
-        plot(NaN, NaN, 'o', 'Color', legend_color, 'DisplayName', condition_labels{j});
+        plot(NaN, NaN, 'o', 'Color', color_map(condition), 'DisplayName', condition_labels{j});
     end
 
     % Finalize the first subplot
@@ -44,9 +39,9 @@ function plotRTOverTimeColouredByCondition(data, color_map, comparison_results_f
     all_conditions = [];
 
     % Collect reaction times and conditions for plot
-    for j = 1:length(condition_keys)
+    for j = 1:length(conditions)
         % Filter reaction times based on the current condition
-        condition = condition_keys{j};
+        condition = conditions{j};
         rt_condition = data.rt(strcmp(data.Condition, condition));  % Use strcmp for cell array comparison
 
         % Append to arrays for violin plot
@@ -58,8 +53,8 @@ function plotRTOverTimeColouredByCondition(data, color_map, comparison_results_f
     %errorbar(all_rt, all_conditions, 'ShowData', false, 'ShowMean', true, 'ShowBox', false);
 
     % Calculate and add error bars for each condition
-    for j = 1:length(condition_keys)
-        condition = condition_keys{j};
+    for j = 1:length(conditions)
+        condition = conditions{j};
         rt_condition = data.rt(strcmp(data.Condition, condition));
         
         % Calculate mean and standard error for each condition
@@ -68,7 +63,7 @@ function plotRTOverTimeColouredByCondition(data, color_map, comparison_results_f
 
         % Plot error bars on top of the violin plot
         x_loc = j;  % x-location for error bars
-        bar(j,avg_rt, 'FaceColor', color_map(condition_keys{j}), 'EdgeColor', 'none', ...
+        bar(j,avg_rt, 'FaceColor', color_map(conditions{j}), 'EdgeColor', 'none', ...
             'FaceAlpha', 0.3, 'DisplayName', condition_labels{j}, 'HandleVisibility', 'off');
         errorbar(x_loc, avg_rt, stderr_rt, 'k', 'LineWidth', 1.5);
     end

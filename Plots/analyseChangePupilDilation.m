@@ -10,11 +10,14 @@ diam_t0_tss = getPupilDiamsBasedOnt0(cut_data, trial_metrics, 'tss_diam_before',
 % Fill outliers
 diam_t0_tss.cleanedData = filloutliers(diam_t0_tss.aligned_diams,'nearest', 'percentiles',[10 90]); 
 if do_plots == 1
+    try
     plotCompareTwoStepsDiam(diam_t0_tss, 'aligned_diams', 'ZeroAligned',  ...
                             diam_t0_tss, 'cleanedData',   '80Percentile', ...
                             strcat('ID ', num2str(id), ': Pupil Response Around Target Saccade Starts'), ...
                             color_map, conditions, condition_labels, time_vector, x_label_text, 't0_s',analysis_folder, compare_folder, 'tss',id);
     plotHistNaNsBufferedDiamSacc(diam_t0_tss, analysis_folder, 'Target Saccade NaN Counts before/after t0start', 'diam_t0_tss_nan_counts_histogram');
+    catch
+    end
 else
 end
 save(fullfile(analysis_folder, strcat('\diam_t0_tss.mat')), 'diam_t0_tss');
@@ -28,11 +31,14 @@ diam_t0_ntss = getPupilDiamsBasedOnt0(cut_data, trial_metrics, 'ntss_diam_before
 diam_t0_ntss.cleanedData = filloutliers(diam_t0_ntss.aligned_diams,'nearest','percentiles',[10 90]); 
 save(fullfile(analysis_folder, strcat('\diam_t0_ntss.mat')), 'diam_t0_ntss');
 if do_plots == 1
+    try
     plotCompareTwoStepsDiam(diam_t0_ntss, 'aligned_diams', 'ZeroAligned', ...
                             diam_t0_ntss, 'cleanedData',   '80Percentile', ...
                             strcat('ID ', num2str(id), ': Pupil Response Around non-Target Saccade Starts'), ...
                             color_map, conditions, condition_labels, time_vector, x_label_text, 't0_s', analysis_folder, compare_folder, 'ntss',id);
     plotHistNaNsBufferedDiamSacc(diam_t0_ntss, analysis_folder, 'NonTarget Saccade NaN Counts before/after t0start', 'diam_t0_ntss_nan_counts_histogram');
+    catch
+    end
 else
 end
 %%  --- 4.3 plot ALL saccades TOWARDS target aligned by END of saccade [raw, 0-aligned, cleaned] ---
@@ -44,11 +50,14 @@ diam_t0_tse = getPupilDiamsBasedOnt0(cut_data, trial_metrics, 'tse_diam_before',
 diam_t0_tse.cleanedData = filloutliers(diam_t0_tse.aligned_diams,'nearest', 'percentiles',[10 90]); 
 save(fullfile(analysis_folder, strcat('\diam_t0_tse.mat')), 'diam_t0_tse');
 if do_plots == 1
+    try
     plotCompareTwoStepsDiam(diam_t0_tse, 'aligned_diams', 'ZeroAligned', ...
                             diam_t0_tse, 'cleanedData',   '80Percentile', ...
                             strcat('ID ', num2str(id), ': Pupil Response Around Target Saccade Ends'), ...
                             color_map, conditions, condition_labels, time_vector, x_label_text, 't0_e', analysis_folder, compare_folder, 'tse',id);
     plotHistNaNsBufferedDiamSacc(diam_t0_tse, analysis_folder, 'Target Saccade NaN Counts before/after t0end', 'diam_t0_tse_nan_counts_histogram');
+    catch
+    end
 else
 end
 %%  --- 4.4 plot saccades NOT towards target aligned by END of saccade ---
@@ -61,11 +70,14 @@ diam_t0_ntse = getPupilDiamsBasedOnt0(cut_data, trial_metrics, 'ntse_diam_before
 diam_t0_ntse.cleanedData = filloutliers(diam_t0_ntse.aligned_diams,'nearest', 'percentiles',[10 90]);
 save(fullfile(analysis_folder, strcat('\diam_t0_ntse.mat')), 'diam_t0_ntse');
 if do_plots == 1
+    try
     plotCompareTwoStepsDiam(diam_t0_ntse, 'aligned_diams', 'ZeroAligned', ...
                             diam_t0_ntse, 'cleanedData',   '80Percentile', ...
                             strcat('ID ', num2str(id), ': Pupil Response Around non-Target Saccade Ends'), ...
                             color_map, conditions, condition_labels,time_vector, x_label_text, 't0_e', analysis_folder, compare_folder, 'ntse',id);
     plotHistNaNsBufferedDiamSacc(diam_t0_ntse, analysis_folder, 'NonTarget Saccade NaN Counts before/after t0end', 'diam_t0_ntse_nan_counts_histogram');
+    catch
+    end
 else
 end
 %%  --- 4.5 plot FIRST START target saccade of trial ---
@@ -96,6 +108,7 @@ end
 diam_t0_tss_first.cleanedData = filloutliers(diam_t0_tss_first.aligned_diams,'nearest','percentiles',[10 90]); %remove outliers
 save(fullfile(analysis_folder, strcat('\diam_t0_tss_first.mat')), 'diam_t0_tss_first');
 if do_plots == 1
+    try
     plotCompareTwoStepsDiam(diam_t0_tss_first, 'aligned_diams', 'ZeroAligned', ...
                             diam_t0_tss_first, 'cleanedData',   '80Percentile', ...
                             strcat('ID ', num2str(id), ': Pupil Response Around First Target Saccade Start'), ...
@@ -103,6 +116,8 @@ if do_plots == 1
     plotDiamsPerConditionAndAverage(diam_t0_tss_first, 'aligned_diams', conditions,  condition_labels, time_vector, x_label_text, color_map, ...
             strcat('ID ', num2str(id), ': Pupil Response Around First Target Saccade Start [ZeroAligned]'), 't0_s',...
             analysis_folder, compare_folder, 'tss_first',id);
+    catch
+    end
 else
 end
 %%  --- 4.6 plot FIRST saccade TOWARDS target aligned by END of saccade ---
@@ -141,6 +156,7 @@ end
 diam_t0_tse_first.cleanedData = filloutliers(diam_t0_tse_first.aligned_diams,'nearest','percentiles',[10 90]);% remove outliers
 save(fullfile(analysis_folder, strcat('\diam_t0_tse_first.mat')), 'diam_t0_tse_first');
 if do_plots == 1
+    try
     plotCompareTwoStepsDiam(diam_t0_tse_first, 'aligned_diams', 'ZeroAligned', ...
                             diam_t0_tse_first, 'cleanedData',   '80Percentile', ...
                             strcat('ID ', num2str(id), ': Pupil Response Around First Target Saccade Ends'), ...
@@ -149,7 +165,8 @@ if do_plots == 1
     plotDiamsPerConditionAndAverage(diam_t0_tse_first, 'aligned_diams', conditions, condition_labels, time_vector, x_label_text, color_map, ...
             strcat('ID ', num2str(id), ': Pupil Response Around First Target Saccade End [ZeroAligned]'), 't0_e',...
             analysis_folder, compare_folder, 'tse_first',id);
-    
+    catch
+    end
 else
 end
 %%  --- 4.7 only take start of last target saccades per trial ---

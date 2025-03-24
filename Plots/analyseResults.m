@@ -1,15 +1,13 @@
 %% Load all the varibles and get all the paths
 function analyseResults(color_map, color_map_trans, conditions, condition_labels, ...
                         n_rows, n_columns, screenXpixels, screenYpixels, sr, safe, do_plots, fullscreen, ...
-                        results_path, subfolders, ids, comparison_folder, analysis_subfolder)
+                        results_path, subfolders, ids, comparison_folder, analysis_subfolder,...
+                        fixation_threshold, fix_cluster_threshold)
 % gets results from experiment including data from eyetracker
 % calls all the analysis/plotting functions
 
-% analysis_folder = strcat(folder_name, '\analysis');
-% mkdir(analysis_folder);
 
-
-for subject = 1: length(subfolders)
+for subject = 20: length(subfolders)
     name = subfolders{subject};
     folder = strcat(results_path, name);
     analysis_folder = strcat(folder, analysis_subfolder);
@@ -28,8 +26,8 @@ for subject = 1: length(subfolders)
         load(strcat(analysis_folder, '\eye_rt.mat')); % eye_rt
     catch % calculate/plot if first time
         show = false; % dont show plots (slightly faster)
-        num_plots = 10; % size(cut_data, 1); % how many trials you want plotted, starts with first
-        eye_rt = plotStimAndEye(analysis_folder, cut_data, num_plots, show, 'plotsanddata');
+        num_plots = size(cut_data, 1); % how many trials you want plotted, starts with first
+        eye_rt = plotStimAndEye(analysis_folder, cut_data, num_plots, show, 'onlydata');
     end
     
     %Behavioural Data (RT, accuracy, RTV, confusion)
@@ -40,21 +38,17 @@ for subject = 1: length(subfolders)
     plotButtonPressMinusGazeRT(trial_results, eye_rt, analysis_folder);
     
     %Plot the RT per trial and violin plot/average/std error of mean RT per condition
-    plotRTOverTimeColouredByCondition(trial_results, color_map, analysis_folder, condition_labels)
+    plotRTOverTimeColouredByCondition(trial_results, color_map, analysis_folder, condition_labels, conditions)
     plotRT(trial_results, analysis_folder, condition_labels)
 
     %Accuracy per condition
-    plotAccuracyPerCondition(trial_results, color_map, safe, analysis_folder)
+    %plotAccuracyPerCondition(trial_results, color_map, safe, analysis_folder)
     
     % rt/accuracy
     plotRTvsAccuracy(trial_results, analysis_folder)
     
     %Reaction Time Variability
     rt_variability = getRTvariabilityPerParticipant(trial_results, conditions, color_map, analysis_folder);
-    
-    % diff if stim in inner vs outer circle of screen
-    % TODO check visul angle 
-    plotRTbyEccentricity(trial_results, eye_rt, screenXpixels, screenYpixels, n_rows, n_columns, analysis_folder);
     
     % distance to target at onset vs rt (gaze) to target (did they even look at the stim)
     plotDistanceVsRT(trial_results, samp, eye_rt, screenXpixels, screenYpixels, analysis_folder, color_map)
@@ -63,8 +57,7 @@ for subject = 1: length(subfolders)
     plotRTvsPupilSizePerCondition(trial_results, samp, analysis_folder, color_map)
     
     % did they look at fixation?
-    fixationThreshold = 200; % threshold for how close the gaze needs to be to the fixation cross
-    lookedAtFixation = checkFixation(trial_results, samp, screenXpixels, screenYpixels, fixationThreshold,analysis_folder);
+    lookedAtFixation = checkFixation(trial_results, samp, screenXpixels, screenYpixels, fixation_threshold,analysis_folder);
 
     
     % rt trial with looking at fixation vs without
@@ -76,29 +69,28 @@ for subject = 1: length(subfolders)
     
     %% --- Eyetracking Data  ---
     % plotPupilDiameterOverTime(id, cut_data, analysis_folder);
-    plot_these = [1, 2, 5, 20, 100]; % just plot some trials for checking
-    fixation_durations = [50, 100, 200]; % in ms
+    plot_these = [1,5]; % just plot some trials for checking
+    fixation_durations = [100]; % in ms  50,, 200
     
     for fd_idx=1:(size(fixation_durations,2))
         fd_label = strcat(num2str(fixation_durations(fd_idx)), 'ms');
-        analysis_subfolder = strcat(folder, '\analysis_fixation_', fd_label);
+        fixation_subfolder = strcat(folder, '\analysis_fixation_', fd_label);
         compare_folder = strcat(comparison_folder,'\PupilDiam_fix_', fd_label); % safe some plots here for easier comparison
         
         sampling_rate = sr *1000; % convert sr into seconds
         min_duration = round(fixation_durations(fd_idx)/sampling_rate); % min num of consecutive datapoints to count as a fixation
         
         try
-            mkdir(analysis_subfolder);
+            mkdir(fixation_subfolder);
             mkdir(compare_folder);
         catch % folders already exists thats fine
         end
         
         % - 1. Detect fixations -
-        dist_threshold = 50; % max distance between consecutive points (in pixels) to count as fixation cluster
-        fixations = analyseFixation(id, plot_these, cut_data, dist_threshold, min_duration, screenXpixels, screenYpixels, safe, analysis_subfolder, fd_label);
+        fixations = analyseFixation(id, plot_these, cut_data, fix_cluster_threshold, min_duration, screenXpixels, screenYpixels, safe, fixation_subfolder, fd_label);
         
         % - 2. Reverse engineer "saccades" from fixation clusters -
-        saccades = reverseEngineerSaccades(cut_data, fixations, screenXpixels, screenYpixels, plot_these, analysis_subfolder, safe);
+        saccades = reverseEngineerSaccades(cut_data, fixations, screenXpixels, screenYpixels, plot_these, fixation_subfolder, safe);
         
         % - 3. Get num saccades, distance, angle, cosine from trial start to target center/saccades,... -
         % fill in baselines with not enough data with NaNs
@@ -110,9 +102,9 @@ for subject = 1: length(subfolders)
         num_before = 20;        % Number of datapoints before target found
         num_after = 31;         % Number of valid pupil diam datapoints after target found 0.5/0.016=31.3
         min_length = 10;        % number of valid datapoints needed for data about 1/5
-        tolerance = 200;        % num pixels away to count as target found
-        trial_metrics = calcGazeALLSaccadesDistanceDirection(cut_data, fixations, saccades, tolerance, num_before, num_after, baseline_length, screenXpixels, screenYpixels, min_length);
-        save(fullfile(analysis_subfolder, strcat('\trial_metrics.mat')), 'trial_metrics');
+        %fixation_threshhold = 200;        % num pixels away to count as target found
+        trial_metrics = calcGazeALLSaccadesDistanceDirection(cut_data, fixations, saccades, fixation_threshold, num_before, num_after, baseline_length, screenXpixels, screenYpixels, min_length);
+        save(fullfile(fixation_subfolder, strcat('\trial_metrics.mat')), 'trial_metrics');
                 
         %  - 4. Look at changes in pupil dilation -      
         % Reverse engineer Saccades from Fixations and take as t0:
@@ -125,7 +117,7 @@ for subject = 1: length(subfolders)
         % 7. [LAST Start of Target Saccades per trial] (uneccessary bc fixation as marker for fixation ensures the saccade was goal oriented)
         time_vector = (-num_before:num_after - 1) * sr; % Time in seconds
         x_label_text = 'Time from t0 (s)';
-        analyseChangePupilDilation(id, cut_data, trial_metrics, conditions, condition_labels, analysis_subfolder, compare_folder, do_plots, time_vector, x_label_text, color_map);
+        analyseChangePupilDilation(id, cut_data, trial_metrics, conditions, condition_labels, fixation_subfolder, compare_folder, do_plots, time_vector, x_label_text, color_map);
         close all; % close plots
         
         % search efficiency
@@ -138,12 +130,12 @@ for subject = 1: length(subfolders)
         plotHistSaccadeMetricsParticipant(trial_metrics, cut_data, conditions,color_map, sr, ...
                                           fullfile(compare_folder, strcat('saccade_stats_hist_all_id_',num2str(id))), ...
                                           fullfile(compare_folder, strcat('saccade_stats_hist_condition_id_',num2str(id))))
-        plotSaccadeMetricsViolin(trial_metrics, cut_data, conditions, color_map, condition_labels, fullfile(compare_folder, ...
-                                strcat('saccade_num_dist_angle_violin_id_',num2str(id),'.svg')));
+        %plotSaccadeMetricsViolin(trial_metrics, cut_data, conditions, color_map, condition_labels, fullfile(compare_folder, ...
+        %                        strcat('saccade_num_dist_angle_violin_id_',num2str(id),'.svg')));
          
         % --- first sacacde ---
         % - reaction time/ start of first sacacde -
-        first_sacc = plotAverageStartFirstSaccade(id, trial_metrics, trial_results, conditions, condition_labels, color_map, compare_folder, analysis_subfolder);
+        first_sacc = plotAverageStartFirstSaccade(id, trial_metrics, trial_results, conditions, condition_labels, color_map, compare_folder, fixation_subfolder);
         
         % difference of first saccade angle & distance compared to optimal one
         % pretty but useless plot
@@ -151,7 +143,7 @@ for subject = 1: length(subfolders)
         
         % cosine similarity
         plotCosineSimilarity(trial_results, trial_metrics, saccades, fixations, screenXpixels, screenYpixels, ...
-            conditions, condition_labels, color_map, safe, analysis_subfolder)
+            conditions, condition_labels, color_map, safe, fixation_subfolder)
         close all
     end
 end

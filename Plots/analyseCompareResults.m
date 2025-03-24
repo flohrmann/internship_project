@@ -50,12 +50,12 @@ for i = 1:length(valid_participant_folders) % Loop through each folder and load 
         data_struct(i).x_centers          = cutData.x_centers;
         data_struct(i).y_centers          = cutData.y_centers;
         data_struct(i).angleMatrix        = cutData.AngleMatrix;
-        %         % pupil dilation data
-        %         load(fullfile(pupil_file.folder, pupil_file.name), 'result_table');
-        %         data_struct(i).pupilDiam          = result_table;
-        %         load(fullfile(pupil_diam_norm_file.folder, pupil_diam_norm_file.name), 'condition_diam_avg');
-        %         data_struct(i).pupilDiamNorm      = condition_diam_avg;
-        
+                        %         % pupil dilation data
+                        %         load(fullfile(pupil_file.folder, pupil_file.name), 'result_table');
+                        %         data_struct(i).pupilDiam          = result_table;
+                        %         load(fullfile(pupil_diam_norm_file.folder, pupil_diam_norm_file.name), 'condition_diam_avg');
+                        %         data_struct(i).pupilDiamNorm      = condition_diam_avg;
+                        
         % the following results depend on their fixation duration
         load(strcat(folder, '\',subfolder_fixation, '\diam_t0_ntse.mat'));
         load(strcat(folder, '\',subfolder_fixation, '\diam_t0_ntss.mat'));
@@ -111,11 +111,10 @@ data_median = normalizeMeanRTsBySimpleConditions(data_struct, average, condition
 %%  PLOTS/ANALYSIS %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% central vs peripheral
-plotRTbyEccentricity(data_median, screenXpixels, screenYpixels, comparison_results_folder, conditions)
+%plotRTbyEccentricity(data_median, screenXpixels, screenYpixels, comparison_results_folder, conditions)
 
 % get group labels and ids per participant into lists for easier plotting
 getGroupStats(data_struct, group_labels);
-
 
 
 

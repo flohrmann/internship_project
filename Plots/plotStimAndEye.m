@@ -38,8 +38,14 @@ function eye_rt = plotStimAndEye(analysis_folder, cutData, num_plots, show, what
             left_eye_arrival_time = 0;
             left_eye_rt = 0;
         end 
+
         eye_rt = [eye_rt; {trial, start_time, right_eye_arrival_idx, left_eye_arrival_idx, current_data.rt, right_eye_rt, left_eye_rt}];
-        saveas(gcf,strcat(safe_name, num2str(trial),'.png'));
+        
+        if strcmp(whattodo, 'onlydata')
+            % dont plot
+        else
+            %saveas(gcf,strcat(safe_name, num2str(trial),'.png'));
+        end
     end
     save(fullfile(analysis_folder, 'eye_rt.mat'), 'eye_rt'); 
     end

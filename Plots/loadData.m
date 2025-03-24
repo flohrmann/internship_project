@@ -19,7 +19,7 @@ end
 
 %% try to load cut data (already cut in trials)
 try 
-    file_pattern = fullfile(folder, subfolder_name, 'cut_trials_*');
+    file_pattern = fullfile(folder, subfolder_name, 'cut_trials*');
     file_info = dir(file_pattern);
     load(strcat(folder, subfolder_name, '\', file_info.name)); % cut eyetracking; cut_data
 catch % cut data if not already cut

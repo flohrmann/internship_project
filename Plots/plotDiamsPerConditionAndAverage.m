@@ -74,6 +74,8 @@ hold off;
 
 
 %set(gcf, 'Units', 'normalized', 'OuterPosition', [0 0 1 1]);
-saveas(gcf, fullfile(analysis_folder, strcat('diam_',t0,'_0aligned_each_condition.png')));
-print(gcf, fullfile(compare_folder, strcat('diam_',t0,'_zero_aligned_subj',num2str(id),'.svg')), '-dsvg');
-
+%saveas(gcf, fullfile(analysis_folder, strcat('diam_',t0,'_0aligned_each_condition.png')));
+try
+    print(gcf, fullfile(compare_folder, strcat('diam_',t0,'_zero_aligned_subj',num2str(id),'.svg')), '-dsvg');
+catch
+end
