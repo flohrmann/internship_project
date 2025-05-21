@@ -45,30 +45,30 @@ conditions = struct();
 % simple conditions have two equal looking distractors
 conditions.a_simple = [135, 45, 45;
     % kinda looks like: \   /   /
-    45, 135, 135];
+                       45, 135, 135];
 conditions.b_simple = [110, 45, 45;
-    70, 135, 135;
-    160, 45, 45;
-    20, 135, 135];
+                       70, 135, 135;
+                       160, 45, 45;
+                       20, 135, 135];
 % normal conditions have two different looking distractors
 conditions.a = { % flip distractors to make sure they appear at each position
-    [135, 90],[45, 0],[45, 90];
+    %[135, 90],[45, 0],[45, 90];
     [135, 90],[45, 90],[45, 0]; % distractors flipped
-    [135, 0],[45, 90],[45, 0];
+    %[135, 0],[45, 90],[45, 0];
     [135, 0],[45, 0],[45, 90];  % distractors flipped
-    [45, 90],[135, 0],[135, 90];
+    %[45, 90],[135, 0],[135, 90];
     [45, 90],[135, 90],[135, 0];% distractors flipped
-    [45, 0],[135, 90],[135, 0];
+    %[45, 0],[135, 90],[135, 0];
     [45, 0],[135, 0],[135, 90]; % distractors flipped
     };
 conditions.b = {
-    [110, 90],[45, 0],[45, 90];
+    %[110, 90],[45, 0],[45, 90];
     [110, 90],[45, 90],[45, 0]; % distractors flipped
-    [160, 0],[45, 90],[45, 0];
+    %[160, 0],[45, 90],[45, 0];
     [160, 0],[45, 0],[45, 90];  % distractors flipped
-    [70, 90],[135, 0],[135, 90];
+    %[70, 90],[135, 0],[135, 90];
     [70, 90],[135, 90],[135, 0];% distractors flipped
-    [20, 0],[135, 90],[135, 0];
+    %[20, 0],[135, 90],[135, 0];
     [20, 0],[135, 0],[135, 90]; % distractors flipped
     };
 
@@ -126,8 +126,8 @@ Subject_prompt={'Subject name (no space)', ...
     };
 dialog_title='Give_Subject_Information';
 num_lines=1;
-Subject_default_answer={'','','','','',  '','','','','',  '','','','',''};
-%Subject_default_answer={'Fani','1', '1', '','27','normal','normal', 'experimenter', '', '', '', '', '', ''};
+%Subject_default_answer={'','','','','',  '','','','','',  '','','','',''};
+Subject_default_answer={'Fani','1', '1', '0','27',    'normal','normal', 'experimenter', '9', '10',     '11', '12','13', '14', '15'};
 subject_info=inputdlg(Subject_prompt,dialog_title,num_lines,Subject_default_answer);
 SubjectName  = subject_info{1};
 SubjectID = str2num(subject_info{2});
@@ -139,10 +139,11 @@ Subject_RightEyeSight = subject_info{7};
 Subject_OtherVisionInfo = subject_info{8};
 Subject_ADHD = subject_info{9};
 Subject_ADHD_when = subject_info{10};
-Subject_ADHD_meds = subject_info{11};
-Subject_ADHD_meds_taken = subject_info{12};
-Subject_Autism = subject_info{13};
-Subject_Gaming = subject_info{14};
+Subject_ADHD_meds_which = subject_info{11};
+Subject_ADHD_meds_how_often = subject_info{12};
+Subject_ADHD_meds_taken = subject_info{13};
+Subject_Autism = subject_info{14};
+Subject_Gaming = subject_info{15};
 
 
 %% experiment infos
@@ -159,7 +160,7 @@ Exp_prompt={'Lights on?', ...
 Exp_dialog_title='Give_Exp_Information';
 num_lines=1;
 %Exp_default_answer={'Indoor dim light', 'none', 'English', '1', '8 8 8 8', '0 0 0 0', '60', '0', '50 cm', '32 cm', '21 cm',  '', '1'};
-Exp_default_answer={'Indoor dim light', '', 'English', '50 50 50 50', '60', '50 cm', '32 cm', '21 cm',  '', '1'};
+Exp_default_answer={'Indoor dim light', '', 'English', '50 50 50 50', '60', '50 cm', '32 cm', '21 cm',  '', '0'};
 Exp_info=inputdlg(Exp_prompt,Exp_dialog_title,num_lines,Exp_default_answer);
 Exp_RoomLights = Exp_info{1};
 Exp_OtherInfo = Exp_info{2};
@@ -201,16 +202,20 @@ saveData(param_table, folder_name, 'parameters.csv');
 
 % Save subject info parameters in a table
 infos = {SubjectName, SubjectID, SessionNumber, Subject_Gender, Subject_Age, Subject_LeftEyeSight, Subject_RightEyeSight,...
-    Subject_OtherVisionInfo, Subject_ADHD, Subject_ADHD_when,Subject_ADHD_meds,Subject_ADHD_meds_taken, Subject_Autism, Subject_Gaming};
-infos_table = cell2table(infos, 'VariableNames', {'SubjectName', 'SubjectID', 'SessionNumber', 'SubjectGender', ...
-    'Subject_Age', 'SubjectLeftEyeSight', 'SubjectRightEyeSight', 'SubjectOtherVisionInfo', 'SubjectADHD', 'SubjectADHD_when', 'SubjecADHD_meds', 'SubjectADHD_meds_taken', 'SubjectAutism', 'SubjectGaming'});
+        Subject_OtherVisionInfo, ...
+        Subject_ADHD, Subject_ADHD_when,Subject_ADHD_meds_which, Subject_ADHD_meds_how_often, Subject_ADHD_meds_taken, ...
+        Subject_Autism, Subject_Gaming};
+infos_table = cell2table(infos, 'VariableNames', {'SubjectName', 'SubjectID', 'SessionNumber', 'SubjectGender', 'Subject_Age', ...
+            'SubjectLeftEyeSight', 'SubjectRightEyeSight', 'SubjectOtherVisionInfo', ...
+            'SubjectADHD', 'SubjectADHD_when', 'SubjecADHD_meds_which', 'Subject_ADHD_meds_how_often', 'SubjectADHD_meds_taken', ...
+            'SubjectAutism', 'SubjectGaming'});
 saveData(infos_table, folder_name, 'info.csv');
 
 % Save exp infos in table
 exps = {Exp_RoomLights, Exp_OtherInfo, Exp_InstructionLanguage, NTrialsEachCondition,  ...
-    TimeOut_DurationInSeconds, ViewingDistance, DisplayScreenWidth, DisplayScreenHeight, DisplayScreenDescription};
+        TimeOut_DurationInSeconds, ViewingDistance, DisplayScreenWidth, DisplayScreenHeight, DisplayScreenDescription};
 exps_table = cell2table(exps, 'VariableNames', {'Exp_RoomLights', 'Exp_OtherInfo', 'Exp_InstructionLanguage', 'NTrialsEachCondition', ...
-    'TimeOut_DurationInSeconds', 'ViewingDistance', 'DisplayScreenWidth', 'DisplayScreenHeight', 'DisplayScreenDescription'});
+        'TimeOut_DurationInSeconds', 'ViewingDistance', 'DisplayScreenWidth', 'DisplayScreenHeight', 'DisplayScreenDescription'});
 saveData(exps_table, folder_name, 'exp_info.csv');
 
 %% Generate trials
