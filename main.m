@@ -20,9 +20,9 @@ seed = sum(clock);
 rand('state', seed); % seed AGAINST reproducibility
 
 global exp_folder backup_folder ptb_drawformattedtext_oversize
-exp_folder = 'C:\Users\flohrmann\Documents\MATLAB\internship_project';
-results_folder = 'C:\Users\flohrmann\Documents\Results\';
-backup_folder = 'C:\Users\flohrmann\Documents\Backup';
+exp_folder = 'C:\Users\lab\Documents\GitHub\internship_project';
+results_folder = 'C:\Users\lab\Documents\Results\';
+backup_folder = 'C:\Users\lab\Documents\Backup';
 
 ptb_drawformattedtext_oversize = 2;
 
@@ -126,7 +126,7 @@ Subject_prompt={'Subject name (no space)', ...
     };
 dialog_title='Give_Subject_Information';
 num_lines=1;
-Subject_default_answer={'','', '', '','','','', '', '', '', '', '', '', '', ''};
+Subject_default_answer={'','','','','',  '','','','','',  '','','','',''};
 %Subject_default_answer={'Fani','1', '1', '','27','normal','normal', 'experimenter', '', '', '', '', '', ''};
 subject_info=inputdlg(Subject_prompt,dialog_title,num_lines,Subject_default_answer);
 SubjectName  = subject_info{1};
