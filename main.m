@@ -156,11 +156,12 @@ Exp_prompt={'Lights on?', ...
             'Display screen width', ...
             'Display screen height', ...
             'Display screen description', ...
-            'With eyetracking? (1 yes, 0 no)'};
+            'With eyetracking? (1 yes, 0 no)',...
+            'Verify Fixation? (1 yes, 0 no)'};
 Exp_dialog_title='Give_Exp_Information';
 num_lines=1;
-%Exp_default_answer={'Indoor dim light', 'none', 'English', '1', '8 8 8 8', '0 0 0 0', '60', '0', '50 cm', '32 cm', '21 cm',  '', '1'};
-Exp_default_answer={'Indoor dim light', '', 'English', '50 50 50 50', '60', '50 cm', '32 cm', '21 cm',  '', '0'};
+%Exp_default_answer={'Indoor dim light', 'none', 'English', '1', '8 8 8 8', '0 0 0 0', '60', '0', '50 cm', '32 cm', '21 cm',  '', '1', '1'};
+Exp_default_answer={'Indoor dim light', '', 'English', '50 50 50 50', '60', '50 cm', '32 cm', '21 cm',  '', '1', '1'};
 Exp_info=inputdlg(Exp_prompt,Exp_dialog_title,num_lines,Exp_default_answer);
 Exp_RoomLights = Exp_info{1};
 Exp_OtherInfo = Exp_info{2};
@@ -180,7 +181,7 @@ DisplayScreenWidth = Exp_info{7};
 DisplayScreenHeight = Exp_info{8};
 DisplayScreenDescription = Exp_info{9};
 use_eyetracking = str2num(Exp_info{10});  
-
+verify_fixation = str2num(Exp_info{11});
 % if length(NTrialsEachCondition) ~= NConditions |  ...
 %         length(NTrialsEachConditionTraining) ~= NConditions
 %     'Need as many numbers as the number of experimental conditions';
@@ -235,19 +236,22 @@ rand_trials_file_name = fullfile(folder_name, 'rand_trials.mat');
 save(rand_trials_file_name, 'rand_trials');
 
 %%  Start Psychtoolbox and display instructions
-if use_eyetracking == 1 % with eyetracking
+verify_fixation = 1; % for debugging
+use_eyetracking = 1; % for debugging
+if (use_eyetracking == 1) && (verify_fixation == 0) 
+    % with eyetracking
     continue_without_eyetracking = false; % flag to check if the experiment should continue without eye-tracking
     [trial_results, samp] = startPsychToolboxEyeTracking(rand_trials, folder_name, n_columns, n_rows, TimeOut_DurationInSeconds, EnglishOrGerman, continue_without_eyetracking);
+
+elseif use_eyetracking == 1 && verify_fixation == 1 
+    % with eyetracking AND verifying if they look at fixation
+    continue_without_eyetracking = false; % flag to check if the experiment should continue without eye-tracking
+    [trial_results, samp] = startPsychToolboxEyeTrackingFixationTracked(rand_trials, folder_name, n_columns, n_rows, TimeOut_DurationInSeconds, EnglishOrGerman, continue_without_eyetracking);
+
 else % without eyetracking
     continue_without_eyetracking = true; % flag to check if the experiment should continue without eye-tracking
     [trial_results, samp] = startPsychToolboxEyeTracking(rand_trials, folder_name, n_columns, n_rows, TimeOut_DurationInSeconds, EnglishOrGerman, continue_without_eyetracking);
 end
-
-%% Clean up Fixation Data and Safe
-%clean_data = aggregateFixationData(results);
-%results.sampFixAll = table2array(clean_data);
-%results_file_name = [folder_name, 'results\trial_results_fixed.mat'];
-%save(results_file_name, 'results');
 
 %% Ask for user feedback
 Ending_prompt={'Type in subject report', ...
@@ -264,5 +268,14 @@ saveData(end_table, folder_name, 'end_comments.csv');
 %% User questionaire of (in)attention
 createQuestionnaire(folder_name, num2str(SubjectID));
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% experiment end
+
+%% Clean up Fixation Data and Safe
+% load('C:\Users\lab\Documents\Results\1_20250521_181939\results\eyetracking_results_20250521_1820.mat')
+% clean_data = aggregateFixationData(samp_all); % for debugging
+% clean_data = aggregateFixationData(samp);
+%results.sampFixAll = table2array(clean_data);
+%results_file_name = [folder_name, 'results\trial_results_fixed.mat'];
+%save(results_file_name, 'results');
 
 end
