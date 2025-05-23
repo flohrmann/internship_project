@@ -4,14 +4,14 @@ function eye_rt = plotStimAndEye(analysis_folder, cutData, num_plots, show, what
     screenXpixels = 3240;
     screenYpixels = 2160;
     
-    % if this has already been calculated only show plot of first trial instead
-    if strcmp(whattodo, 'onlyplots')
-        for trial = 1:num_plots
-            current_data = cutData(trial,:);
-            [~, ~]  = plot_lines_with_gaze(current_data, screenXpixels, screenYpixels, trial, show);
-        end
-    else % calc every trial and plot it (dont show bc its super slow)
-        
+    % if this has already been calculated only show plot of first trials instead
+%     if strcmp(whattodo, 'onlyplots')
+%         for trial = 1:num_plots
+%             current_data = cutData(trial,:);
+%             [~, ~]  = plot_lines_with_gaze(current_data, screenXpixels, screenYpixels, trial, show);
+%         end
+%     else % do nothing???? (% calc every trial and plot it (dont show bc its super slow))
+%     end
     %%% get stimulus onset time instead of trialstarttime
      cutData = renamevars(cutData, 'eyeTrial', 'eyeTrial1');
      cutData = renamevars(cutData, 'stimulusTrial', 'eyeTrial');
@@ -44,12 +44,12 @@ function eye_rt = plotStimAndEye(analysis_folder, cutData, num_plots, show, what
         if strcmp(whattodo, 'onlydata')
             % dont plot
         else
-            %saveas(gcf,strcat(safe_name, num2str(trial),'.png'));
+            saveas(gcf,strcat(safe_name, num2str(trial),'.png'));
         end
     end
     save(fullfile(analysis_folder, 'eye_rt.mat'), 'eye_rt'); 
-    end
 end
+
 
 function [right_eye_arrival_time, left_eye_arrival_time] = plot_lines_with_gaze(trial_data, screenXpixels, screenYpixels, t, show)
 

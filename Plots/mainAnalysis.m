@@ -76,12 +76,12 @@ analysis_subfolder = '\analysis'; %'\analysis_final';
 
 %% individual results - needs to run first
 % takes long to plot each individual trials gaze path
-% fixation_threshold = 200; % threshold for how close the gaze needs to be to the fixation cross/target to count as it being fixated
-% fix_cluster_threshold = 50; % max distance between consecutive points (in pixels) to count as fixation cluster
-% analyseResults(color_map, color_map_trans, conditions, condition_labels, ...
-%                n_rows, n_columns, screenXpixels, screenYpixels, sr, safe, do_plots, fullscreen, ...
-%                results_path, subfolders, ids, comparison_results_folder, analysis_subfolder,...
-%                fixation_threshold, fix_cluster_threshold)
+fixation_threshold = 200; % threshold for how close the gaze needs to be to the fixation cross/target to count as it being fixated
+fix_cluster_threshold = 50; % max distance between consecutive points (in pixels) to count as fixation cluster
+analyseResults(color_map, color_map_trans, conditions, condition_labels, ...
+                n_rows, n_columns, screenXpixels, screenYpixels, sr, safe, do_plots, fullscreen, ...
+                results_path, subfolders, ids, group_analysis_folder, analysis_subfolder,...
+                fixation_threshold, fix_cluster_threshold)
 
 %% group results
 % save path
@@ -97,11 +97,3 @@ analyseCompareResults(color_map, color_map_other, conditions, condition_labels, 
                       screenXpixels, screenYpixels, sr, safe, ...
                       results_path, subfolders(2:18), ids(2:18), analysis_subfolder, group_analysis_folder, ... %
                       subfolder_fixation, fixation_duration);
-
-
-
-
-%% infos:
-% subject gaming was accidentally safed as false instead of in hours
-% 
-%

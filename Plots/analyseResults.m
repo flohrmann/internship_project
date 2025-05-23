@@ -22,12 +22,13 @@ for subject = 22: length(subfolders)
     % eyeTrial: starts with fixation onset
     % stimulusTrial: starts with Stimulation onset
     try % load data (takes forever to calc/plot, dont wanna do this twice)
-        %a = notaFunction(); % fail try block
+        a = notaFunction(); % fail try block
         load(strcat(analysis_folder, '\eye_rt.mat')); % eye_rt
     catch % calculate/plot if first time
         show = false; % dont show plots (slightly faster)
-        num_plots = size(cut_data, 1); % how many trials you want plotted, starts with first
-        eye_rt = plotStimAndEye(analysis_folder, cut_data, num_plots, show, 'onlydata');
+        num_plots = 20% size(cut_data, 1); % how many trials you want plotted, starts with first
+        %eye_rt = plotStimAndEye(analysis_folder, cut_data, num_plots, show, 'onlydata'); 
+        eye_rt = plotStimAndEye(analysis_folder, cut_data, num_plots, show, 'egal'); 
     end
     
     %Behavioural Data (RT, accuracy, RTV, confusion)
@@ -69,8 +70,8 @@ for subject = 22: length(subfolders)
     
     %% --- Eyetracking Data  ---
     % plotPupilDiameterOverTime(id, cut_data, analysis_folder);
-    plot_these = [1,5]; % just plot some trials for checking
-    fixation_durations = [100]; % in ms  50,, 200
+    plot_these = [1,5,7]; % just plot some trials for checking
+    fixation_durations = [50, 100, 200]; % in ms  50,, 200
     
     for fd_idx=1:(size(fixation_durations,2))
         fd_label = strcat(num2str(fixation_durations(fd_idx)), 'ms');

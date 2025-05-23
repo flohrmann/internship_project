@@ -92,7 +92,7 @@ function cutData = cutEyeTrackingData(folder_name, trial_results, eye_tracking_d
         cutData(trial).StimulusOnsetTime = StimulusOnsetTime;
         cutData(trial).trialEndTime = trialEndTime;
         cutData(trial).rt = current_data.rt;
-        cutData(trial).fixTime = current_data.fixTime;     
+        %cutData(trial).fixTime = current_data.fixTime;   % removed 25.5.25  
     end
 
     % Convert struct array to table
