@@ -22,8 +22,8 @@ rand('state', seed); % seed AGAINST reproducibility
 
 global exp_folder backup_folder ptb_drawformattedtext_oversize
 exp_folder = 'C:\Users\lab\Documents\GitHub\internship_project';
-results_folder = 'C:\Users\lab\Documents\Results\';
-backup_folder = 'C:\Users\lab\Documents\Backup';
+results_folder = 'C:\Users\lab\Documents\Results';
+backup_folder = 'C:\Users\lab\Documents\BackupResults';
 
 ptb_drawformattedtext_oversize = 2;
 
@@ -173,7 +173,8 @@ verify_fixation = str2num(Exp_info{11});
 % end
 
 %% create a folder with subjectID and the current date and time
-folder_name = strcat(results_folder, [num2str(SubjectID) '_' datestr(now, 'yyyymmdd_HHMMSS')]);
+subfolder_name = strcat([num2str(SubjectID) '_' datestr(now, 'yyyymmdd_HHMMSS')]);
+folder_name = fullfile(results_folder, subfolder_name);
 disp(folder_name)
 mkdir(folder_name);
 
@@ -205,18 +206,15 @@ saveData(exps_table, folder_name, 'exp_info.csv');
 %% generate trials
 n_trials = sum(NTrialsEachCondition);
 trials = generateTrials_new(n_trials, n_rows, n_columns);%, grid_visual_angle, ec_circle, ec_min);
-trial_data_file_name = fullfile(folder_name, 'trials.mat');
-save(trial_data_file_name, 'trials');
+save(fullfile(folder_name, 'trials.mat'), 'trials');
 
 %% fill trials with angles
 trial_data = createTrialsByCondition_new(NTrialsEachCondition, trials, conditions);
-trial_data_file_name = fullfile(folder_name, 'trials_filled.mat');
-save(trial_data_file_name, 'trial_data');
+save(fullfile(folder_name, 'trials_filled.mat'), 'trial_data');
 
 %% randomize order of trials
 rand_trials = randomize_trials(trial_data, folder_name); % struct to table
-rand_trials_file_name = fullfile(folder_name, 'rand_trials.mat');
-save(rand_trials_file_name, 'rand_trials');
+save(fullfile(folder_name, 'rand_trials.mat'), 'rand_trials');
 
 
 %% experiment start %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -260,4 +258,16 @@ save(rand_trials_file_name, 'rand_trials');
     Experimenter_Comments = Ending_info{2};
     end_table = cell2table({Subject_EndingReport, Experimenter_Comments}, 'VariableNames', {'Subject_EndingReport', 'Experimenter_Comments'});
     saveData(end_table, folder_name, 'end_comments.csv');
+    
+%% copy all of the data into a seperate folder and also zip it
+subfolder_name = '22_20250523_111244';
+new_folder = fullfile(backup_folder, subfolder_name);
+folder_name = fullfile(results_folder, subfolder_name);
+
+% copy folder into backup folder
+copyfile(folder_name, new_folder, 'f');
+
+% zip the copied folder
+zip(strcat(new_folder, '_copy.zip'), new_folder);
+    
 end
