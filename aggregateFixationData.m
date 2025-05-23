@@ -70,7 +70,11 @@ function aggregatedData = addSampToSampStruct(samp_new, aggregatedData)
     aggregatedData.left.gazePoint.inUserCoords = [aggregatedData.left.gazePoint.inUserCoords, samp_new.left.gazePoint.inUserCoords];
     aggregatedData.left.gazePoint.valid = [aggregatedData.left.gazePoint.valid, samp_new.left.gazePoint.valid];
     aggregatedData.left.gazePoint.available = [aggregatedData.left.gazePoint.available, samp_new.left.gazePoint.available];
-
+    
+    aggregatedData.left.pupil.diameter = [aggregatedData.left.pupil.diameter, samp_new.left.pupil.diameter];
+    aggregatedData.left.pupil.valid = [aggregatedData.left.pupil.valid, samp_new.left.pupil.valid];
+    aggregatedData.left.pupil.available = [aggregatedData.left.pupil.available, samp_new.left.pupil.available];
+    
     aggregatedData.left.gazeOrigin.inUserCoords = [aggregatedData.left.gazeOrigin.inUserCoords, samp_new.left.gazeOrigin.inUserCoords];
     aggregatedData.left.gazeOrigin.inTrackBoxCoords = [aggregatedData.left.gazeOrigin.inTrackBoxCoords, samp_new.left.gazeOrigin.inTrackBoxCoords];
     aggregatedData.left.gazeOrigin.valid = [aggregatedData.left.gazeOrigin.valid, samp_new.left.gazeOrigin.valid];
@@ -86,6 +90,10 @@ function aggregatedData = addSampToSampStruct(samp_new, aggregatedData)
     aggregatedData.right.gazePoint.valid = [aggregatedData.right.gazePoint.valid, samp_new.right.gazePoint.valid];
     aggregatedData.right.gazePoint.available = [aggregatedData.right.gazePoint.available, samp_new.right.gazePoint.available];
 
+    aggregatedData.right.pupil.diameter = [aggregatedData.right.pupil.diameter, samp_new.right.pupil.diameter];
+    aggregatedData.right.pupil.valid = [aggregatedData.right.pupil.valid, samp_new.right.pupil.valid];
+    aggregatedData.right.pupil.available = [aggregatedData.right.pupil.available, samp_new.right.pupil.available];
+    
     aggregatedData.right.gazeOrigin.inUserCoords = [aggregatedData.right.gazeOrigin.inUserCoords, samp_new.right.gazeOrigin.inUserCoords];
     aggregatedData.right.gazeOrigin.inTrackBoxCoords = [aggregatedData.right.gazeOrigin.inTrackBoxCoords, samp_new.right.gazeOrigin.inTrackBoxCoords];
     aggregatedData.right.gazeOrigin.valid = [aggregatedData.right.gazeOrigin.valid, samp_new.right.gazeOrigin.valid];
