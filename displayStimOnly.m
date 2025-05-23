@@ -117,16 +117,23 @@ end
 %     samp = struct('deviceTimeStamp', [], 'systemTimeStamp', [], 'left', struct(), 'right', struct()); % No eye-tracking data
 % end
 %     
-%trial_resp_time = GetSecs; % number of seconds since system start up
+trial_resp_time = GetSecs; % number of seconds since system start up
 
-% flip to blank screen to get system time instead
-Screen('FillRect', window, color_bg); 
-trial_resp_time = Screen('Flip', window);
-%  
+% flip to blank screen to get system time 
+% if wait_for_flip == 1
+%     WaitSecs(wait_time_s);
+%     Screen('FillRect', window, color_bg); 
+%     trial_resp_time = Screen('Flip', window);
+% else 
+%     Screen('FillRect', window, color_bg); 
+%     trial_resp_time = Screen('Flip', window);
+% end
+
 % noise
 fs = 5000; t = 0:0.00002:0.02;
 LowToneSoundwave =  sin(2*pi*fs/2*t);
-sound(LowToneSoundwave, fs); pause(0.2);
+sound(LowToneSoundwave, fs); 
+WaitSecs(0.2);
 %
 
 % Work out if the location of the target was identified corrcetly
