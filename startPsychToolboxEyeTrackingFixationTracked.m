@@ -217,7 +217,7 @@ disp('Start Experiment');
 results_file_name = [subfolder_name, '\trial_results_' , datestr(now, 'yyyymmdd_HHMM'), '.mat'];
 eye_results_file_name = [subfolder_name, '\eyetracking_results_' , datestr(now, 'yyyymmdd_HHMM'), '.mat'];
 
-for trial = 1:4% size(data, 1)
+for trial = 1: size(data, 1)
     current_data = data(trial,:);
     
     %% Display Trial Start Instructions until button press
@@ -288,39 +288,37 @@ for trial = 1:4% size(data, 1)
     WaitSecs(wait_time_s_after_button_press);
 
     %% safe trial results    
-    
-    % get rest of trial eye tracking data
-    samp_blank_stim = eye_tracker.buffer.consumeN('gaze');
-        
-    % Add all the timestamps
+    % add all the timestamps
     trial_result.trialStartTime = trialStartTime; % timestamp trial start
     trial_result.fixStartTime = fixStartTime; % timestamp fixation start
     trial_result.UserInPressAnyButtonScreenDuration = fixStartTime - trialStartTime; % duration until fixation started this trial (pause of user basically)
     
-    trial_result.eyeStart = samp_start; % eye start of trial/before fixation
-    trial_result.eyeFix = {samp_fix}; % eye fixation
-    trial_result.eyeBlankAndStim = samp_blank_stim; % eye blank screen and stimulation
+    % save/overwrite each loop in case experiment crashes/gets aborted
+    trial_results(trial,:) = trial_result(1,:);
+    save(results_file_name, 'trial_results');    
+    clear trial_result
     
-    % doppelt gemoppelt: same for eyetracking data
+    % this slows done the saving immeensly after a few dozen trials
+    %trial_result.eyeStart = samp_start; % eye start of trial/before fixation
+    %trial_result.eyeFix = {samp_fix}; % eye fixation
+    %trial_result.eyeBlankAndStim = samp_blank_stim; % eye blank screen and stimulation
+    
+    % get rest of trial eye tracking data
+    samp_blank_stim = eye_tracker.buffer.consumeN('gaze');
+        
+    % put eyetracking data into big struct
     samp(trial).sampStart = samp_start;
     samp(trial).sampFix = samp_fix; 
     samp(trial).sampBlankStim = samp_blank_stim;
-    
-    % save/overwrite each loop in case experiment crashes/gets aborted
-    trial_results(trial,:) = trial_result(1,:);
-    save(results_file_name, 'trial_results');
-    save(eye_results_file_name, 'samp'); 
-    
-    clear trial_result
 end
 % catch
 %     disp('Experiment Crashed')
 % end
 
 
-
 %% End screen
 % clean up: stop eye tracker and close
+save(eye_results_file_name, 'samp'); 
 eye_tracker.deInit();
 
 % TODO CHANGE BACK FOR EXPERIMENT
