@@ -1,8 +1,3 @@
-% start this function to start the experiment
-
-% make sure the DrawFormattedText in this Project is in your path and NOT
-% the one from psychtoolbox
-
 % TODOs 
 % - add tactical stickers to buttons
 % - extra file with inputs like jitter (everyhting that DOESNT change), make
@@ -11,10 +6,15 @@
 % - STAI questionaire
 
 function main()
+% start this function to start the experiment
+
+% make sure the DrawFormattedText in this Project is in your path and NOT
+% the one from psychtoolbox
+
 % Clear the workspace and the screen
 sca; close all; clear;
 
-%% Standard parameters for this experiment
+%% standard parameters for this experiment
 %PsychDefaultSetup(2); % standard setup 
 %rand('state',42); % seed for reproducibility
 seed = sum(clock); 
@@ -27,14 +27,7 @@ backup_folder = 'C:\Users\lab\Documents\Backup';
 
 ptb_drawformattedtext_oversize = 2;
 
-% unused
-% grid_visual_angle = [34, 46]; % in degrees
-% stim_size = [0.12, 1.1]; % in degrees
-% ec_circle = 15; % circle of stim pos in degrees
-% ec_min = 12; % minimum horizontal eccentricity
-% fix_stim_dia = 0.3; % in degrees
-
-%% Stimuli
+%% stimuli
 % All angles are degrees counter clockwise from vertical
 % Bsp. - = 0° this is the standard drawBar
 %      / = 70°   | = 90°   \ = 110°
@@ -52,30 +45,22 @@ conditions.b_simple = [110, 45, 45;
                        160, 45, 45;
                        20, 135, 135];
 % normal conditions have two different looking distractors
-conditions.a = { % flip distractors to make sure they appear at each position
-    %[135, 90],[45, 0],[45, 90];
-    [135, 90],[45, 90],[45, 0]; % distractors flipped
-    %[135, 0],[45, 90],[45, 0];
-    [135, 0],[45, 0],[45, 90];  % distractors flipped
-    %[45, 90],[135, 0],[135, 90];
-    [45, 90],[135, 90],[135, 0];% distractors flipped
-    %[45, 0],[135, 90],[135, 0];
-    [45, 0],[135, 0],[135, 90]; % distractors flipped
+conditions.a = { 
+    [135, 90],[45, 90], [45, 0]; 
+    [135, 0], [45, 0],  [45, 90];  
+    [45, 90], [135, 90],[135, 0];
+    [45, 0],  [135, 0], [135, 90];
     };
 conditions.b = {
-    %[110, 90],[45, 0],[45, 90];
-    [110, 90],[45, 90],[45, 0]; % distractors flipped
-    %[160, 0],[45, 90],[45, 0];
-    [160, 0],[45, 0],[45, 90];  % distractors flipped
-    %[70, 90],[135, 0],[135, 90];
-    [70, 90],[135, 90],[135, 0];% distractors flipped
-    %[20, 0],[135, 90],[135, 0];
-    [20, 0],[135, 0],[135, 90]; % distractors flipped
+    [110, 90],[45, 90], [45, 0]; 
+    [160, 0], [45, 0],  [45, 90];  
+    [70, 90], [135, 90],[135, 0];
+    [20, 0],  [135, 0], [135, 90]; 
     };
 
 NConditions = length(fieldnames(conditions));
 
-%% User Input 
+%% user input 
 SetSize_prompt = {'Numbers of columns (minimum 4) and rows (mininum 4) in the search array'};
 SetSize_dialog_title='Row_column_Num';
 num_lines=1;
@@ -187,8 +172,7 @@ verify_fixation = str2num(Exp_info{11});
 %     return;
 % end
 
-
-%% create a folder with User ID and the current date and time
+%% create a folder with subjectID and the current date and time
 folder_name = strcat(results_folder, [num2str(SubjectID) '_' datestr(now, 'yyyymmdd_HHMMSS')]);
 disp(folder_name)
 mkdir(folder_name);
@@ -234,52 +218,46 @@ rand_trials = randomize_trials(trial_data, folder_name); % struct to table
 rand_trials_file_name = fullfile(folder_name, 'rand_trials.mat');
 save(rand_trials_file_name, 'rand_trials');
 
-%% user questionaire of (in)attention
-createQuestionnaire(folder_name, num2str(SubjectID));
-% waits until enter is pressed in the matlab command window to continue with the experiment
-input('Press Enter to continue...', 's');
 
-%% start psychtoolbox and display instructions
-%verify_fixation = 1; % for debugging
-%use_eyetracking = 1; % for debugging
-if (use_eyetracking == 1) && (verify_fixation == 0) 
-    % with eyetracking
-    continue_without_eyetracking = false; % flag to check if the experiment should continue without eye-tracking
-    [trial_results, samp] = startPsychToolboxEyeTracking(rand_trials, folder_name, n_columns, n_rows, TimeOut_DurationInSeconds, EnglishOrGerman, continue_without_eyetracking);
+%% experiment start %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-elseif use_eyetracking == 1 && verify_fixation == 1 
-    % with eyetracking AND verifying if they look at fixation
-    continue_without_eyetracking = false; % flag to check if the experiment should continue without eye-tracking
-    [trial_results, samp] = startPsychToolboxEyeTrackingFixationTracked(rand_trials, folder_name, n_columns, n_rows, TimeOut_DurationInSeconds, EnglishOrGerman, continue_without_eyetracking);
+    %% 1. user questionaire of (in)attention
+    createQuestionnaire(folder_name, num2str(SubjectID));
+    % waits until enter is pressed in the matlab command window to continue with the experiment
+    input('Press Enter to continue...', 's');
 
-else % without eyetracking
-    continue_without_eyetracking = true; % flag to check if the experiment should continue without eye-tracking
-    [trial_results, samp] = startPsychToolboxEyeTracking(rand_trials, folder_name, n_columns, n_rows, TimeOut_DurationInSeconds, EnglishOrGerman, continue_without_eyetracking);
-end
+    %% 2. start psychtoolbox and display instructions
+    %verify_fixation = 1; % for debugging
+    %use_eyetracking = 1; % for debugging
+    if (use_eyetracking == 1) && (verify_fixation == 0) 
+        % with eyetracking
+        continue_without_eyetracking = false; % flag to check if the experiment should continue without eye-tracking
+        [trial_results, samp] = startPsychToolboxEyeTracking(rand_trials, folder_name, n_columns, n_rows, TimeOut_DurationInSeconds, EnglishOrGerman, continue_without_eyetracking);
 
-%% Ask for user feedback
-Ending_prompt={'Type in subject report', ...
-    'write down experimenter comment/observations'};
-dialog_title='Ending_Information';
-num_lines=1;
-ending_default_answer={'none','none'};
-Ending_info=inputdlg(Ending_prompt, dialog_title,num_lines,ending_default_answer);
-Subject_EndingReport  = Ending_info{1};
-Experimenter_Comments = Ending_info{2};
-end_table = cell2table({Subject_EndingReport, Experimenter_Comments}, 'VariableNames', {'Subject_EndingReport', 'Experimenter_Comments'});
-saveData(end_table, folder_name, 'end_comments.csv');
+    elseif use_eyetracking == 1 && verify_fixation == 1 
+        % with eyetracking AND verifying if they look at fixation
+        continue_without_eyetracking = false; % flag to check if the experiment should continue without eye-tracking
+        [trial_results, samp] = startPsychToolboxEyeTrackingFixationTracked(rand_trials, folder_name, n_columns, n_rows, TimeOut_DurationInSeconds, EnglishOrGerman, continue_without_eyetracking);
+        
+            % gaze is split into snippets here: so need to clean up fixation data and safe extra
+            [trialwise_gaze, continuous_gaze] = aggregateFixationData(samp, folder_name);
+            save(fullfile(folder_name, 'trialwise_gaze.mat'), 'trialwise_gaze');
+            save(fullfile(folder_name, 'continuous_gaze.mat'), 'continuous_gaze');
+            
+    else % without eyetracking
+        continue_without_eyetracking = true; % flag to check if the experiment should continue without eye-tracking
+        [trial_results, samp] = startPsychToolboxEyeTracking(rand_trials, folder_name, n_columns, n_rows, TimeOut_DurationInSeconds, EnglishOrGerman, continue_without_eyetracking);
+    end
 
-%% User questionaire of (in)attention
-%createQuestionnaire(folder_name, num2str(SubjectID));
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% experiment end
-
-%% Clean up Fixation Data and Safe
-load('C:\Users\lab\Documents\Results\\22_20250523_111244\results\eyetracking_results_20250523_1113.mat')
-[trialwise_gaze, continuous_gaze] = aggregateFixationData(samp); % for debugging
-
-%results.sampFixAll = table2array(clean_data);
-%results_file_name = [folder_name, 'results\trial_results_fixed.mat'];
-%save(results_file_name, 'results');
-
+    %% 3. subject and experimenter comments
+    Ending_prompt={'Type in subject report', ...
+        'write down experimenter comment/observations'};
+    dialog_title='Ending_Information';
+    num_lines=1;
+    ending_default_answer={'none','none'};
+    Ending_info=inputdlg(Ending_prompt, dialog_title,num_lines,ending_default_answer);
+    Subject_EndingReport  = Ending_info{1};
+    Experimenter_Comments = Ending_info{2};
+    end_table = cell2table({Subject_EndingReport, Experimenter_Comments}, 'VariableNames', {'Subject_EndingReport', 'Experimenter_Comments'});
+    saveData(end_table, folder_name, 'end_comments.csv');
 end
