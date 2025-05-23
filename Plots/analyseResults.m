@@ -26,7 +26,8 @@ for subject = 22: length(subfolders)
         load(strcat(analysis_folder, '\eye_rt.mat')); % eye_rt
     catch % calculate/plot if first time
         show = false; % dont show plots (slightly faster)
-        num_plots = 20% size(cut_data, 1); % how many trials you want plotted, starts with first
+        % num_plots is unused rn
+        num_plots = 20;% size(cut_data, 1); % how many trials you want plotted, starts with first
         %eye_rt = plotStimAndEye(analysis_folder, cut_data, num_plots, show, 'onlydata'); 
         eye_rt = plotStimAndEye(analysis_folder, cut_data, num_plots, show, 'egal'); 
     end
